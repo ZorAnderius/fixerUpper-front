@@ -1,0 +1,240 @@
+/* CSS Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  tab-size: 4;
+}
+
+body {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-background-white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+/* Remove default focus styles */
+:focus {
+  outline: none;
+}
+
+/* Remove default button styles */
+button:focus {
+  outline: none;
+}
+
+/* Remove default input styles */
+input:focus {
+  outline: none;
+}
+
+/* Remove default textarea styles */
+textarea:focus {
+  outline: none;
+}
+
+/* Remove default select styles */
+select:focus {
+  outline: none;
+}
+
+/* Remove default link styles */
+a:focus {
+  outline: none;
+}
+
+/* Remove default list styles */
+ul,
+ol {
+  list-style: none;
+}
+
+/* Remove default table styles */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* Remove default fieldset styles */
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Remove default legend styles */
+legend {
+  padding: 0;
+}
+
+/* Remove default hr styles */
+hr {
+  border: none;
+  height: 1px;
+  background-color: var(--color-border-light);
+  margin: var(--spacing-md) 0;
+}
+
+/* Remove default blockquote styles */
+blockquote {
+  margin: 0;
+  padding: 0;
+}
+
+/* Remove default pre styles */
+pre {
+  margin: 0;
+  padding: 0;
+}
+
+/* Remove default code styles */
+code {
+  font-family: var(--font-family-mono);
+}
+
+/* Remove default kbd styles */
+kbd {
+  font-family: var(--font-family-mono);
+}
+
+/* Remove default samp styles */
+samp {
+  font-family: var(--font-family-mono);
+}
+
+/* Remove default var styles */
+var {
+  font-style: normal;
+}
+
+/* Remove default mark styles */
+mark {
+  background-color: transparent;
+  color: inherit;
+}
+
+/* Remove default small styles */
+small {
+  font-size: inherit;
+}
+
+/* Remove default sub and sup styles */
+sub,
+sup {
+  font-size: inherit;
+  line-height: inherit;
+  position: static;
+  vertical-align: baseline;
+}
+
+/* Remove default details styles */
+details {
+  display: block;
+}
+
+/* Remove default summary styles */
+summary {
+  display: block;
+  cursor: pointer;
+}
+
+/* Remove default dialog styles */
+dialog {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Remove default meter styles */
+meter {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Remove default progress styles */
+progress {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Remove default output styles */
+output {
+  display: inline;
+}
+
+/* Remove default template styles */
+template {
+  display: none;
+}
+
+/* Remove default slot styles */
+slot {
+  display: contents;
+}
+
