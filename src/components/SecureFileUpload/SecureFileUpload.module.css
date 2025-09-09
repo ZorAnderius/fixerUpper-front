@@ -1,0 +1,161 @@
+.secureFileUpload {
+  width: 100%;
+}
+
+.dropZone {
+  border: 2px dashed #d1d5db;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #f9fafb;
+}
+
+.dropZone:hover:not(.disabled) {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.dropZone.dragOver {
+  border-color: #3b82f6;
+  background-color: #dbeafe;
+  transform: scale(1.02);
+}
+
+.dropZone.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.dropZoneContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dropZoneText {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #374151;
+  margin: 0;
+}
+
+.dropZoneSubtext {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.errorContainer {
+  margin-top: 1rem;
+}
+
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.375rem;
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.fileList {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fileItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+}
+
+.fileInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.fileDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.fileName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  word-break: break-all;
+}
+
+.fileSize {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.removeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.removeButton:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+.removeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .dropZone {
+    padding: 1.5rem;
+  }
+  
+  .dropZoneText {
+    font-size: 0.875rem;
+  }
+  
+  .dropZoneSubtext {
+    font-size: 0.75rem;
+  }
+  
+  .fileItem {
+    padding: 0.5rem;
+  }
+  
+  .fileInfo {
+    gap: 0.5rem;
+  }
+}
+
+
+

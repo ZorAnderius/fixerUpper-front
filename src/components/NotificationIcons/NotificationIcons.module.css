@@ -1,0 +1,95 @@
+/* Mobile First Approach */
+.notificationContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.notificationButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--color-text-secondary);
+}
+
+.notificationButton:hover {
+  background-color: var(--color-background-slate);
+  color: var(--color-primary-orange);
+  transform: translateY(-1px);
+}
+
+.notificationIcon {
+  width: 20px;
+  height: 20px;
+  transition: transform var(--transition-fast);
+}
+
+.notificationButton:hover .notificationIcon {
+  transform: scale(1.1);
+}
+
+.notificationBadge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background-color: var(--color-primary-orange);
+  color: var(--color-background-white);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  min-width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-background-white);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .notificationContainer {
+    gap: var(--spacing-md);
+  }
+  
+  .notificationButton {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .notificationIcon {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .notificationBadge {
+    min-width: 20px;
+    height: 20px;
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* Desktop and up */
+@media (min-width: 1024px) {
+  .notificationButton {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .notificationIcon {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+
+
+

@@ -1,0 +1,55 @@
+.secureForm {
+  position: relative;
+}
+
+.securityWarning {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 0.375rem;
+  color: #856404;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.lockoutMessage {
+  margin-top: 0.5rem;
+  font-weight: 600;
+  color: #dc3545;
+}
+
+/* Security-focused form styling */
+.secureForm input[type="password"] {
+  font-family: monospace;
+  letter-spacing: 0.1em;
+}
+
+.secureForm input:invalid {
+  border-color: #dc3545;
+}
+
+.secureForm input:valid {
+  border-color: #28a745;
+}
+
+/* Hide password strength indicators by default */
+.passwordStrength {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.passwordStrength.weak {
+  color: #dc3545;
+}
+
+.passwordStrength.medium {
+  color: #ffc107;
+}
+
+.passwordStrength.strong {
+  color: #28a745;
+}
+
+
+

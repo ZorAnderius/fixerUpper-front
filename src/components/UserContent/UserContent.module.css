@@ -1,0 +1,91 @@
+.userContent {
+  line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.userContent p {
+  margin-bottom: 1rem;
+}
+
+.userContent p:last-child {
+  margin-bottom: 0;
+}
+
+.userContent strong,
+.userContent b {
+  font-weight: 600;
+}
+
+.userContent em,
+.userContent i {
+  font-style: italic;
+}
+
+.userContent ul,
+.userContent ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.userContent li {
+  margin-bottom: 0.25rem;
+}
+
+/* Prevent XSS through CSS */
+.userContent * {
+  all: unset;
+  display: revert;
+  box-sizing: border-box;
+}
+
+.userContent *::before,
+.userContent *::after {
+  all: unset;
+  display: revert;
+}
+
+/* Safe styling for allowed elements */
+.userContent p {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.userContent br {
+  display: block;
+  margin: 0.5rem 0;
+}
+
+.userContent strong,
+.userContent b {
+  display: inline;
+  font-weight: 600;
+}
+
+.userContent em,
+.userContent i {
+  display: inline;
+  font-style: italic;
+}
+
+.userContent ul {
+  display: block;
+  list-style-type: disc;
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.userContent ol {
+  display: block;
+  list-style-type: decimal;
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.userContent li {
+  display: list-item;
+  margin-bottom: 0.25rem;
+}
+
+
+

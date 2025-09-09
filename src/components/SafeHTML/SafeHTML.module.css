@@ -1,0 +1,40 @@
+.safeHTML {
+  line-height: 1.6;
+}
+
+.safeHTML p {
+  margin-bottom: 1rem;
+}
+
+.safeHTML ul,
+.safeHTML ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.safeHTML li {
+  margin-bottom: 0.25rem;
+}
+
+.safeHTML a {
+  color: var(--primary-color, #007bff);
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.safeHTML a:hover {
+  color: var(--primary-hover, #0056b3);
+}
+
+.safeHTML strong,
+.safeHTML b {
+  font-weight: 600;
+}
+
+.safeHTML em,
+.safeHTML i {
+  font-style: italic;
+}
+
+
+

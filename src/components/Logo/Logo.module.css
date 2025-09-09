@@ -1,0 +1,61 @@
+/* Mobile First Approach */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-decoration: none;
+}
+
+.logoImage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.logoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.logoText {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+
+.logoBlue {
+  color: var(--color-primary-orange-light);
+}
+
+.logoOrange {
+  color: var(--color-accent-orange);
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .logoImage {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .logoText {
+    font-size: var(--font-size-xl);
+  }
+}
+
+/* Desktop and up */
+@media (min-width: 1024px) {
+  .logoImage {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .logoText {
+    font-size: var(--font-size-2xl);
+  }
+}

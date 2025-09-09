@@ -1,0 +1,141 @@
+.notification {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  max-width: 400px;
+  min-width: 300px;
+  border-radius: 0.75rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.notificationContent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.iconContainer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.textContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+  color: white;
+}
+
+.message {
+  font-size: 0.75rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
+}
+
+.closeButton {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: none;
+  border: none;
+  border-radius: 0.25rem;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.progressBar {
+  height: 3px;
+  background-color: rgba(255, 255, 255, 0.3);
+  transform-origin: left;
+}
+
+/* Color variants */
+.bgSuccess {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.bgError {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.bgWarning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.bgInfo {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+/* Icon colors */
+.success {
+  color: #10b981;
+}
+
+.error {
+  color: #ef4444;
+}
+
+.warning {
+  color: #f59e0b;
+}
+
+.info {
+  color: #3b82f6;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .notification {
+    top: 0.5rem;
+    right: 0.5rem;
+    left: 0.5rem;
+    max-width: none;
+    min-width: auto;
+  }
+  
+  .notificationContent {
+    padding: 0.75rem;
+  }
+  
+  .title {
+    font-size: 0.8rem;
+  }
+  
+  .message {
+    font-size: 0.7rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .notification {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  }
+}
+
+
+
