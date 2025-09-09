@@ -1,0 +1,136 @@
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import {
+  getCartItems as getCartItemsAPI,
+  addToCart as addToCartAPI,
+  updateCartItem as updateCartItemAPI,
+  removeFromCart as removeFromCartAPI,
+  checkoutCart as checkoutCartAPI
+} from '../../api/cartServices';
+import {
+  setLoading,
+  setError,
+  setCartItems,
+  addToCart as addToCartAction,
+  updateCartItem as updateCartItemAction,
+  removeFromCart as removeFromCartAction,
+  clearCart
+} from './slice';
+
+// Fetch cart items
+export const fetchCartItems = createAsyncThunk(
+  'cart/fetchItems',
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch(setLoading(true));
+      const response = await getCartItemsAPI();
+      
+      dispatch(setCartItems(response));
+      return response;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch cart items';
+      dispatch(setError(errorMessage));
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Add item to cart
+export const addToCart = createAsyncThunk(
+  'cart/addItem',
+  async ({ productId, quantity = 1 }, { dispatch, rejectWithValue, getState }) => {
+    try {
+      dispatch(setLoading(true));
+      
+      // First add to Redux store for immediate UI update
+      const state = getState();
+      const product = state.products.items.find(p => p.id === productId);
+      
+      console.log('addToCart thunk - productId:', productId);
+      console.log('addToCart thunk - product:', product);
+      console.log('addToCart thunk - products.items:', state.products.items);
+      
+      if (product) {
+        dispatch(addToCartAction({ product, quantity }));
+      } else {
+        console.error('Product not found in state.products.items');
+      }
+      
+      // Then sync with backend
+      const response = await addToCartAPI({ productId, quantity });
+      
+      // Update with server response
+      dispatch(setCartItems(response));
+      return response;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to add to cart';
+      dispatch(setError(errorMessage));
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Update cart item quantity
+export const updateCartItem = createAsyncThunk(
+  'cart/updateItem',
+  async ({ cartItemId, quantity }, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch(setLoading(true));
+      
+      // Update in Redux store first
+      dispatch(updateCartItemAction({ id: cartItemId, quantity }));
+      
+      // Then sync with backend
+      const response = await updateCartItemAPI(cartItemId, quantity);
+      
+      // Update with server response
+      dispatch(setCartItems(response));
+      return response;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to update cart item';
+      dispatch(setError(errorMessage));
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Remove item from cart
+export const removeFromCart = createAsyncThunk(
+  'cart/removeItem',
+  async (cartItemId, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch(setLoading(true));
+      
+      // Remove from Redux store first
+      dispatch(removeFromCartAction(cartItemId));
+      
+      // Then sync with backend
+      await removeFromCartAPI(cartItemId);
+      
+      return cartItemId;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to remove from cart';
+      dispatch(setError(errorMessage));
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Checkout cart
+export const checkoutCart = createAsyncThunk(
+  'cart/checkout',
+  async (cartItemId, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch(setLoading(true));
+      const response = await checkoutCartAPI(cartItemId);
+      
+      // Clear cart after successful checkout
+      dispatch(clearCart());
+      
+      return response;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to checkout';
+      dispatch(setError(errorMessage));
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
