@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../redux/cart/operations';
 import { selectCartItemById } from '../../redux/cart/selectors';
 import { selectIsAuthenticated } from '../../redux/auth/selectors';
+import { addToPendingCartAndShowAuth } from '../../redux/pending/operations';
+import { setPreviousLocation, setRedirectReason } from '../../redux/pending/slice';
+import { usePreviousLocation } from '../../hooks/usePreviousLocation';
 import { ROUTES } from '../../helpers/constants/routes';
 import { cardVariants } from '../../helpers/animations/variants';
 import { useHoverAnimation } from '../../hooks/useAnimation';
@@ -15,10 +18,12 @@ import styles from './ProductCard.module.css';
 const ProductCard = ({ product, index = 0, onAuthRequired }) => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const cartItem = useSelector(selectCartItemById(product.id));
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const { isHovered, handleMouseEnter, handleMouseLeave } = useHoverAnimation();
+  const { previousLocation } = usePreviousLocation();
 
   // Debug logging
   console.log('ProductCard render - product:', product);
@@ -36,10 +41,26 @@ const ProductCard = ({ product, index = 0, onAuthRequired }) => {
     
     // Check if user is authenticated
     if (!isAuthenticated) {
-      console.log('User not authenticated, calling onAuthRequired');
-      if (onAuthRequired) {
-        onAuthRequired();
-      }
+      console.log('User not authenticated, saving state and showing auth modal');
+      console.log('Current location.pathname:', location.pathname);
+      
+      // Зберігаємо поточну сторінку
+      dispatch(setPreviousLocation(location.pathname));
+      console.log('Dispatched setPreviousLocation with:', location.pathname);
+      
+      // Додаємо товар в pending кошик та показуємо модальку
+      dispatch(addToPendingCartAndShowAuth({
+        productId: product.id,
+        quantity: 1,
+        product: {
+          id: product.id,
+          title: product.title,
+          price: product.price,
+          image_url: product.image_url
+        },
+        reason: 'add_to_cart'
+      }));
+      
       return;
     }
     

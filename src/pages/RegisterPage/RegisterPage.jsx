@@ -1,9 +1,11 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Formik, Form, Field } from 'formik';
 import { registerUser } from '../../redux/auth/operations';
 import { selectAuthLoading, selectAuthError } from '../../redux/auth/selectors';
+import { transferPendingCartToCart } from '../../redux/pending/operations';
+import { clearPendingState } from '../../redux/pending/slice';
 import { ROUTES } from '../../helpers/constants/routes';
 import { registerSchema } from '../../helpers/validation/schemas';
 import { ICONS, ICON_SIZES } from '../../helpers/constants/icons';
@@ -17,10 +19,15 @@ import styles from './RegisterPage.module.css';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const isLoading = useSelector(selectAuthLoading);
   const error = useSelector(selectAuthError);
   const { redirectToGoogleAuth, isLoading: googleLoading, error: googleError } = useGoogleOAuth();
+  
+  // Отримуємо дані з state для редиректу
+  const from = location.state?.from || '/';
+  const hasPendingItems = location.state?.hasPendingItems || false;
 
   const initialValues = {
     firstName: '',
@@ -58,8 +65,18 @@ const RegisterPage = () => {
 
       await dispatch(registerUser(sanitizedData)).unwrap();
       
-      // Use helper for redirect
-      redirectAfterAuth(navigate, '/');
+      // Якщо є pending товари, переносимо їх в кошик
+      if (hasPendingItems) {
+        console.log('Transferring pending cart items to real cart');
+        await dispatch(transferPendingCartToCart()).unwrap();
+      }
+      
+      // Очищаємо pending стан після успішної реєстрації
+      dispatch(clearPendingState());
+      
+      // Редиректимо на попередню сторінку або головну
+      console.log('Redirecting to:', from);
+      navigate(from, { replace: true });
     } catch (error) {
       console.error('Registration failed:', error);
     } finally {

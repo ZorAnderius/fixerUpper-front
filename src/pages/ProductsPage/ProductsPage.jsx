@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { fetchAllProducts, fetchCategories } from '../../redux/products/operations';
 import { selectFilteredProducts, selectProductsLoading, selectProductsError } from '../../redux/products/selectors';
+import { selectShowAuthModal } from '../../redux/pending/selectors';
+import { setShowAuthModal } from '../../redux/pending/slice';
 import { staggerContainer, staggerItem } from '../../helpers/animations/variants';
 import { useRef } from 'react';
 import ProductFilters from '../../components/ProductFilters/ProductFilters';
@@ -15,11 +17,12 @@ import Section from '../../widges/Section/Section';
 import styles from './ProductsPage.module.css';
 
 const ProductsPage = () => {
+  console.log('ProductsPage component is rendering!');
   const dispatch = useDispatch();
   const products = useSelector(selectFilteredProducts);
   const isLoading = useSelector(selectProductsLoading);
   const error = useSelector(selectProductsError);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const showAuthModal = useSelector(selectShowAuthModal);
 
   // Debug logging
   console.log('ProductsPage render - products:', products);
@@ -38,11 +41,11 @@ const ProductsPage = () => {
   }, [dispatch]);
 
   const handleAuthRequired = () => {
-    setShowAuthModal(true);
+    dispatch(setShowAuthModal(true));
   };
 
   const handleCloseAuthModal = () => {
-    setShowAuthModal(false);
+    dispatch(setShowAuthModal(false));
   };
 
   if (error) {

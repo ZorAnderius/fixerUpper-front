@@ -1,9 +1,11 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Formik, Form, Field } from 'formik';
 import { loginUser } from '../../redux/auth/operations';
 import { selectAuthLoading, selectAuthError } from '../../redux/auth/selectors';
+import { transferPendingCartToCart } from '../../redux/pending/operations';
+import { clearPendingState } from '../../redux/pending/slice';
 import { ROUTES } from '../../helpers/constants/routes';
 import { loginSchema } from '../../helpers/validation/schemas';
 import { ICONS, ICON_SIZES } from '../../helpers/constants/icons';
@@ -17,10 +19,22 @@ import styles from './LoginPage.module.css';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const isLoading = useSelector(selectAuthLoading);
   const error = useSelector(selectAuthError);
   const { redirectToGoogleAuth, isLoading: googleLoading, error: googleError } = useGoogleOAuth();
+  
+  // Отримуємо дані з state для редиректу
+  const from = location.state?.from || sessionStorage.getItem('previousLocation') || '/';
+  const hasPendingItems = location.state?.hasPendingItems || sessionStorage.getItem('pendingItems') === 'true';
+  
+  console.log('LoginPage - location.state:', location.state);
+  console.log('LoginPage - from:', from);
+  console.log('LoginPage - hasPendingItems:', hasPendingItems);
+  console.log('LoginPage - location.pathname:', location.pathname);
+  console.log('LoginPage - sessionStorage previousLocation:', sessionStorage.getItem('previousLocation'));
+  console.log('LoginPage - sessionStorage pendingItems:', sessionStorage.getItem('pendingItems'));
 
   const initialValues = {
     email: '',
@@ -43,9 +57,39 @@ const LoginPage = () => {
       console.log('Dispatching loginUser with:', sanitizedData);
       const result = await dispatch(loginUser(sanitizedData)).unwrap();
       console.log('Login result:', result);
+      console.log('Login successful! Proceeding with post-login logic...');
       
-      // Use helper for redirect
-      redirectAfterAuth(navigate, '/');
+      // Якщо є pending товари, переносимо їх в кошик
+      if (hasPendingItems) {
+        console.log('Transferring pending cart items to real cart');
+        try {
+          await dispatch(transferPendingCartToCart()).unwrap();
+          console.log('Successfully transferred pending cart items');
+        } catch (error) {
+          console.error('Failed to transfer pending cart items:', error);
+        }
+      } else {
+        console.log('No pending items to transfer');
+      }
+      
+      // Очищаємо pending стан після успішного логіну
+      dispatch(clearPendingState());
+      
+      // Редиректимо на попередню сторінку або головну
+      console.log('Redirecting to:', from);
+      console.log('Current location before redirect:', location.pathname);
+      console.log('from value type:', typeof from);
+      console.log('from value:', from);
+      
+      // Перевіряємо, чи from не є головною сторінкою
+      if (from && from !== '/' && from !== '/home') {
+        console.log('Navigating to previous location:', from);
+        navigate(from, { replace: true });
+      } else {
+        console.log('from is home page, staying on current page');
+        // Не робимо navigate, якщо from є головною сторінкою
+      }
+      console.log('Navigate logic completed');
     } catch (error) {
       console.error('Login failed:', error);
     } finally {

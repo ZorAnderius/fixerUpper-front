@@ -1,5 +1,5 @@
 import { RouterProvider } from 'react-router-dom';
-import { router } from './routes';
+import { router } from './routes/index.jsx';
 import './App.css'
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';

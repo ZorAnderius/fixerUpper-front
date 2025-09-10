@@ -121,10 +121,9 @@ const GoogleAuthCallback = async () => {
   return { Component: mod.default };
 };
 
-// Error element function
-const ErrorElement = async () => {
-  const mod = await import("../../pages/NotFoundPage/NotFoundPage");
-  return { Component: mod.default };
+// Error element component
+const ErrorElement = () => {
+  return <NotFoundPage />;
 };
 
 
@@ -132,7 +131,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     lazy: SharedLayout,
-    errorElement: NotFoundPage,
+    errorElement: ErrorElement,
     children: [
       { index: true, lazy: HomePage },
       { path: ROUTES.REGISTER, lazy: RegisterPage },

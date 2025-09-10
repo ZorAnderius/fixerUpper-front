@@ -1,56 +1,42 @@
 import api from './client';
 
-// Get cart items
+// Get user's cart
 export const getCartItems = async () => {
-  try {
-    const response = await api.get('/cart');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching cart items:', error);
-    throw error;
-  }
+  const response = await api.get('http://localhost:3000/api/carts');
+  return response.data;
 };
 
 // Add item to cart
-export const addToCart = async (cartData) => {
-  try {
-    const response = await api.post('/cart', cartData);
-    return response.data;
-  } catch (error) {
-    console.error('Error adding to cart:', error);
-    throw error;
-  }
+export const addToCart = async (productId, quantity = 1) => {
+  const response = await api.post('http://localhost:3000/api/carts', {
+    productId,
+    quantity
+  });
+  return response.data;
 };
 
-// Update cart item
-export const updateCartItem = async (itemId, quantity) => {
-  try {
-    const response = await api.put(`/cart/${itemId}`, { quantity });
-    return response.data;
-  } catch (error) {
-    console.error('Error updating cart item:', error);
-    throw error;
-  }
+// Update cart item quantity
+export const updateCartItem = async (productId, quantity) => {
+  const response = await api.put(`http://localhost:3000/api/carts/${productId}`, {
+    quantity
+  });
+  return response.data;
 };
 
 // Remove item from cart
-export const removeFromCart = async (itemId) => {
-  try {
-    const response = await api.delete(`/cart/${itemId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error removing from cart:', error);
-    throw error;
-  }
+export const removeFromCart = async (productId) => {
+  const response = await api.delete(`http://localhost:3000/api/carts/${productId}`);
+  return response.data;
+};
+
+// Clear entire cart
+export const clearCart = async () => {
+  const response = await api.delete('http://localhost:3000/api/carts');
+  return response.data;
 };
 
 // Checkout cart
-export const checkoutCart = async (checkoutData) => {
-  try {
-    const response = await api.post('/cart/checkout', checkoutData);
-    return response.data;
-  } catch (error) {
-    console.error('Error checking out cart:', error);
-    throw error;
-  }
+export const checkoutCart = async (cartItemId) => {
+  const response = await api.post(`http://localhost:3000/api/carts/${cartItemId}/checkout`);
+  return response.data;
 };

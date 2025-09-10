@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { fetchProductById, deleteProduct } from '../../redux/products/operations';
@@ -7,6 +7,10 @@ import { selectCurrentProduct, selectProductsLoading, selectProductsError } from
 import { selectUser, selectIsAuthenticated } from '../../redux/auth/selectors';
 import { addToCart } from '../../redux/cart/operations';
 import { selectCartItemById } from '../../redux/cart/selectors';
+import { addToPendingCartAndShowAuth } from '../../redux/pending/operations';
+import { setPreviousLocation, setRedirectReason } from '../../redux/pending/slice';
+import { selectShowAuthModal } from '../../redux/pending/selectors';
+import { setShowAuthModal } from '../../redux/pending/slice';
 import { ROUTES } from '../../helpers/constants/routes';
 import Button from '../../components/Button/Button';
 import AuthModal from '../../components/AuthModal/AuthModal';
@@ -15,6 +19,7 @@ import styles from './ProductDetailsPage.module.css';
 const ProductDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   
   const product = useSelector(selectCurrentProduct);
@@ -25,7 +30,7 @@ const ProductDetailsPage = () => {
   const cartItem = useSelector(selectCartItemById(id));
   
   const [quantity, setQuantity] = useState(1);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const showAuthModal = useSelector(selectShowAuthModal);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
@@ -60,14 +65,22 @@ const ProductDetailsPage = () => {
   const handleAddToCart = async () => {
     // Check if user is authenticated
     if (!isAuthenticated) {
-      // Save product data in localStorage for after login
-      const pendingCartItem = {
+      // Зберігаємо поточну сторінку
+      dispatch(setPreviousLocation(location.pathname));
+      
+      // Додаємо товар в pending кошик та показуємо модальку
+      dispatch(addToPendingCartAndShowAuth({
         productId: product.id,
         quantity: quantity,
-        returnUrl: window.location.pathname
-      };
-      localStorage.setItem('pendingCartItem', JSON.stringify(pendingCartItem));
-      setShowAuthModal(true);
+        product: {
+          id: product.id,
+          title: product.title,
+          price: product.price,
+          image_url: product.image_url
+        },
+        reason: 'add_to_cart'
+      }));
+      
       return;
     }
 
@@ -288,7 +301,7 @@ const ProductDetailsPage = () => {
       {/* Global Auth Modal */}
       <AuthModal 
         isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
+        onClose={() => dispatch(setShowAuthModal(false))}
       />
 
       {/* Delete Confirmation Modal */}

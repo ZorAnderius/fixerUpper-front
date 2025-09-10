@@ -56,7 +56,7 @@ export const addToCart = createAsyncThunk(
       }
       
       // Then sync with backend
-      const response = await addToCartAPI({ productId, quantity });
+      const response = await addToCartAPI(productId, quantity);
       
       // Update with server response
       dispatch(setCartItems(response));

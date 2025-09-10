@@ -7,7 +7,7 @@ import { RateLimiter } from "../helpers/security/validation.js";
 const rateLimiter = new RateLimiter(100, 60000); // 100 requests per minute
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
