@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { fetchAllOrders, fetchOrderById } from './operations';
 
 const initialState = {
   items: [],
@@ -45,6 +46,42 @@ const ordersSlice = createSlice({
       state.isOrderModalOpen = false;
       state.currentOrder = null;
     }
+  },
+  extraReducers: (builder) => {
+    builder
+      // Fetch all orders
+      .addCase(fetchAllOrders.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllOrders.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.error = null;
+        // Handle different response formats
+        if (action.payload.data) {
+          state.items = Array.isArray(action.payload.data) ? action.payload.data : action.payload.data.orders || [];
+        } else {
+          state.items = Array.isArray(action.payload) ? action.payload : [];
+        }
+      })
+      .addCase(fetchAllOrders.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      // Fetch order by ID
+      .addCase(fetchOrderById.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchOrderById.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.error = null;
+        state.currentOrder = action.payload.data || action.payload;
+      })
+      .addCase(fetchOrderById.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      });
   }
 });
 

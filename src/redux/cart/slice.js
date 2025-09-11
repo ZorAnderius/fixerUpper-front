@@ -4,6 +4,7 @@ const initialState = {
   items: [],
   totalItems: 0,
   totalPrice: 0,
+  cartId: null,
   isLoading: false,
   error: null
 };
@@ -23,9 +24,9 @@ const cartSlice = createSlice({
       state.error = null;
     },
     setCartItems: (state, action) => {
-      
       // Handle different response formats from backend
       let cartItems = [];
+      let cartId = null;
       
       if (Array.isArray(action.payload)) {
         cartItems = action.payload;
@@ -36,17 +37,37 @@ const cartSlice = createSlice({
       } else if (action.payload && Array.isArray(action.payload.cartItems)) {
         // Backend returns cartItems array - THIS IS THE CORRECT PATH
         cartItems = action.payload.cartItems;
+        // Extract cart ID from first item if available
+        if (cartItems.length > 0 && cartItems[0].cart_id) {
+          cartId = cartItems[0].cart_id;
+        }
       } else if (action.payload && action.payload.items && Array.isArray(action.payload.items)) {
         cartItems = action.payload.items;
       } else if (action.payload && action.payload.data && typeof action.payload.data === 'object' && !Array.isArray(action.payload.data)) {
-        // Backend returns {status: 200, message: "...", data: {}}
-        // This means empty cart - data object is empty
-        cartItems = [];
+        // Backend returns {status: 200, message: "...", data: {...}}
+        // Try to extract cart ID and items from data object
+        const data = action.payload.data;
+        if (data.id) {
+          cartId = data.id;
+        }
+        if (data.cartItems && Array.isArray(data.cartItems)) {
+          cartItems = data.cartItems;
+        } else if (data.items && Array.isArray(data.items)) {
+          cartItems = data.items;
+        } else {
+          // Empty cart
+          cartItems = [];
+        }
+      }
+      
+      // Also check if cartId is directly in the payload (from our API transformation)
+      if (!cartId && action.payload.cartId) {
+        cartId = action.payload.cartId;
       }
       
       
-      
       state.items = cartItems;
+      state.cartId = cartId;
       state.totalItems = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
       state.totalPrice = cartItems.reduce((total, item) => {
         const price = parseFloat(item.products?.price || item.price || 0);
@@ -55,7 +76,6 @@ const cartSlice = createSlice({
       }, 0);
       state.isLoading = false;
       state.error = null;
-      
       
     },
     addToCart: (state, action) => {

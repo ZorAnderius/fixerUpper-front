@@ -136,10 +136,10 @@ export const removeFromCart = createAsyncThunk(
 // Checkout cart
 export const checkoutCart = createAsyncThunk(
   'cart/checkout',
-  async (cartItemId, { dispatch, rejectWithValue }) => {
+  async (cartId, { dispatch, rejectWithValue }) => {
     try {
       dispatch(setLoading(true));
-      const response = await checkoutCartAPI(cartItemId);
+      const response = await checkoutCartAPI(cartId);
       
       // Clear cart after successful checkout
       dispatch(clearCart());

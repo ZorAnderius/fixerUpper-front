@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { fetchCartItems, updateCartItem, removeFromCart, checkoutCart } from '../../redux/cart/operations';
+import { fetchCartItems, updateCartItem, removeFromCart } from '../../redux/cart/operations';
 import { selectCartItems, selectCartLoading, selectCartError, selectCartTotalItems, selectCartTotalPrice } from '../../redux/cart/selectors';
 import { selectIsAuthenticated } from '../../redux/auth/selectors';
 import { ROUTES } from '../../helpers/constants/routes';
@@ -10,6 +10,7 @@ import Button from '../../components/Button/Button';
 import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner';
 import Container from '../../widges/Container/Container';
 import Section from '../../widges/Section/Section';
+import CheckoutModal from '../../components/CheckoutModal/CheckoutModal';
 import styles from './CartPage.module.css';
 
 const CartPage = () => {
@@ -21,6 +22,7 @@ const CartPage = () => {
   const error = useSelector(selectCartError);
   const totalItems = useSelector(selectCartTotalItems);
   const totalPrice = useSelector(selectCartTotalPrice);
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -48,13 +50,12 @@ const CartPage = () => {
     }
   };
 
-  const handleCheckout = async () => {
-    try {
-      // For now, just navigate to a success page
-      navigate(ROUTES.ORDERS);
-    } catch (error) {
-      console.error('Checkout failed:', error);
-    }
+  const handleCheckout = () => {
+    setShowCheckoutModal(true);
+  };
+
+  const handleCloseCheckoutModal = () => {
+    setShowCheckoutModal(false);
   };
 
   const formatPrice = (price) => {
@@ -103,14 +104,15 @@ const CartPage = () => {
   }
 
   return (
-    <Section>
-      <Container>
-        <motion.div
-          className={styles.cartPage}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
+    <>
+      <Section>
+        <Container>
+          <motion.div
+            className={styles.cartPage}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
           <div className={styles.cartContainer}>
             <div className={styles.cartHeader}>
               <h1 className={styles.cartTitle}>🛒 Shopping Cart</h1>
@@ -271,9 +273,15 @@ const CartPage = () => {
               </div>
             )}
           </div>
-        </motion.div>
-      </Container>
-    </Section>
+          </motion.div>
+        </Container>
+      </Section>
+
+      <CheckoutModal
+        isOpen={showCheckoutModal}
+        onClose={handleCloseCheckoutModal}
+      />
+    </>
   );
 };
 

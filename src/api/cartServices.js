@@ -14,7 +14,8 @@ export const getCartItems = async () => {
     
     const transformedResponse = {
       ...backendData,
-      cartItems: cartItems
+      cartItems: cartItems,
+      cartId: cart.id || cart.cart_id // Add cart ID
     };
     return transformedResponse;
   }
@@ -52,7 +53,7 @@ export const clearCart = async () => {
 };
 
 // Checkout cart
-export const checkoutCart = async (cartItemId) => {
-  const response = await api.post(`http://localhost:3000/api/carts/${cartItemId}/checkout`);
+export const checkoutCart = async (cartId) => {
+  const response = await api.post(`http://localhost:3000/api/carts/${cartId}/checkout`);
   return response.data;
 };

@@ -1,0 +1,372 @@
+.ordersPage {
+  padding: 40px 0;
+  min-height: 60vh;
+}
+
+.ordersHeader {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.ordersTitle {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ordersSubtitle {
+  font-size: 18px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.errorContainer {
+  text-align: center;
+  padding: 40px 20px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  color: #dc2626;
+}
+
+.errorContainer h2 {
+  margin: 0 0 16px 0;
+  color: #dc2626;
+}
+
+.errorContainer p {
+  margin: 0 0 24px 0;
+}
+
+/* Success Message */
+.successMessage {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+}
+
+.successIcon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  background: #059669;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.successContent {
+  flex: 1;
+}
+
+.successContent h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #059669;
+  margin: 0 0 4px 0;
+}
+
+.successContent p {
+  font-size: 14px;
+  color: #047857;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.closeSuccessButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.closeSuccessButton:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #374151;
+}
+
+/* Checkout Success */
+.checkoutSuccess {
+  text-align: center;
+  padding: 60px 20px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-radius: 16px;
+  border: 1px solid #bbf7d0;
+  margin-bottom: 32px;
+}
+
+.successIconLarge {
+  margin: 0 auto 24px auto;
+  width: 120px;
+  height: 120px;
+  background: #059669;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.successTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: #059669;
+  margin: 0 0 16px 0;
+}
+
+.successDescription {
+  font-size: 16px;
+  color: #047857;
+  margin: 0 0 32px 0;
+  line-height: 1.5;
+}
+
+.startShoppingButton {
+  background: linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%);
+  border: 1px solid #ff6b35;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+  font-weight: 600;
+  padding: 12px 32px;
+}
+
+.startShoppingButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e55a2b 0%, #d1491a 100%);
+  border-color: #e55a2b;
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Empty Orders */
+.emptyOrders {
+  text-align: center;
+  padding: 60px 20px;
+  background: #f9fafb;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.emptyOrdersIcon {
+  margin: 0 auto 24px auto;
+  width: 80px;
+  height: 80px;
+  color: #9ca3af;
+}
+
+.emptyOrdersTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 12px 0;
+}
+
+.emptyOrdersMessage {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0 0 32px 0;
+  line-height: 1.5;
+}
+
+/* Orders List */
+.ordersList {
+  display: grid;
+  gap: 20px;
+}
+
+.orderCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.orderCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #d1d5db;
+}
+
+.orderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.orderInfo {
+  flex: 1;
+}
+
+.orderNumber {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+}
+
+.orderDate {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.orderStatus {
+  flex-shrink: 0;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.orderDetails {
+  margin-bottom: 20px;
+}
+
+.orderTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-top: 1px solid #f3f4f6;
+}
+
+.totalLabel {
+  font-size: 16px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.totalValue {
+  font-size: 18px;
+  font-weight: 600;
+  color: #059669;
+}
+
+.orderActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 640px) {
+  .ordersPage {
+    padding: 20px 0;
+  }
+
+  .ordersTitle {
+    font-size: 28px;
+  }
+
+  .ordersSubtitle {
+    font-size: 16px;
+  }
+
+  .successMessage {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .successIcon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .successContent h3 {
+    font-size: 16px;
+  }
+
+  .successContent p {
+    font-size: 13px;
+  }
+
+  .orderCard {
+    padding: 20px;
+  }
+
+  .orderHeader {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .orderStatus {
+    align-self: flex-end;
+  }
+
+  .orderTotal {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .totalValue {
+    align-self: flex-end;
+  }
+
+  .orderActions {
+    justify-content: stretch;
+  }
+
+  .orderActions button {
+    width: 100%;
+  }
+
+  .checkoutSuccess {
+    padding: 40px 20px;
+  }
+
+  .successIconLarge {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 20px;
+  }
+
+  .successIconLarge svg {
+    width: 60px;
+    height: 60px;
+  }
+
+  .successTitle {
+    font-size: 24px;
+  }
+
+  .successDescription {
+    font-size: 14px;
+  }
+}
