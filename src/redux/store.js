@@ -14,14 +14,15 @@ import { authReducer } from "./auth/slice";
 import productsReducer from "./products/slice";
 import cartReducer from "./cart/slice";
 import ordersReducer from "./orders/slice";
-import { pendingReducer } from "./pending/slice";
 import { authMiddleware } from "./middleware/authMiddleware";
 
 // Конфігурація для персистенції
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth', 'cart', 'pending'], // Зберігаємо auth, cart та pending
+  whitelist: ['auth', 'cart', 'products'], // Зберігаємо auth, cart та products
+  transforms: [],
+  debug: true,
 };
 
 // Створюємо основний reducer
@@ -30,7 +31,6 @@ const rootReducer = combineReducers({
   products: productsReducer,
   cart: cartReducer,
   orders: ordersReducer,
-  pending: pendingReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -46,3 +46,4 @@ export const store = configureStore({
 });
 
 export const persistor = persistStore(store);
+

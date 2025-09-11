@@ -26,9 +26,7 @@ export const fetchAllProducts = createAsyncThunk(
   async (filters, { dispatch, rejectWithValue }) => {
     try {
       dispatch(setLoading(true));
-      console.log('fetchAllProducts thunk called with filters:', filters);
       const response = await getAllProductsAPI(filters);
-      console.log('fetchAllProducts response:', response);
       
       // Handle different response formats from API
       let products;
@@ -55,10 +53,6 @@ export const fetchAllProducts = createAsyncThunk(
         products = response;
       }
       
-      console.log('fetchAllProducts processed products:', products);
-      console.log('fetchAllProducts products type:', typeof products);
-      console.log('fetchAllProducts products isArray:', Array.isArray(products));
-      console.log('fetchAllProducts products length:', products?.length);
       
       dispatch(setProducts(products));
       
@@ -91,17 +85,13 @@ export const fetchProductById = createAsyncThunk(
   'products/fetchById',
   async (id, { dispatch, rejectWithValue }) => {
     try {
-      console.log('fetchProductById: Starting fetch for ID:', id);
       dispatch(setLoading(true));
       const response = await getProductByIdAPI(id);
-      console.log('fetchProductById: API response:', response);
       
       // Extract the actual product data from response.data
       const productData = response.data || response;
-      console.log('fetchProductById: Extracted product data:', productData);
       
       dispatch(setCurrentProduct(productData));
-      console.log('fetchProductById: Product set in state:', productData);
       return productData;
     } catch (error) {
       console.error('fetchProductById: Error occurred:', error);
@@ -171,13 +161,10 @@ export const fetchCategories = createAsyncThunk(
   'products/fetchCategories',
   async (_, { dispatch, rejectWithValue }) => {
     try {
-      console.log('fetchCategories thunk called');
       const response = await getAllCategoriesAPI();
-      console.log('fetchCategories response:', response);
       
       // Handle different response formats
       const categories = response.data || response;
-      console.log('fetchCategories processed categories:', categories);
       
       dispatch(setCategories(categories));
       return categories;

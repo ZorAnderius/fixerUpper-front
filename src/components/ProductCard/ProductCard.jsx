@@ -5,9 +5,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../redux/cart/operations';
 import { selectCartItemById } from '../../redux/cart/selectors';
 import { selectIsAuthenticated } from '../../redux/auth/selectors';
-import { addToPendingCartAndShowAuth } from '../../redux/pending/operations';
-import { setPreviousLocation, setRedirectReason } from '../../redux/pending/slice';
-import { usePreviousLocation } from '../../hooks/usePreviousLocation';
 import { ROUTES } from '../../helpers/constants/routes';
 import { cardVariants } from '../../helpers/animations/variants';
 import { useHoverAnimation } from '../../hooks/useAnimation';
@@ -23,48 +20,25 @@ const ProductCard = ({ product, index = 0, onAuthRequired }) => {
   const cartItem = useSelector(selectCartItemById(product.id));
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const { isHovered, handleMouseEnter, handleMouseLeave } = useHoverAnimation();
-  const { previousLocation } = usePreviousLocation();
 
-  // Debug logging
-  console.log('ProductCard render - product:', product);
-  console.log('ProductCard render - product.image_url:', product.image_url);
-  console.log('ProductCard render - product.title:', product.title);
-  console.log('ProductCard render - product.quantity:', product.quantity);
-  console.log('ProductCard render - cartItem:', cartItem);
-  console.log('ProductCard render - isLoading:', isLoading);
-  console.log('ProductCard render - isAuthenticated:', isAuthenticated);
 
   const handleAddToCart = async (e) => {
     e.stopPropagation();
     
-    console.log('handleAddToCart called, isAuthenticated:', isAuthenticated);
-    
-    // Check if user is authenticated
-    if (!isAuthenticated) {
-      console.log('User not authenticated, saving state and showing auth modal');
-      console.log('Current location.pathname:', location.pathname);
-      
-      // Зберігаємо поточну сторінку
-      dispatch(setPreviousLocation(location.pathname));
-      console.log('Dispatched setPreviousLocation with:', location.pathname);
-      
-      // Додаємо товар в pending кошик та показуємо модальку
-      dispatch(addToPendingCartAndShowAuth({
-        productId: product.id,
-        quantity: 1,
-        product: {
-          id: product.id,
-          title: product.title,
-          price: product.price,
-          image_url: product.image_url
-        },
-        reason: 'add_to_cart'
-      }));
-      
+    // Check if product is out of stock
+    if (product.quantity === 0) {
       return;
     }
     
-    console.log('User authenticated, adding to cart');
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      // Просто показуємо модальку авторизації
+      if (onAuthRequired) {
+        onAuthRequired();
+      }
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
@@ -150,11 +124,11 @@ const ProductCard = ({ product, index = 0, onAuthRequired }) => {
             variant="primary"
             size="sm"
             onClick={handleAddToCart}
-            disabled={product.quantity === 0 || isLoading}
+            disabled={isLoading || product.quantity === 0}
             loading={isLoading}
             fullWidth
           >
-            {cartItem ? 'In Cart' : 'Add to Cart'}
+            {product.quantity === 0 ? 'Out of Stock' : (cartItem ? 'In Cart' : 'Add to Cart')}
           </Button>
         </div>
       </div>

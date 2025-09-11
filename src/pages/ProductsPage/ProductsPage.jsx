@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { fetchAllProducts, fetchCategories } from '../../redux/products/operations';
-import { selectFilteredProducts, selectProductsLoading, selectProductsError } from '../../redux/products/selectors';
-import { selectShowAuthModal } from '../../redux/pending/selectors';
-import { setShowAuthModal } from '../../redux/pending/slice';
+import { selectFilteredProducts, selectProductsLoading, selectProductsError, selectProductsFilters } from '../../redux/products/selectors';
 import { staggerContainer, staggerItem } from '../../helpers/animations/variants';
 import { useRef } from 'react';
 import ProductFilters from '../../components/ProductFilters/ProductFilters';
@@ -17,20 +15,13 @@ import Section from '../../widges/Section/Section';
 import styles from './ProductsPage.module.css';
 
 const ProductsPage = () => {
-  console.log('ProductsPage component is rendering!');
   const dispatch = useDispatch();
   const products = useSelector(selectFilteredProducts);
   const isLoading = useSelector(selectProductsLoading);
   const error = useSelector(selectProductsError);
-  const showAuthModal = useSelector(selectShowAuthModal);
+  const filters = useSelector(selectProductsFilters);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // Debug logging
-  console.log('ProductsPage render - products:', products);
-  console.log('ProductsPage render - products type:', typeof products);
-  console.log('ProductsPage render - isArray:', Array.isArray(products));
-  console.log('ProductsPage render - products length:', products?.length);
-  console.log('ProductsPage render - isLoading:', isLoading);
-  console.log('ProductsPage render - error:', error);
   // Simplified animation - no staggered visibility
   const ref = useRef(null);
 
@@ -40,12 +31,17 @@ const ProductsPage = () => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
+  // Fetch products when filters change
+  useEffect(() => {
+    dispatch(fetchAllProducts(filters));
+  }, [dispatch, filters]);
+
   const handleAuthRequired = () => {
-    dispatch(setShowAuthModal(true));
+    setShowAuthModal(true);
   };
 
   const handleCloseAuthModal = () => {
-    dispatch(setShowAuthModal(false));
+    setShowAuthModal(false);
   };
 
   if (error) {

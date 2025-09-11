@@ -26,10 +26,8 @@ const processQueue = (error, token = null) => {
 const initializeToken = () => {
   try {
     const storedToken = localStorage.getItem('accessToken');
-    console.log('tokenManager.initializeToken - storedToken:', storedToken);
     if (storedToken) {
       accessToken = storedToken;
-      console.log('tokenManager.initializeToken - token set to:', accessToken);
     }
   } catch (error) {
     console.error('Failed to initialize token from localStorage:', error);
@@ -53,31 +51,24 @@ export const setAccessToken = (token, user = null) => {
   
   channel.postMessage({ type: "TOKEN_REFRESH", accessToken: token });
   if (token && user) {
-    console.log('tokenManager.setAccessToken - dispatching setAuth with user:', user);
     store.dispatch(setAuth({ user }));
   } else if (!token) {
-    console.log('tokenManager.setAccessToken - dispatching clearAuth');
     store.dispatch(clearAuth());
   }
 };
 
 export const refreshToken = async () => {
-  console.log('refreshToken called, accessToken:', accessToken);
-  
   if (!accessToken) {
-    console.log('No access token, returning null');
     return null;
   }
 
   if (isRefreshing) {
-    console.log('Already refreshing, adding to queue');
     return new Promise((resolve, reject) =>
       pendingQueue.push({ resolve, reject })
     );
   }
 
   isRefreshing = true;
-  console.log('Starting token refresh...');
 
   try {
     const controller = new AbortController();
@@ -94,11 +85,9 @@ export const refreshToken = async () => {
     );
 
     clearTimeout(timeout);
-    console.log('Refresh response status:', res.status);
 
     if (!res.ok) throw new Error(`Refresh failed: ${res.status}`);
     const data = await res.json();
-    console.log('Refresh response data:', data);
 
     // Extract data from nested structure
     const { accessToken, user } = data.data;

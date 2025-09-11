@@ -12,17 +12,15 @@ const sanitizeInput = (input) => {
 
 // Get all products with filters
 export const getAllProducts = async (filters = {}) => {
-  console.log('getAllProducts called with filters:', filters);
-  
   try {
     const sanitizedFilters = {};
     
-    // Sanitize filter values
-    if (filters.category) {
+    // Sanitize filter values - only send non-empty values
+    if (filters.category && filters.category !== '') {
       sanitizedFilters.category = sanitizeInput(filters.category);
     }
-    if (filters.search) {
-      sanitizedFilters.search = sanitizeInput(filters.search);
+    if (filters.search && filters.search.trim() !== '') {
+      sanitizedFilters.product = sanitizeInput(filters.search);
     }
     if (filters.sortBy) {
       sanitizedFilters.sortBy = sanitizeInput(filters.sortBy);
@@ -31,18 +29,23 @@ export const getAllProducts = async (filters = {}) => {
       sanitizedFilters.page = parseInt(filters.page) || 1;
     }
     if (filters.limit) {
-      sanitizedFilters.limit = parseInt(filters.limit) || 10;
+      sanitizedFilters.limit = parseInt(filters.limit) || 12;
     }
     
-    const params = new URLSearchParams(sanitizedFilters);
-    const url = `/products?${params.toString()}`;
-    console.log('Making API request to:', url);
-    console.log('Full URL:', api.defaults.baseURL + url);
+    // Only add params if they exist
+    const params = new URLSearchParams();
+    Object.keys(sanitizedFilters).forEach(key => {
+      if (sanitizedFilters[key] !== undefined && sanitizedFilters[key] !== '') {
+        params.append(key, sanitizedFilters[key]);
+      }
+    });
+    
+    const url = params.toString() ? `/products?${params.toString()}` : '/products';
+    console.log('🔍 API Request URL:', url);
+    console.log('🔍 Sanitized Filters:', sanitizedFilters);
+    console.log('🔍 Original filters from Redux:', filters);
     const response = await api.get(url);
-    console.log('Products API response status:', response.status);
-    console.log('Products API response data:', response.data);
-    console.log('Products API response data type:', typeof response.data);
-    console.log('Products API response data keys:', Object.keys(response.data || {}));
+    console.log('🔍 API Response products count:', response.data?.products?.length || response.data?.length || 0);
     return response.data;
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -59,10 +62,7 @@ export const getAllProducts = async (filters = {}) => {
 // Get product by ID
 export const getProductById = async (id) => {
   try {
-    console.log('Making API request to /products/' + id);
     const response = await api.get(`/products/${id}`);
-    console.log('Product API response status:', response.status);
-    console.log('Product API response data:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching product:', error);
@@ -124,14 +124,9 @@ export const deleteProduct = async (id) => {
 
 // Get all categories
 export const getAllCategories = async () => {
-  console.log('getAllCategories called');
-  console.log('API base URL:', api.defaults.baseURL);
   
   try {
-    console.log('Making API request to /categories');
     const response = await api.get('/categories');
-    console.log('Categories API response status:', response.status);
-    console.log('Categories API response data:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching categories:', error);

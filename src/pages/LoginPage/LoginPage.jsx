@@ -1,11 +1,10 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate, Link, useLocation, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Formik, Form, Field } from 'formik';
 import { loginUser } from '../../redux/auth/operations';
-import { selectAuthLoading, selectAuthError } from '../../redux/auth/selectors';
-import { transferPendingCartToCart } from '../../redux/pending/operations';
-import { clearPendingState } from '../../redux/pending/slice';
+import { selectAuthLoading, selectAuthError, selectIsAuthenticated } from '../../redux/auth/selectors';
 import { ROUTES } from '../../helpers/constants/routes';
 import { loginSchema } from '../../helpers/validation/schemas';
 import { ICONS, ICON_SIZES } from '../../helpers/constants/icons';
@@ -23,18 +22,24 @@ const LoginPage = () => {
   const dispatch = useDispatch();
   const isLoading = useSelector(selectAuthLoading);
   const error = useSelector(selectAuthError);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const { redirectToGoogleAuth, isLoading: googleLoading, error: googleError } = useGoogleOAuth();
   
-  // Отримуємо дані з state для редиректу
-  const from = location.state?.from || sessionStorage.getItem('previousLocation') || '/';
-  const hasPendingItems = location.state?.hasPendingItems || sessionStorage.getItem('pendingItems') === 'true';
+  // Простий редирект - на головну сторінку або з location.state
+  const from = location.state?.from || '/';
   
-  console.log('LoginPage - location.state:', location.state);
-  console.log('LoginPage - from:', from);
-  console.log('LoginPage - hasPendingItems:', hasPendingItems);
-  console.log('LoginPage - location.pathname:', location.pathname);
-  console.log('LoginPage - sessionStorage previousLocation:', sessionStorage.getItem('previousLocation'));
-  console.log('LoginPage - sessionStorage pendingItems:', sessionStorage.getItem('pendingItems'));
+  
+  // useEffect для автоматичного перенаправлення після логіну
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, from, navigate]);
+
+  // Якщо користувач вже авторизований, одразу перенаправляємо
+  if (isAuthenticated) {
+    return <Navigate to={from} replace />;
+  }
 
   const initialValues = {
     email: '',
@@ -54,42 +59,9 @@ const LoginPage = () => {
         throw new Error('Invalid email format');
       }
 
-      console.log('Dispatching loginUser with:', sanitizedData);
-      const result = await dispatch(loginUser(sanitizedData)).unwrap();
-      console.log('Login result:', result);
-      console.log('Login successful! Proceeding with post-login logic...');
+      await dispatch(loginUser(sanitizedData)).unwrap();
       
-      // Якщо є pending товари, переносимо їх в кошик
-      if (hasPendingItems) {
-        console.log('Transferring pending cart items to real cart');
-        try {
-          await dispatch(transferPendingCartToCart()).unwrap();
-          console.log('Successfully transferred pending cart items');
-        } catch (error) {
-          console.error('Failed to transfer pending cart items:', error);
-        }
-      } else {
-        console.log('No pending items to transfer');
-      }
-      
-      // Очищаємо pending стан після успішного логіну
-      dispatch(clearPendingState());
-      
-      // Редиректимо на попередню сторінку або головну
-      console.log('Redirecting to:', from);
-      console.log('Current location before redirect:', location.pathname);
-      console.log('from value type:', typeof from);
-      console.log('from value:', from);
-      
-      // Перевіряємо, чи from не є головною сторінкою
-      if (from && from !== '/' && from !== '/home') {
-        console.log('Navigating to previous location:', from);
-        navigate(from, { replace: true });
-      } else {
-        console.log('from is home page, staying on current page');
-        // Не робимо navigate, якщо from є головною сторінкою
-      }
-      console.log('Navigate logic completed');
+      // Навігація тепер відбувається автоматично через useEffect
     } catch (error) {
       console.error('Login failed:', error);
     } finally {

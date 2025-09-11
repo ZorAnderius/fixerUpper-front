@@ -37,9 +37,6 @@ const productsSlice = createSlice({
       state.error = null;
     },
     setProducts: (state, action) => {
-      console.log('setProducts called with payload:', action.payload);
-      console.log('setProducts payload type:', typeof action.payload);
-      console.log('setProducts payload isArray:', Array.isArray(action.payload));
       
       state.items = action.payload;
       state.isLoading = false;

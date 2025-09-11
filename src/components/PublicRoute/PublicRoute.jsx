@@ -10,14 +10,10 @@ const PublicRoute = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  console.log('PublicRoute - isAuthenticated:', isAuthenticated);
-  console.log('PublicRoute - user:', user);
-  console.log('PublicRoute - current path:', location.pathname);
 
   useEffect(() => {
     // If user is authenticated, redirect to home page
     if (isAuthenticated) {
-      console.log('PublicRoute - redirecting authenticated user to home');
       // Get the intended destination from state, or default to home
       const from = location.state?.from?.pathname || ROUTES.MAIN;
       console.log('PublicRoute - navigating to:', from);

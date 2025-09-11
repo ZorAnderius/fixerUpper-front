@@ -33,6 +33,8 @@ const ProductDetailsPage = () => {
   const showAuthModal = useSelector(selectShowAuthModal);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+  console.log('ProductDetailsPage render - showAuthModal:', showAuthModal);
+
   useEffect(() => {
     if (id) {
       dispatch(fetchProductById(id));
@@ -63,8 +65,10 @@ const ProductDetailsPage = () => {
   }, [product, dispatch]);
 
   const handleAddToCart = async () => {
+    console.log('ProductDetailsPage handleAddToCart called, isAuthenticated:', isAuthenticated);
     // Check if user is authenticated
     if (!isAuthenticated) {
+      console.log('User not authenticated, saving state and showing auth modal');
       // Зберігаємо поточну сторінку
       dispatch(setPreviousLocation(location.pathname));
       
@@ -80,15 +84,18 @@ const ProductDetailsPage = () => {
         },
         reason: 'add_to_cart'
       }));
+      console.log('ProductDetailsPage - dispatched addToPendingCartAndShowAuth');
       
       return;
     }
 
+    console.log('User authenticated, adding to cart');
     try {
       await dispatch(addToCart({
         productId: product.id,
         quantity: quantity
       })).unwrap();
+      console.log('Successfully added to cart');
     } catch (error) {
       console.error('Failed to add to cart:', error);
     }

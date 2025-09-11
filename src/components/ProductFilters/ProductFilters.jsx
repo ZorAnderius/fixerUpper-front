@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { setFilters } from '../../redux/products/slice';
@@ -12,30 +12,34 @@ const ProductFilters = () => {
   const categories = useSelector(selectCategories);
   const filters = useSelector(selectProductsFilters);
   const hasLoadedCategories = useRef(false);
-
-  // Debug logging
-  console.log('ProductFilters render - categories:', categories);
-  console.log('ProductFilters render - categories type:', typeof categories);
-  console.log('ProductFilters render - isArray:', Array.isArray(categories));
-  console.log('ProductFilters render - categories length:', categories?.length);
+  const [searchValue, setSearchValue] = useState(filters.search || '');
 
   useEffect(() => {
     // Load categories only once
     if (!hasLoadedCategories.current) {
-      console.log('ProductFilters - dispatching fetchCategories (first time)');
       hasLoadedCategories.current = true;
       dispatch(fetchCategories());
-    } else {
-      console.log('ProductFilters - categories already requested, skipping fetch');
     }
   }, []); // Empty dependency array - run only once on mount
 
+  // Debounce search
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchValue !== filters.search) {
+        dispatch(setFilters({ search: searchValue, page: 1 }));
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchValue, dispatch, filters.search]);
+
   const handleSearchChange = (e) => {
-    dispatch(setFilters({ search: e.target.value, page: 1 }));
+    setSearchValue(e.target.value);
   };
 
   const handleCategoryChange = (e) => {
-    dispatch(setFilters({ category: e.target.value, page: 1 }));
+    const categoryValue = e.target.value === '' ? '' : e.target.value;
+    dispatch(setFilters({ category: categoryValue, page: 1 }));
   };
 
   const handleSortChange = (e) => {
@@ -43,6 +47,7 @@ const ProductFilters = () => {
   };
 
   const clearFilters = () => {
+    setSearchValue('');
     dispatch(setFilters({ 
       search: '', 
       category: '', 
@@ -51,7 +56,7 @@ const ProductFilters = () => {
     }));
   };
 
-  const hasActiveFilters = filters.search || filters.category || filters.sortBy !== 'newest';
+  const hasActiveFilters = searchValue || filters.category || filters.sortBy !== 'newest';
 
   return (
     <motion.div 
@@ -69,7 +74,7 @@ const ProductFilters = () => {
             <input
               type="text"
               placeholder="Search products..."
-              value={filters.search}
+              value={searchValue}
               onChange={handleSearchChange}
               className={styles.searchInput}
             />
