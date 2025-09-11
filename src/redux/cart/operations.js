@@ -64,6 +64,12 @@ export const addToCart = createAsyncThunk(
       if (response.cartItems && Array.isArray(response.cartItems)) {
         // Update Redux with server response to ensure consistency
         dispatch(setCartItems(response));
+      } else if (response.data && response.data.cartItems && Array.isArray(response.data.cartItems)) {
+        // Backend might return cartItems in data object
+        dispatch(setCartItems(response));
+      } else {
+        // If backend doesn't return cartItems, fetch the full cart to ensure sync
+        dispatch(fetchCartItems());
       }
       
       return response;
@@ -93,7 +99,8 @@ export const updateCartItem = createAsyncThunk(
       // Then sync with backend
       const response = await updateCartItemAPI(cartItemId, quantity);
       
-      // Update with server response
+      
+      // Update with server response - backend returns same structure as getCartItems
       dispatch(setCartItems(response));
       return response;
     } catch (error) {

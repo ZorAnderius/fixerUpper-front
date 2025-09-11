@@ -1,16 +1,16 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { openCart } from '../../redux/cart/slice';
-import { selectCartTotalItems, selectIsCartOpen } from '../../redux/cart/selectors';
+import { selectCartTotalItems } from '../../redux/cart/selectors';
+import { ROUTES } from '../../helpers/constants/routes';
 import styles from './CartIcon.module.css';
 
 const CartIcon = () => {
-  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const totalItems = useSelector(selectCartTotalItems);
-  const isCartOpen = useSelector(selectIsCartOpen);
 
   const handleCartClick = () => {
-    dispatch(openCart());
+    navigate(ROUTES.CART);
   };
 
   return (

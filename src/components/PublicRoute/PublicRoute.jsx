@@ -16,7 +16,6 @@ const PublicRoute = ({ children }) => {
     if (isAuthenticated) {
       // Get the intended destination from state, or default to home
       const from = location.state?.from?.pathname || ROUTES.MAIN;
-      console.log('PublicRoute - navigating to:', from);
       
       // Try both methods to ensure redirect works
       navigate(from, { replace: true });
@@ -24,7 +23,6 @@ const PublicRoute = ({ children }) => {
       // Fallback: force redirect with window.location
       setTimeout(() => {
         if (window.location.pathname === location.pathname) {
-          console.log('PublicRoute - fallback redirect with window.location');
           window.location.href = from;
         }
       }, 100);
@@ -36,7 +34,6 @@ const PublicRoute = ({ children }) => {
     return null; // or a loading spinner
   }
 
-  console.log('PublicRoute - allowing access to public route');
   return children;
 };
 

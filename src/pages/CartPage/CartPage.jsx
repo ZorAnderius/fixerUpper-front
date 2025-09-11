@@ -250,22 +250,22 @@ const CartPage = () => {
                   </div>
 
                   <div className={styles.cartActions}>
-                    <button
-                      className={styles.checkoutButton}
-                      onClick={handleCheckout}
-                      disabled={isLoading}
-                    >
-                      <span>🛒</span>
-                      <span>Proceed to Checkout</span>
-                    </button>
-                    
-                    <button
-                      className={styles.continueShoppingButton}
-                      onClick={() => navigate(ROUTES.PRODUCTS)}
-                    >
-                      <span>🛍️</span>
-                      <span>Continue Shopping</span>
-                    </button>
+                    <div className={styles.buttonsContainer}>
+                      <button
+                        className={styles.continueShoppingButton}
+                        onClick={() => navigate(ROUTES.PRODUCTS)}
+                      >
+                        Continue Shopping
+                      </button>
+                      
+                      <button
+                        className={styles.checkoutButton}
+                        onClick={handleCheckout}
+                        disabled={isLoading}
+                      >
+                        Proceed to Checkout
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

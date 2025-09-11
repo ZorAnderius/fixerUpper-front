@@ -2,6 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { authServices } from '../../api/authServices';
 import { setAuth, clearAuth } from './slice';
 import { clearCart } from '../cart/slice';
+import { fetchCartItems } from '../cart/operations';
 
 // Register user
 export const registerUser = createAsyncThunk(
@@ -19,9 +20,13 @@ export const registerUser = createAsyncThunk(
 // Login user
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
-  async (credentials, { rejectWithValue }) => {
+  async (credentials, { dispatch, rejectWithValue }) => {
     try {
       const response = await authServices.login(credentials);
+      
+      // Load user's cart after successful login
+      dispatch(fetchCartItems());
+      
       return response;
     } catch (error) {
       return rejectWithValue(error.message || 'Login failed');

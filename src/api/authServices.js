@@ -26,7 +26,6 @@ export const authServices = {
   },
 
   login: async (credentials) => {
-    console.log('authServices.login called with:', credentials);
     
     try {
       const response = await fetch(`http://localhost:3000/api/users/login`, {
@@ -39,8 +38,6 @@ export const authServices = {
         body: JSON.stringify(credentials),
       });
       
-      console.log('Login response status:', response.status);
-      console.log('Login response headers:', response.headers);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -50,7 +47,6 @@ export const authServices = {
       }
       
       const data = await response.json();
-      console.log('Login response data:', data);
       
       // Extract data from nested structure
       const { accessToken, user } = data.data;
@@ -65,7 +61,6 @@ export const authServices = {
 
   logout: async () => {
     const token = getAccessToken();
-    console.log('authServices.logout called with token:', token ? 'present' : 'missing');
     
     const response = await fetch(`http://localhost:3000/api/users/logout`, {
       method: 'POST',
@@ -76,7 +71,6 @@ export const authServices = {
       credentials: 'include',
     });
     
-    console.log('Logout response status:', response.status);
     
     setAccessToken(null);
     

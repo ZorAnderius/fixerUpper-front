@@ -26,11 +26,6 @@ const GoogleAuthCallback = () => {
         const error = urlParams.get('error');
         const state = urlParams.get('state');
         
-        console.log('Full URL:', window.location.href);
-        console.log('URL search params:', window.location.search);
-        console.log('All URL params:', Object.fromEntries(urlParams.entries()));
-        console.log('Code from URL:', code);
-        console.log('Error from URL:', error);
 
         if (error) {
           console.error('Google OAuth error:', error);
@@ -44,15 +39,9 @@ const GoogleAuthCallback = () => {
         if (code) {
         setStatus('authenticating');
         
-        console.log('Received OAuth code:', code);
-        console.log('Code length:', code.length);
-        console.log('Code type:', typeof code);
-        console.log('Sending POST request to confirm-oauth');
         
         // Send the code to our backend via POST
         const requestBody = { code };
-        console.log('Request body:', requestBody);
-        console.log('Request body JSON:', JSON.stringify(requestBody));
         
         const response = await fetch(`http://localhost:3000/api/users/confirm-oauth`, {
           method: 'POST',
@@ -65,7 +54,6 @@ const GoogleAuthCallback = () => {
           body: JSON.stringify(requestBody),
         });
 
-          console.log('OAuth callback response status:', response.status);
 
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
@@ -74,7 +62,6 @@ const GoogleAuthCallback = () => {
           }
 
           const data = await response.json();
-          console.log('OAuth callback success data:', data);
           
           // Store the user data and token
           if (data.data.accessToken && data.data.user) {

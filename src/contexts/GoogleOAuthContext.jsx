@@ -65,7 +65,6 @@ export const GoogleOAuthProvider = ({ children }) => {
       setIsLoading(true);
       setError(null);
 
-      console.log('Sending OAuth code to backend:', code);
 
       const response = await fetch(`/api/users/confirm-oauth`, {
         method: 'POST',
@@ -78,7 +77,6 @@ export const GoogleOAuthProvider = ({ children }) => {
         body: JSON.stringify({ code }),
       });
 
-      console.log('OAuth response status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -87,7 +85,6 @@ export const GoogleOAuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
-      console.log('OAuth success data:', data);
       
       // Dispatch the authentication action
       await dispatch(authenticateWithGoogleOAuth({

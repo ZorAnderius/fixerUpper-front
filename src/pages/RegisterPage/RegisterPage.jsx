@@ -52,9 +52,6 @@ const RegisterPage = () => {
       };
 
       // Log the data being sent
-      console.log('Original phone:', values.phoneNumber);
-      console.log('Sanitized phone:', sanitizedData.phoneNumber);
-      console.log('Full data being sent:', sanitizedData);
 
       // Validate sanitized data
       if (!sanitizedData.email) {
@@ -68,12 +65,10 @@ const RegisterPage = () => {
       
       // Якщо є pending товари, переносимо їх в кошик
       if (hasPendingItems) {
-        console.log('Transferring pending cart items to real cart');
         await dispatch(transferPendingCartToCart()).unwrap();
       }
       
       // Редиректимо на попередню сторінку або головну
-      console.log('Redirecting to:', from);
       navigate(from, { replace: true });
       
       // Очищаємо pending стан ПІСЛЯ навігації

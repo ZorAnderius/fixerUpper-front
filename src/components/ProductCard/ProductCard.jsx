@@ -46,6 +46,9 @@ const ProductCard = ({ product, index = 0, onAuthRequired }) => {
         productId: product.id, 
         quantity: 1 
       })).unwrap();
+      
+      // Small delay to ensure backend synchronization
+      await new Promise(resolve => setTimeout(resolve, 500));
     } catch (error) {
       console.error('Failed to add to cart:', error);
     } finally {
@@ -125,7 +128,6 @@ const ProductCard = ({ product, index = 0, onAuthRequired }) => {
                    size="sm"
                    onClick={cartItem ? (e) => {
                      e.stopPropagation(); // CRITICAL: Prevent event bubbling to handleCardClick
-                     console.log('🔍 ProductCard: Navigating to cart:', ROUTES.CART);
                      navigate(ROUTES.CART);
                    } : handleAddToCart}
                    disabled={isLoading || product.quantity === 0}

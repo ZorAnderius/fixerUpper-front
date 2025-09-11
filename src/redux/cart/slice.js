@@ -5,8 +5,7 @@ const initialState = {
   totalItems: 0,
   totalPrice: 0,
   isLoading: false,
-  error: null,
-  isCartOpen: false
+  error: null
 };
 
 const cartSlice = createSlice({
@@ -24,6 +23,7 @@ const cartSlice = createSlice({
       state.error = null;
     },
     setCartItems: (state, action) => {
+      
       // Handle different response formats from backend
       let cartItems = [];
       
@@ -45,6 +45,7 @@ const cartSlice = createSlice({
       }
       
       
+      
       state.items = cartItems;
       state.totalItems = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
       state.totalPrice = cartItems.reduce((total, item) => {
@@ -54,6 +55,7 @@ const cartSlice = createSlice({
       }, 0);
       state.isLoading = false;
       state.error = null;
+      
       
     },
     addToCart: (state, action) => {
@@ -121,15 +123,6 @@ const cartSlice = createSlice({
       state.totalItems = 0;
       state.totalPrice = 0;
     },
-    toggleCart: (state) => {
-      state.isCartOpen = !state.isCartOpen;
-    },
-    openCart: (state) => {
-      state.isCartOpen = true;
-    },
-    closeCart: (state) => {
-      state.isCartOpen = false;
-    }
   }
 });
 
@@ -142,10 +135,7 @@ export const {
   updateCartItem,
   removeFromCart,
   revertAddToCart,
-  clearCart,
-  toggleCart,
-  openCart,
-  closeCart
+  clearCart
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

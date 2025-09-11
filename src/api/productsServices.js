@@ -41,11 +41,7 @@ export const getAllProducts = async (filters = {}) => {
     });
     
     const url = params.toString() ? `/products?${params.toString()}` : '/products';
-    console.log('🔍 API Request URL:', url);
-    console.log('🔍 Sanitized Filters:', sanitizedFilters);
-    console.log('🔍 Original filters from Redux:', filters);
     const response = await api.get(url);
-    console.log('🔍 API Response products count:', response.data?.products?.length || response.data?.length || 0);
     return response.data;
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -78,10 +74,7 @@ export const createProduct = async (productData) => {
       sanitizedData[key] = sanitizeInput(productData[key]);
     });
     
-    console.log('Making API request to POST /products');
     const response = await api.post('/products', sanitizedData);
-    console.log('Create product API response status:', response.status);
-    console.log('Create product API response data:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error creating product:', error);
@@ -97,10 +90,7 @@ export const updateProduct = async (id, productData) => {
       sanitizedData[key] = sanitizeInput(productData[key]);
     });
     
-    console.log('Making API request to PUT /products/' + id);
     const response = await api.put(`/products/${id}`, sanitizedData);
-    console.log('Update product API response status:', response.status);
-    console.log('Update product API response data:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error updating product:', error);
@@ -111,10 +101,7 @@ export const updateProduct = async (id, productData) => {
 // Delete product
 export const deleteProduct = async (id) => {
   try {
-    console.log('Making API request to DELETE /products/' + id);
     const response = await api.delete(`/products/${id}`);
-    console.log('Delete product API response status:', response.status);
-    console.log('Delete product API response data:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error deleting product:', error);
@@ -142,13 +129,8 @@ export const getAllCategories = async () => {
 
 // Get all product statuses
 export const getAllProductStatuses = async () => {
-  console.log('getAllProductStatuses called');
-  
   try {
-    console.log('Making API request to /product-statuses');
     const response = await api.get('/product-statuses');
-    console.log('Product statuses API response status:', response.status);
-    console.log('Product statuses API response data:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching product statuses:', error);

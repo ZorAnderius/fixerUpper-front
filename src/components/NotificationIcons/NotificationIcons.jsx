@@ -8,7 +8,6 @@ const NotificationIcons = () => {
   });
 
   const handleNotificationClick = (type) => {
-    console.log(`${type} notification clicked`);
     // TODO: Implement notification handling
   };
 
