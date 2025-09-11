@@ -7,10 +7,7 @@ import { selectCurrentProduct, selectProductsLoading, selectProductsError } from
 import { selectUser, selectIsAuthenticated } from '../../redux/auth/selectors';
 import { addToCart } from '../../redux/cart/operations';
 import { selectCartItemById } from '../../redux/cart/selectors';
-import { addToPendingCartAndShowAuth } from '../../redux/pending/operations';
-import { setPreviousLocation, setRedirectReason } from '../../redux/pending/slice';
-import { selectShowAuthModal } from '../../redux/pending/selectors';
-import { setShowAuthModal } from '../../redux/pending/slice';
+// Removed pending slice imports - using local state instead
 import { ROUTES } from '../../helpers/constants/routes';
 import Button from '../../components/Button/Button';
 import AuthModal from '../../components/AuthModal/AuthModal';
@@ -30,10 +27,10 @@ const ProductDetailsPage = () => {
   const cartItem = useSelector(selectCartItemById(id));
   
   const [quantity, setQuantity] = useState(1);
-  const showAuthModal = useSelector(selectShowAuthModal);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  console.log('ProductDetailsPage render - showAuthModal:', showAuthModal);
+  // Removed debug logging
 
   useEffect(() => {
     if (id) {
@@ -41,61 +38,21 @@ const ProductDetailsPage = () => {
     }
   }, [id, dispatch]);
 
-  // Handle return after login
-  useEffect(() => {
-    const pendingCartItem = localStorage.getItem('pendingCartItem');
-    if (pendingCartItem && product) {
-      try {
-        const cartData = JSON.parse(pendingCartItem);
-        // Check if it's the same product
-        if (cartData.productId === product?.id) {
-          // Add product to cart
-          dispatch(addToCart({
-            productId: product.id,
-            quantity: cartData.quantity || 1
-          }));
-          // Clear saved data
-          localStorage.removeItem('pendingCartItem');
-        }
-      } catch (error) {
-        console.error('Failed to parse pending cart item:', error);
-        localStorage.removeItem('pendingCartItem');
-      }
-    }
-  }, [product, dispatch]);
+  // Removed pending cart logic - simplified approach
 
   const handleAddToCart = async () => {
-    console.log('ProductDetailsPage handleAddToCart called, isAuthenticated:', isAuthenticated);
     // Check if user is authenticated
     if (!isAuthenticated) {
-      console.log('User not authenticated, saving state and showing auth modal');
-      // Зберігаємо поточну сторінку
-      dispatch(setPreviousLocation(location.pathname));
-      
-      // Додаємо товар в pending кошик та показуємо модальку
-      dispatch(addToPendingCartAndShowAuth({
-        productId: product.id,
-        quantity: quantity,
-        product: {
-          id: product.id,
-          title: product.title,
-          price: product.price,
-          image_url: product.image_url
-        },
-        reason: 'add_to_cart'
-      }));
-      console.log('ProductDetailsPage - dispatched addToPendingCartAndShowAuth');
-      
+      // Просто показуємо модальку авторизації
+      setShowAuthModal(true);
       return;
     }
 
-    console.log('User authenticated, adding to cart');
     try {
       await dispatch(addToCart({
         productId: product.id,
         quantity: quantity
       })).unwrap();
-      console.log('Successfully added to cart');
     } catch (error) {
       console.error('Failed to add to cart:', error);
     }
@@ -120,9 +77,7 @@ const ProductDetailsPage = () => {
 
 
   const formatPrice = (price) => {
-    console.log('formatPrice called with:', price, 'type:', typeof price);
     if (price === null || price === undefined || isNaN(price)) {
-      console.log('Invalid price value:', price);
       return 'Price not available';
     }
     return new Intl.NumberFormat('en-GB', {
@@ -308,7 +263,7 @@ const ProductDetailsPage = () => {
       {/* Global Auth Modal */}
       <AuthModal 
         isOpen={showAuthModal}
-        onClose={() => dispatch(setShowAuthModal(false))}
+        onClose={() => setShowAuthModal(false)}
       />
 
       {/* Delete Confirmation Modal */}

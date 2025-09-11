@@ -13,6 +13,7 @@ import {
   addToCart as addToCartAction,
   updateCartItem as updateCartItemAction,
   removeFromCart as removeFromCartAction,
+  revertAddToCart,
   clearCart
 } from './slice';
 
@@ -24,6 +25,9 @@ export const fetchCartItems = createAsyncThunk(
       dispatch(setLoading(true));
       const response = await getCartItemsAPI();
       
+      
+      // Backend returns: { status: 200, message: "...", data: {...}, cartItems: [...] }
+      // We need to pass the full response object to setCartItems
       dispatch(setCartItems(response));
       return response;
     } catch (error) {
@@ -41,27 +45,34 @@ export const addToCart = createAsyncThunk(
     try {
       dispatch(setLoading(true));
       
-      // First add to Redux store for immediate UI update
+      // First add to Redux store for immediate UI update (optimistic update)
       const state = getState();
       const product = state.products.items.find(p => p.id === productId);
       
-      console.log('addToCart thunk - productId:', productId);
-      console.log('addToCart thunk - product:', product);
-      console.log('addToCart thunk - products.items:', state.products.items);
-      
-      if (product) {
-        dispatch(addToCartAction({ product, quantity }));
-      } else {
-        console.error('Product not found in state.products.items');
+      if (!product) {
+        throw new Error('Product not found');
       }
+      
+      // Optimistic update - add to Redux immediately
+      dispatch(addToCartAction({ product, quantity }));
       
       // Then sync with backend
       const response = await addToCartAPI(productId, quantity);
       
-      // Update with server response
-      dispatch(setCartItems(response));
+      
+      // Backend should return the updated cart items
+      if (response.cartItems && Array.isArray(response.cartItems)) {
+        // Update Redux with server response to ensure consistency
+        dispatch(setCartItems(response));
+      }
+      
       return response;
     } catch (error) {
+      // If backend call fails, we should revert the optimistic update
+      
+      // Remove the item we optimistically added
+      dispatch(revertAddToCart({ productId }));
+      
       const errorMessage = error.response?.data?.message || error.message || 'Failed to add to cart';
       dispatch(setError(errorMessage));
       return rejectWithValue(errorMessage);

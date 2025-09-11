@@ -120,16 +120,20 @@ const ProductCard = ({ product, index = 0, onAuthRequired }) => {
         </div>
         
         <div className={styles.productActions}>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handleAddToCart}
-            disabled={isLoading || product.quantity === 0}
-            loading={isLoading}
-            fullWidth
-          >
-            {product.quantity === 0 ? 'Out of Stock' : (cartItem ? 'In Cart' : 'Add to Cart')}
-          </Button>
+                 <Button
+                   variant={cartItem ? "secondary" : "primary"}
+                   size="sm"
+                   onClick={cartItem ? (e) => {
+                     e.stopPropagation(); // CRITICAL: Prevent event bubbling to handleCardClick
+                     console.log('🔍 ProductCard: Navigating to cart:', ROUTES.CART);
+                     navigate(ROUTES.CART);
+                   } : handleAddToCart}
+                   disabled={isLoading || product.quantity === 0}
+                   loading={isLoading}
+                   fullWidth
+                 >
+                   {product.quantity === 0 ? 'Out of Stock' : (cartItem ? 'Go to Cart' : 'Add to Cart')}
+                 </Button>
         </div>
       </div>
 
