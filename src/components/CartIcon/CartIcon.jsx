@@ -19,7 +19,7 @@ const CartIcon = () => {
       onClick={handleCartClick}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      aria-label="Відкрити кошик"
+      aria-label="Open cart"
     >
       <svg 
         width="24" 

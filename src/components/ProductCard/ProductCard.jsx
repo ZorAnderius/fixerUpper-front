@@ -32,7 +32,7 @@ const ProductCard = ({ product, index = 0, onAuthRequired }) => {
     
     // Check if user is authenticated
     if (!isAuthenticated) {
-      // Просто показуємо модальку авторизації
+      // Just show auth modal
       if (onAuthRequired) {
         onAuthRequired();
       }

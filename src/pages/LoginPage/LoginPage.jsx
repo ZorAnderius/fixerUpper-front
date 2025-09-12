@@ -25,18 +25,18 @@ const LoginPage = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const { redirectToGoogleAuth, isLoading: googleLoading, error: googleError } = useGoogleOAuth();
   
-  // Простий редирект - на головну сторінку або з location.state
+  // Simple redirect - to home page or from location.state
   const from = location.state?.from || '/';
   
   
-  // useEffect для автоматичного перенаправлення після логіну
+  // useEffect for automatic redirection after login
   useEffect(() => {
     if (isAuthenticated) {
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, from, navigate]);
 
-  // Якщо користувач вже авторизований, одразу перенаправляємо
+  // If user is already authenticated, redirect immediately
   if (isAuthenticated) {
     return <Navigate to={from} replace />;
   }
@@ -61,7 +61,7 @@ const LoginPage = () => {
 
       await dispatch(loginUser(sanitizedData)).unwrap();
       
-      // Навігація тепер відбувається автоматично через useEffect
+      // Navigation now happens automatically through useEffect
     } catch (error) {
       console.error('Login failed:', error);
     } finally {

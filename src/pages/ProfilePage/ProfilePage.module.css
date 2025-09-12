@@ -195,15 +195,14 @@
 }
 
 .orderCard {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-lg);
+  position: relative;
   padding: var(--spacing-lg);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-md);
   background: var(--color-background-white);
   transition: all var(--transition-normal);
   cursor: pointer;
+  margin-top: var(--spacing-md);
 }
 
 .orderCard:hover {
@@ -211,12 +210,76 @@
   border-color: var(--color-primary-orange);
 }
 
-.orderImage {
-  width: 80px;
-  height: 80px;
-  border-radius: var(--radius-md);
+.orderContent {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-sm);
+}
+
+.productsSection {
+  flex-shrink: 0;
+  width: 120px;
+  height: 60px;
+}
+
+.productsGrid {
+  display: flex;
+  gap: var(--spacing-sm);
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+  height: 100%;
+  padding: var(--spacing-xs) 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary-orange) transparent;
+}
+
+.productsGrid::-webkit-scrollbar {
+  height: 4px;
+}
+
+.productsGrid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.productsGrid::-webkit-scrollbar-thumb {
+  background: var(--color-primary-orange);
+  border-radius: 2px;
+}
+
+.productItem {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   flex-shrink: 0;
+  border: 1px solid var(--color-border-light);
+}
+
+.productImage {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.quantityBadge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background: var(--color-primary-orange);
+  color: var(--color-background-white);
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  padding: 2px 4px;
+  border-radius: 8px;
+  min-width: 16px;
+  text-align: center;
+  line-height: 1;
+  border: 2px solid var(--color-background-white);
+  box-shadow: var(--shadow-sm);
 }
 
 .orderImg {
@@ -240,6 +303,26 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+.orderActions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.viewButton {
+  min-width: 80px;
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-xs) var(--spacing-md);
+}
+
+.orderTitleContainer {
+  position: absolute;
+  top: -12px;
+  left: var(--spacing-md);
+  z-index: 3;
 }
 
 .orderTitle {
@@ -247,6 +330,11 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0;
+  background: var(--color-background-white);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-sm);
 }
 
 .orderDescription {
@@ -415,8 +503,13 @@
     padding: var(--spacing-xl);
   }
   
-  .orderImage {
-    width: 100px;
-    height: 100px;
+  .productsSection {
+    width: 140px;
+    height: 70px;
+  }
+  
+  .productItem {
+    width: 60px;
+    height: 60px;
   }
 }

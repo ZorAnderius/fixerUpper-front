@@ -25,7 +25,7 @@ const RegisterPage = () => {
   const error = useSelector(selectAuthError);
   const { redirectToGoogleAuth, isLoading: googleLoading, error: googleError } = useGoogleOAuth();
   
-  // Отримуємо дані з Redux pending стану (який зберігається в redux-persist)
+  // Get data from Redux pending state (which is saved in redux-persist)
   const pendingState = useSelector(state => state.pending);
   const from = pendingState.previousLocation || location.state?.from || '/';
   const hasPendingItems = pendingState.pendingCartItems.length > 0 || location.state?.hasPendingItems || false;
@@ -63,15 +63,15 @@ const RegisterPage = () => {
 
       await dispatch(registerUser(sanitizedData)).unwrap();
       
-      // Якщо є pending товари, переносимо їх в кошик
+      // If there are pending items, transfer them to cart
       if (hasPendingItems) {
         await dispatch(transferPendingCartToCart()).unwrap();
       }
       
-      // Редиректимо на попередню сторінку або головну
+      // Redirect to previous page or home
       navigate(from, { replace: true });
       
-      // Очищаємо pending стан ПІСЛЯ навігації
+      // Clear pending state AFTER navigation
       dispatch(clearPendingState());
     } catch (error) {
       console.error('Registration failed:', error);

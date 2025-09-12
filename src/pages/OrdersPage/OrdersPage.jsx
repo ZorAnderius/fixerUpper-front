@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllOrders } from '../../redux/orders/operations';
@@ -15,6 +15,7 @@ import styles from './OrdersPage.module.css';
 const OrdersPage = () => {
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const orders = useSelector(selectOrders);
   const isLoading = useSelector(selectOrdersLoading);
@@ -223,8 +224,12 @@ const OrdersPage = () => {
                 >
                   <div className={styles.orderHeader}>
                     <div className={styles.orderInfo}>
-                      <h3 className={styles.orderNumber}>Order #{order.order_number}</h3>
-                      <p className={styles.orderDate}>{formatDate(order.created_at)}</p>
+                      <h3 className={styles.orderNumber}>
+                        Order #{order.order_number || order.id?.slice(-8)}
+                      </h3>
+                      <p className={styles.orderDate}>
+                        {formatDate(order.createdAt || order.created_at)}
+                      </p>
                     </div>
                     <div className={styles.orderStatus}>
                       <span className={styles.statusBadge}>
@@ -234,10 +239,15 @@ const OrdersPage = () => {
                   </div>
 
                   <div className={styles.orderDetails}>
+                    <div className={styles.orderItems}>
+                      <span className={styles.itemsLabel}>
+                        Items: {order.orderItems?.length || 0}
+                      </span>
+                    </div>
                     <div className={styles.orderTotal}>
                       <span className={styles.totalLabel}>Total:</span>
                       <span className={styles.totalValue}>
-                        {formatPrice(order.total_price)}
+                        {formatPrice(order.total_price || order.totalAmount)}
                       </span>
                     </div>
                   </div>
@@ -246,7 +256,10 @@ const OrdersPage = () => {
                     <Button
                       variant="secondary"
                       size="sm"
-                      onClick={() => window.location.href = `${ROUTES.ORDER_DETAILS.replace(':id', order.id)}`}
+                      onClick={() => {
+                        console.log('OrdersPage: Navigating to order details:', order.id);
+                        navigate(`${ROUTES.ORDERS}/${order.id}`);
+                      }}
                     >
                       View Details
                     </Button>
