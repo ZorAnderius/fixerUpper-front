@@ -1,5 +1,6 @@
 import { clearAuth, setAuth } from "../redux/auth/slice";
 import { store } from "../redux/store";
+import { clearCSRFToken, setCSRFToken } from "./csrfService.js";
 
 let accessToken = null;
 let isRefreshing = false;
@@ -47,6 +48,8 @@ export const setAccessToken = (token, user = null) => {
     localStorage.setItem('accessToken', token);
   } else {
     localStorage.removeItem('accessToken');
+    // Clear CSRF token when access token is cleared
+    clearCSRFToken();
   }
   
   channel.postMessage({ type: "TOKEN_REFRESH", accessToken: token });
@@ -71,32 +74,26 @@ export const refreshToken = async () => {
   isRefreshing = true;
 
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-
-    const res = await fetch(
-      `http://localhost:3000/api/users/refresh`,
-      {
-        method: "POST",
-        credentials: "include",
-        headers: { "X-No-CSRF": "1" },
-        signal: controller.signal,
+    // Import api client here to avoid circular dependency
+    const { default: api } = await import('./client.js');
+    
+    const response = await api.post('/users/refresh', {}, {
+      headers: {
+        ...(accessToken && { Authorization: `Bearer ${accessToken}` })
       }
-    );
-
-    clearTimeout(timeout);
-
-    if (!res.ok) throw new Error(`Refresh failed: ${res.status}`);
-    const data = await res.json();
-
+    });
+    
     // Extract data from nested structure
-    const { accessToken, user } = data.data;
-    setAccessToken(accessToken, user);
-    processQueue(null, accessToken);
-
-    return accessToken;
+    const { accessToken: newAccessToken, user } = response.data.data || response.data;
+    
+    if (newAccessToken) {
+      setAccessToken(newAccessToken, user);
+      processQueue(null, newAccessToken);
+      return newAccessToken;
+    }
+    
+    return null;
   } catch (err) {
-    console.error('Refresh token error:', err);
     processQueue(err, null);
     setAccessToken(null);
     throw err;

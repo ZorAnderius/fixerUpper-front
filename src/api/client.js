@@ -2,6 +2,7 @@ import axios from "axios";
 import { getAccessToken, refreshToken } from "./tokenManager.js";
 import { sanitizeInput } from "../helpers/security/sanitize.js";
 import { RateLimiter } from "../helpers/security/validation.js";
+import { getCSRFToken, clearCSRFToken } from "./csrfService.js";
 
 // Rate limiter for API requests
 const rateLimiter = new RateLimiter(100, 60000); // 100 requests per minute
@@ -11,13 +12,12 @@ const api = axios.create({
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
-    "X-No-CSRF": "1",
   },
   timeout: import.meta.env.VITE_API_TIMEOUT || 15000,
 });
 
 // Request interceptor for security
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(async (config) => {
   // Rate limiting check
   const clientId = getClientId();
   if (!rateLimiter.isAllowed(clientId)) {
@@ -30,15 +30,66 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
+  // Add CSRF token for state-changing requests (POST, PUT, PATCH, DELETE)
+  const method = config.method?.toUpperCase();
+  if (method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    try {
+      const csrfToken = await getCSRFToken();
+      config.headers['x-csrf-token'] = csrfToken;
+    } catch (error) {
+      // If no CSRF token available, continue without it
+      // This allows initial requests (like register) to work
+    }
+  }
+
   // Sanitize request data
   if (config.data && typeof config.data === 'object') {
     config.data = sanitizeRequestData(config.data);
   }
 
-  // Security headers are handled by the server, not needed in client requests
-
   return config;
 });
+
+// Response interceptor for handling errors
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    // Handle CSRF token errors
+    if (error.response?.status === 403 && 
+        (error.response?.data?.message === 'CSRF header missing' || 
+         error.response?.data?.error === 'CSRF token mismatch')) {
+      clearCSRFToken();
+      // Optionally retry the request with a new CSRF token
+      if (error.config && !error.config._retry) {
+        error.config._retry = true;
+        try {
+          const csrfToken = await getCSRFToken();
+          error.config.headers['X-CSRF-Token'] = csrfToken;
+          return api.request(error.config);
+        } catch (csrfError) {
+          // Failed to retry with new CSRF token
+        }
+      }
+    }
+    
+    // Handle token refresh on 401 errors
+    if (error.response?.status === 401 && error.config && !error.config._retry) {
+      error.config._retry = true;
+      try {
+        await refreshToken();
+        const newToken = getAccessToken();
+        if (newToken) {
+          error.config.headers.Authorization = `Bearer ${newToken}`;
+          return api.request(error.config);
+        }
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError);
+      }
+    }
+    
+    return Promise.reject(error);
+  }
+);
 
 // Helper function to get client ID for rate limiting
 const getClientId = () => {

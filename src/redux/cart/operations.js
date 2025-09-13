@@ -31,9 +31,17 @@ export const fetchCartItems = createAsyncThunk(
       dispatch(setCartItems(response));
       return response;
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch cart items';
-      dispatch(setError(errorMessage));
-      return rejectWithValue(errorMessage);
+      // If cart doesn't exist (404), that's normal for new users - just set empty cart
+      if (error.response?.status === 404) {
+        console.log('fetchCartItems: Cart not found (404) - setting empty cart');
+        dispatch(setCartItems({ cartItems: [], cartId: null }));
+        return { cartItems: [], cartId: null };
+      }
+      
+      // For other errors, log but don't set error state to avoid affecting auth flow
+      console.warn('fetchCartItems: Error fetching cart:', error.response?.data?.message || error.message);
+      dispatch(setCartItems({ cartItems: [], cartId: null }));
+      return { cartItems: [], cartId: null };
     }
   }
 );

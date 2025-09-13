@@ -11,6 +11,7 @@ const AnimatedAuth = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useSelector(state => state.auth);
+  
 
   const handleLogout = async () => {
     try {

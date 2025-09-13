@@ -24,8 +24,10 @@ export const loginUser = createAsyncThunk(
     try {
       const response = await authServices.login(credentials);
       
-      // Load user's cart after successful login
-      dispatch(fetchCartItems());
+      // Load user's cart after successful login (async, don't wait)
+      dispatch(fetchCartItems()).catch(error => {
+        // Cart fetch failed, but login still successful
+      });
       
       return response;
     } catch (error) {

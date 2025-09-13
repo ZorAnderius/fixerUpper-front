@@ -4,7 +4,7 @@ import { useNavigate, Link, useLocation, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Formik, Form, Field } from 'formik';
 import { loginUser } from '../../redux/auth/operations';
-import { selectAuthLoading, selectAuthError, selectIsAuthenticated } from '../../redux/auth/selectors';
+import { selectAuthLoading, selectAuthError, selectIsAuthenticated, selectUser } from '../../redux/auth/selectors';
 import { ROUTES } from '../../helpers/constants/routes';
 import { loginSchema } from '../../helpers/validation/schemas';
 import { ICONS, ICON_SIZES } from '../../helpers/constants/icons';
@@ -23,6 +23,7 @@ const LoginPage = () => {
   const isLoading = useSelector(selectAuthLoading);
   const error = useSelector(selectAuthError);
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  const user = useSelector(selectUser);
   const { redirectToGoogleAuth, isLoading: googleLoading, error: googleError } = useGoogleOAuth();
   
   // Simple redirect - to home page or from location.state
@@ -34,7 +35,7 @@ const LoginPage = () => {
     if (isAuthenticated) {
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, from, navigate]);
+  }, [isAuthenticated, from, navigate, user]);
 
   // If user is already authenticated, redirect immediately
   if (isAuthenticated) {

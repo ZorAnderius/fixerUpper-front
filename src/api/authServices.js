@@ -1,56 +1,30 @@
 import { getAccessToken, setAccessToken, refreshToken } from './tokenManager';
+import { getCSRFToken, setCSRFToken, clearCSRFToken } from './csrfService.js';
+import api from './client';
 
 // Auth services object
 export const authServices = {
   register: async (userData) => {
-    const response = await fetch(`http://localhost:3000/api/users/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-No-CSRF': '1',
-      },
-      body: JSON.stringify(userData),
-    });
-    
-    if (!response.ok) {
-      throw new Error('Registration failed');
-    }
-    
-    const data = await response.json();
+    const response = await api.post('/users/register', userData);
     
     // Extract data from nested structure
-    const { accessToken, user } = data.data;
+    const { accessToken, user } = response.data.data;
     setAccessToken(accessToken, user);
+    
+    // CSRF token is set in cookie by backend, no need to handle it here
     
     return { accessToken, user };
   },
 
   login: async (credentials) => {
-    
     try {
-      const response = await fetch(`http://localhost:3000/api/users/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-No-CSRF': '1',
-        },
-        credentials: 'include',
-        body: JSON.stringify(credentials),
-      });
-      
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Login failed with status:', response.status);
-        console.error('Login error response:', errorText);
-        throw new Error(`Login failed: ${response.status} - ${errorText}`);
-      }
-      
-      const data = await response.json();
+      const response = await api.post('/users/login', credentials);
       
       // Extract data from nested structure
-      const { accessToken, user } = data.data;
+      const { accessToken, user } = response.data.data;
       setAccessToken(accessToken, user);
+      
+      // CSRF token is set in cookie by backend, no need to handle it here
       
       return { accessToken, user };
     } catch (error) {
@@ -60,79 +34,35 @@ export const authServices = {
   },
 
   logout: async () => {
-    const token = getAccessToken();
-    
-    const response = await fetch(`http://localhost:3000/api/users/logout`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'X-No-CSRF': '1',
-      },
-      credentials: 'include',
-    });
-    
-    
-    setAccessToken(null);
-    
-    if (!response.ok) {
-      throw new Error('Logout failed');
+    try {
+      await api.post('/users/logout');
+    } catch (error) {
+      console.error('Logout request failed:', error);
+    } finally {
+      // Always clear tokens and CSRF token on logout
+      setAccessToken(null);
+      clearCSRFToken();
     }
   },
 
   getCurrentUser: async () => {
-    const response = await fetch(`http://localhost:3000/api/users/current`, {
-      method: 'GET',
-      headers: {
-        'X-No-CSRF': '1',
-      },
-      credentials: 'include',
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to get current user');
-    }
-    
-    const data = await response.json();
+    const response = await api.get('/users/current');
     
     // Extract data from nested structure
-    const { user } = data.data;
+    const { user } = response.data.data;
     
     return { user };
   },
 
   updateAvatar: async (formData) => {
-    const response = await fetch(`http://localhost:3000/api/users/update-avatar`, {
-      method: 'PATCH',
-      headers: {
-        'X-No-CSRF': '1',
-      },
-      credentials: 'include',
-      body: formData,
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to update avatar');
-    }
-    
-    return response.json();
+    const response = await api.patch('/users/update-avatar', formData);
+    return response.data;
   },
 
   authenticateWithGoogleOAuth: async (data) => {
-    const response = await fetch(`http://localhost:3000/api/users/confirm-oauth`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-No-CSRF': '1',
-      },
-      credentials: 'include',
-      body: JSON.stringify(data),
-    });
+    const response = await api.post('/users/confirm-oauth', data);
     
-    if (!response.ok) {
-      throw new Error('Google authentication failed');
-    }
-    
-    const result = await response.json();
+    const result = response.data;
     setAccessToken(result.accessToken, result.user);
     
     return result;

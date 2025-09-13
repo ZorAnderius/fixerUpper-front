@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 import { Formik, Form, Field } from 'formik';
 import { registerUser } from '../../redux/auth/operations';
 import { selectAuthLoading, selectAuthError } from '../../redux/auth/selectors';
-import { transferPendingCartToCart } from '../../redux/pending/operations';
-import { clearPendingState } from '../../redux/pending/slice';
+// import { transferPendingCartToCart } from '../../redux/pending/operations';
+// import { clearPendingState } from '../../redux/pending/slice';
 import { ROUTES } from '../../helpers/constants/routes';
 import { registerSchema } from '../../helpers/validation/schemas';
 import { ICONS, ICON_SIZES } from '../../helpers/constants/icons';
@@ -26,9 +26,9 @@ const RegisterPage = () => {
   const { redirectToGoogleAuth, isLoading: googleLoading, error: googleError } = useGoogleOAuth();
   
   // Get data from Redux pending state (which is saved in redux-persist)
-  const pendingState = useSelector(state => state.pending);
-  const from = pendingState.previousLocation || location.state?.from || '/';
-  const hasPendingItems = pendingState.pendingCartItems.length > 0 || location.state?.hasPendingItems || false;
+  // const pendingState = useSelector(state => state.pending);
+  const from = location.state?.from || '/';
+  // const hasPendingItems = pendingState.pendingCartItems.length > 0 || location.state?.hasPendingItems || false;
 
   const initialValues = {
     firstName: '',
@@ -64,15 +64,15 @@ const RegisterPage = () => {
       await dispatch(registerUser(sanitizedData)).unwrap();
       
       // If there are pending items, transfer them to cart
-      if (hasPendingItems) {
-        await dispatch(transferPendingCartToCart()).unwrap();
-      }
+      // if (hasPendingItems) {
+      //   await dispatch(transferPendingCartToCart()).unwrap();
+      // }
       
       // Redirect to previous page or home
       navigate(from, { replace: true });
       
       // Clear pending state AFTER navigation
-      dispatch(clearPendingState());
+      // dispatch(clearPendingState());
     } catch (error) {
       console.error('Registration failed:', error);
     } finally {
