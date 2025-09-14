@@ -221,13 +221,13 @@ const ProductDetailsPage = () => {
                   disabled={product.quantity === 0}
                   fullWidth
                 >
-                  {cartItem ? '🛒 In Cart' : '🛒 Buy Now'}
+                  {cartItem ? `🛒 In Cart (${cartItem.quantity})` : '🛒 Buy Now'}
                 </Button>
               </div>
 
               <div className={styles.productStatus}>
                 <span className={`${styles.statusBadge} ${product.quantity > 0 ? styles.inStock : styles.outOfStock}`}>
-                  {product.quantity > 0 ? '✅ In Stock' : '❌ Out of Stock'}
+                  {product.quantity > 0 ? ' In Stock' : ' Out of Stock'}
                 </span>
               </div>
             </motion.div>

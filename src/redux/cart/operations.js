@@ -14,10 +14,12 @@ import {
   updateCartItem as updateCartItemAction,
   removeFromCart as removeFromCartAction,
   revertAddToCart,
+  revertUpdateCartItem,
+  revertRemoveFromCart,
   clearCart
 } from './slice';
 
-// Fetch cart items
+// Fetch cart items - ONLY for initial load, not for sync
 export const fetchCartItems = createAsyncThunk(
   'cart/fetchItems',
   async (_, { dispatch, rejectWithValue }) => {
@@ -25,121 +27,131 @@ export const fetchCartItems = createAsyncThunk(
       dispatch(setLoading(true));
       const response = await getCartItemsAPI();
       
-      
-      // Backend returns: { status: 200, message: "...", data: {...}, cartItems: [...] }
-      // We need to pass the full response object to setCartItems
+      // Only set cart items on initial load - don't sync during optimistic updates
       dispatch(setCartItems(response));
+      dispatch(setLoading(false));
       return response;
     } catch (error) {
       // If cart doesn't exist (404), that's normal for new users - just set empty cart
       if (error.response?.status === 404) {
-        console.log('fetchCartItems: Cart not found (404) - setting empty cart');
+        // console.log('fetchCartItems: Cart not found (404) - setting empty cart');
         dispatch(setCartItems({ cartItems: [], cartId: null }));
+        dispatch(setLoading(false));
         return { cartItems: [], cartId: null };
       }
       
       // For other errors, log but don't set error state to avoid affecting auth flow
       console.warn('fetchCartItems: Error fetching cart:', error.response?.data?.message || error.message);
       dispatch(setCartItems({ cartItems: [], cartId: null }));
+      dispatch(setLoading(false));
       return { cartItems: [], cartId: null };
     }
   }
 );
 
-// Add item to cart
-export const addToCart = createAsyncThunk(
-  'cart/addItem',
-  async ({ productId, quantity = 1 }, { dispatch, rejectWithValue, getState }) => {
-    try {
-      dispatch(setLoading(true));
-      
-      // First add to Redux store for immediate UI update (optimistic update)
-      const state = getState();
-      const product = state.products.items.find(p => p.id === productId);
-      
-      if (!product) {
-        throw new Error('Product not found');
-      }
-      
-      // Optimistic update - add to Redux immediately
-      dispatch(addToCartAction({ product, quantity }));
-      
-      // Then sync with backend
-      const response = await addToCartAPI(productId, quantity);
-      
-      
-      // Backend should return the updated cart items
-      if (response.cartItems && Array.isArray(response.cartItems)) {
-        // Update Redux with server response to ensure consistency
-        dispatch(setCartItems(response));
-      } else if (response.data && response.data.cartItems && Array.isArray(response.data.cartItems)) {
-        // Backend might return cartItems in data object
-        dispatch(setCartItems(response));
-      } else {
-        // If backend doesn't return cartItems, fetch the full cart to ensure sync
-        dispatch(fetchCartItems());
-      }
-      
-      return response;
-    } catch (error) {
-      // If backend call fails, we should revert the optimistic update
-      
-      // Remove the item we optimistically added
-      dispatch(revertAddToCart({ productId }));
-      
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to add to cart';
-      dispatch(setError(errorMessage));
-      return rejectWithValue(errorMessage);
-    }
+// Add item to cart - SIMPLE action creator, no async thunk
+export const addToCart = ({ productId, quantity = 1 }) => async (dispatch, getState) => {
+  const state = getState();
+  const product = state.products.items.find(p => p.id === productId);
+  
+  if (!product) {
+    dispatch(setError('Product not found'));
+    return;
   }
-);
+  
+  // Store original state for potential revert
+  const originalItemId = state.cart.itemIds.find(itemId => {
+    const item = state.cart.itemsById[itemId];
+    return (item.product_id === productId) || 
+           (item.products?.id === productId) ||
+           (item.product?.id === productId);
+  });
+  
+  const originalQuantity = originalItemId ? state.cart.itemsById[originalItemId].quantity : 0;
+  
+  // Optimistic update - add to Redux immediately
+  dispatch(addToCartAction({ product, quantity }));
+  
+  try {
+    // Sync with backend in background
+    await addToCartAPI(productId, quantity);
+  } catch (error) {
+    // If backend call fails, revert the optimistic update
+    dispatch(revertAddToCart({ productId }));
+    
+    const errorMessage = error.response?.data?.message || error.message || 'Failed to add to cart';
+    dispatch(setError(errorMessage));
+  }
+};
 
-// Update cart item quantity
-export const updateCartItem = createAsyncThunk(
-  'cart/updateItem',
-  async ({ cartItemId, quantity }, { dispatch, rejectWithValue }) => {
-    try {
-      dispatch(setLoading(true));
-      
-      // Update in Redux store first
-      dispatch(updateCartItemAction({ id: cartItemId, quantity }));
-      
-      // Then sync with backend
-      const response = await updateCartItemAPI(cartItemId, quantity);
-      
-      
-      // Update with server response - backend returns same structure as getCartItems
-      dispatch(setCartItems(response));
-      return response;
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to update cart item';
-      dispatch(setError(errorMessage));
-      return rejectWithValue(errorMessage);
+// Update cart item quantity - SIMPLE action creator, no async thunk
+export const updateCartItem = ({ cartItemId, quantity }) => async (dispatch, getState) => {
+  // Store original quantity for potential revert
+  const state = getState();
+  let originalQuantity = null;
+  let itemId = null;
+  for (const currentItemId of state.cart.itemIds) {
+    const item = state.cart.itemsById[currentItemId];
+    if (item && (item.id === cartItemId || 
+        item.product_id === cartItemId ||
+        (item.products && item.products.id === cartItemId))) {
+      originalQuantity = item.quantity;
+      itemId = currentItemId;
+      break;
     }
   }
-);
+  
+  // Calculate new quantity (quantity is difference from backend)
+  const newQuantity = originalQuantity + quantity;
+  
+  // Update in Redux store immediately (optimistic update)
+  dispatch(updateCartItemAction({ id: cartItemId, quantity: newQuantity }));
+  
+  try {
+    // Sync with backend in background
+    await updateCartItemAPI(cartItemId, quantity);
+  } catch (error) {
+    // If backend fails, revert the optimistic update
+    if (originalQuantity !== null) {
+      dispatch(revertUpdateCartItem({ cartItemId, originalQuantity }));
+    }
+    
+    const errorMessage = error.response?.data?.message || error.message || 'Failed to update cart item';
+    dispatch(setError(errorMessage));
+  }
+};
 
-// Remove item from cart
-export const removeFromCart = createAsyncThunk(
-  'cart/removeItem',
-  async (cartItemId, { dispatch, rejectWithValue }) => {
-    try {
-      dispatch(setLoading(true));
-      
-      // Remove from Redux store first
-      dispatch(removeFromCartAction(cartItemId));
-      
-      // Then sync with backend
-      await removeFromCartAPI(cartItemId);
-      
-      return cartItemId;
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to remove from cart';
-      dispatch(setError(errorMessage));
-      return rejectWithValue(errorMessage);
+// Remove item from cart - SIMPLE action creator, no async thunk
+export const removeFromCart = (cartItemId) => async (dispatch, getState) => {
+  // Store original item for potential revert (before any changes)
+  const state = getState();
+  let originalItem = null;
+  for (const itemId of state.cart.itemIds) {
+    const item = state.cart.itemsById[itemId];
+    if (item && (item.id === cartItemId || 
+        item.product_id === cartItemId ||
+        (item.products && item.products.id === cartItemId))) {
+      originalItem = item;
+      break;
     }
   }
-);
+  
+  // Remove from Redux store immediately (optimistic update)
+  dispatch(removeFromCartAction(cartItemId));
+  
+  try {
+    // Sync with backend in background
+    await removeFromCartAPI(cartItemId);
+  } catch (error) {
+    // If backend fails, revert the optimistic update
+    if (originalItem) {
+      dispatch(revertRemoveFromCart({ item: originalItem }));
+    }
+    
+    const errorMessage = error.response?.data?.message || error.message || 'Failed to remove from cart';
+    dispatch(setError(errorMessage));
+  }
+};
 
 // Checkout cart
 export const checkoutCart = createAsyncThunk(

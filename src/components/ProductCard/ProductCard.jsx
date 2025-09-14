@@ -42,10 +42,10 @@ const ProductCard = ({ product, index = 0, onAuthRequired }) => {
     setIsLoading(true);
     
     try {
-      await dispatch(addToCart({ 
+      dispatch(addToCart({ 
         productId: product.id, 
         quantity: 1 
-      })).unwrap();
+      }));
       
       // Small delay to ensure backend synchronization
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -134,7 +134,12 @@ const ProductCard = ({ product, index = 0, onAuthRequired }) => {
                    loading={isLoading}
                    fullWidth
                  >
-                   {product.quantity === 0 ? 'Out of Stock' : (cartItem ? 'Go to Cart' : 'Add to Cart')}
+                   {product.quantity === 0 
+                     ? 'Out of Stock' 
+                     : cartItem 
+                       ? `In Cart (${cartItem.quantity})` 
+                       : 'Add to Cart'
+                   }
                  </Button>
         </div>
       </div>

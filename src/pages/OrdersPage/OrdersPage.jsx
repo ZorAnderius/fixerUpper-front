@@ -26,18 +26,18 @@ const OrdersPage = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      console.log('OrdersPage: Fetching orders...');
+      // console.log('OrdersPage: Fetching orders...');
       dispatch(fetchAllOrders());
     }
   }, [dispatch, isAuthenticated]);
 
   useEffect(() => {
-    console.log('OrdersPage: Orders state changed:', { 
-      orders: orders.length, 
-      isLoading, 
-      error,
-      isAuthenticated 
-    });
+    // console.log('OrdersPage: Orders state changed:', { 
+    //   orders: orders.length, 
+    //   isLoading, 
+    //   error,
+    //   isAuthenticated 
+    // });
   }, [orders, isLoading, error, isAuthenticated]);
 
   useEffect(() => {
@@ -257,7 +257,7 @@ const OrdersPage = () => {
                       variant="secondary"
                       size="sm"
                       onClick={() => {
-                        console.log('OrdersPage: Navigating to order details:', order.id);
+                        // console.log('OrdersPage: Navigating to order details:', order.id);
                         navigate(`${ROUTES.ORDERS}/${order.id}`);
                       }}
                     >

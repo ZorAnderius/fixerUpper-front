@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { fetchCartItems, updateCartItem, removeFromCart } from '../../redux/cart/operations';
+import { fetchCartItems } from '../../redux/cart/operations';
 import { selectCartItems, selectCartLoading, selectCartError, selectCartTotalItems, selectCartTotalPrice } from '../../redux/cart/selectors';
 import { selectIsAuthenticated } from '../../redux/auth/selectors';
 import { ROUTES } from '../../helpers/constants/routes';
@@ -11,6 +11,7 @@ import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner';
 import Container from '../../widges/Container/Container';
 import Section from '../../widges/Section/Section';
 import CheckoutModal from '../../components/CheckoutModal/CheckoutModal';
+import CartItem from '../../components/CartItem/CartItem';
 import styles from './CartPage.module.css';
 
 const CartPage = () => {
@@ -33,22 +34,6 @@ const CartPage = () => {
   }, [dispatch, isAuthenticated, navigate]);
 
 
-  const handleQuantityChange = async (cartItemId, newQuantity) => {
-    if (newQuantity < 1) return;
-    try {
-      await dispatch(updateCartItem({ cartItemId, quantity: newQuantity })).unwrap();
-    } catch (error) {
-      console.error('Failed to update cart item:', error);
-    }
-  };
-
-  const handleRemoveItem = async (cartItemId) => {
-    try {
-      await dispatch(removeFromCart(cartItemId)).unwrap();
-    } catch (error) {
-      console.error('Failed to remove cart item:', error);
-    }
-  };
 
   const handleCheckout = () => {
     setShowCheckoutModal(true);
@@ -157,73 +142,7 @@ const CartPage = () => {
                   </div>
 
                   {cartItems.map((item, index) => (
-                    <motion.div
-                      key={item.id}
-                      className={styles.cartItem}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                    >
-                      <div className={styles.cartItemImage}>
-                        {(item.products?.image_url || item.product?.image_url) ? (
-                          <img 
-                            src={item.products?.image_url || item.product?.image_url} 
-                            alt={item.products?.title || item.product?.title}
-                          />
-                        ) : (
-                          <div className={styles.cartItemImagePlaceholder}>
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className={styles.cartItemInfo}>
-                        <h3 className={styles.cartItemTitle}>
-                          {item.products?.title || item.product?.title || 'Unknown Product'}
-                        </h3>
-                        <p className={styles.cartItemDescription}>
-                          {item.products?.description || item.product?.description || 'No description available'}
-                        </p>
-                        <div className={styles.cartItemPrice}>
-                          {formatPrice(item.products?.price || item.price)}
-                        </div>
-                      </div>
-
-                      <div className={styles.cartItemControls}>
-                        <div className={styles.quantityControls}>
-                          <button
-                            className={styles.quantityButton}
-                            onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                            disabled={item.quantity <= 1}
-                          >
-                            -
-                          </button>
-                          <input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value) || 1)}
-                            min="1"
-                            className={styles.quantityInput}
-                          />
-                          <button
-                            className={styles.quantityButton}
-                            onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                          >
-                            +
-                          </button>
-                        </div>
-
-                        <button
-                          className={styles.removeButton}
-                          onClick={() => handleRemoveItem(item.id)}
-                          title="Remove item"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </motion.div>
+                    <CartItem key={item.id} item={item} index={index} />
                   ))}
                 </div>
 

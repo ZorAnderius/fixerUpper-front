@@ -18,24 +18,18 @@ const CheckoutModal = ({ isOpen, onClose }) => {
   const isLoading = useSelector(selectCartLoading);
 
   const handleCheckout = async () => {
-    console.log('Checkout button clicked!', { cartId, cartItems: cartItems.length });
-    
     if (!cartId) {
-      console.error('No cart ID available for checkout');
       alert('Error: No cart ID found. Please refresh and try again.');
       return;
     }
 
     if (cartItems.length === 0) {
-      console.error('No items in cart for checkout');
       alert('Error: Your cart is empty. Please add items before checkout.');
       return;
     }
 
     try {
-      console.log('Starting checkout process...', { cartId });
       const result = await dispatch(checkoutCart(cartId)).unwrap();
-      console.log('Checkout successful!', result);
       
       // Navigate to orders page with success message
       navigate(ROUTES.ORDERS, { 

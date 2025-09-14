@@ -271,11 +271,11 @@ const ProfilePage = () => {
                               variant="secondary"
                               size="sm"
                               onClick={() => {
-                                console.log('Order data:', order);
-                                console.log('Order ID:', order.id);
-                                console.log('Order number:', order.order_number);
+                                // console.log('Order data:', order);
+                                // console.log('Order ID:', order.id);
+                                // console.log('Order number:', order.order_number);
                                 const orderId = order.id || order.order_number || order.order_id;
-                                console.log('Using order ID:', orderId);
+                                // console.log('Using order ID:', orderId);
                                 if (orderId) {
                                   navigate(`${ROUTES.ORDERS}/${orderId}`);
                                 } else {

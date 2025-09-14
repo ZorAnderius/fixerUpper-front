@@ -1,9 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  items: [],
-  totalItems: 0,
-  totalPrice: 0,
+  itemsById: {}, // Normalized state - items by ID
+  itemIds: [],   // Array of item IDs for ordering
   cartId: null,
   isLoading: false,
   error: null
@@ -24,124 +23,150 @@ const cartSlice = createSlice({
       state.error = null;
     },
     setCartItems: (state, action) => {
-      // Handle different response formats from backend
-      let cartItems = [];
-      let cartId = null;
+      const { cartItems, cartId } = action.payload;
       
-      if (Array.isArray(action.payload)) {
-        cartItems = action.payload;
-      } else if (action.payload && Array.isArray(action.payload.data)) {
-        cartItems = action.payload.data;
-      } else if (action.payload && Array.isArray(action.payload.cart)) {
-        cartItems = action.payload.cart;
-      } else if (action.payload && Array.isArray(action.payload.cartItems)) {
-        // Backend returns cartItems array - THIS IS THE CORRECT PATH
-        cartItems = action.payload.cartItems;
-        // Extract cart ID from first item if available
-        if (cartItems.length > 0 && cartItems[0].cart_id) {
-          cartId = cartItems[0].cart_id;
-        }
-      } else if (action.payload && action.payload.items && Array.isArray(action.payload.items)) {
-        cartItems = action.payload.items;
-      } else if (action.payload && action.payload.data && typeof action.payload.data === 'object' && !Array.isArray(action.payload.data)) {
-        // Backend returns {status: 200, message: "...", data: {...}}
-        // Try to extract cart ID and items from data object
-        const data = action.payload.data;
-        if (data.id) {
-          cartId = data.id;
-        }
-        if (data.cartItems && Array.isArray(data.cartItems)) {
-          cartItems = data.cartItems;
-        } else if (data.items && Array.isArray(data.items)) {
-          cartItems = data.items;
-        } else {
-          // Empty cart
-          cartItems = [];
-        }
+      // Normalize cart items into itemsById and itemIds
+      state.itemsById = {};
+      state.itemIds = [];
+      
+      if (cartItems && Array.isArray(cartItems)) {
+        cartItems.forEach(item => {
+          const itemId = item.id || `temp_${Date.now()}_${Math.random()}`;
+          state.itemsById[itemId] = item;
+          state.itemIds.push(itemId);
+        });
       }
       
-      // Also check if cartId is directly in the payload (from our API transformation)
-      if (!cartId && action.payload.cartId) {
-        cartId = action.payload.cartId;
-      }
-      
-      
-      state.items = cartItems;
       state.cartId = cartId;
-      state.totalItems = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
-      state.totalPrice = cartItems.reduce((total, item) => {
-        const price = parseFloat(item.products?.price || item.price || 0);
-        const quantity = item.quantity || 0;
-        return total + (price * quantity);
-      }, 0);
       state.isLoading = false;
       state.error = null;
-      
     },
     addToCart: (state, action) => {
       const { product, quantity = 1 } = action.payload;
       
+      // Look for existing item by product ID
+      let existingItemId = null;
+      for (const itemId of state.itemIds) {
+        const item = state.itemsById[itemId];
+        if ((item.product_id === product.id) || 
+            (item.products?.id === product.id) ||
+            (item.product?.id === product.id)) {
+          existingItemId = itemId;
+          break;
+        }
+      }
       
-      // Look for existing item by product ID (check both product_id and products.id)
-      const existingItem = state.items.find(item => 
-        (item.product_id === product.id) || 
-        (item.products?.id === product.id) ||
-        (item.product?.id === product.id)
-      );
-      
-      if (existingItem) {
-        existingItem.quantity += quantity;
+      if (existingItemId) {
+        // Update existing item quantity
+        state.itemsById[existingItemId].quantity += quantity;
       } else {
+        // Add new item
+        const newItemId = `temp_${Date.now()}_${Math.random()}`;
         const newItem = {
-          id: `temp_${Date.now()}`, // Temporary ID for optimistic update
+          id: newItemId,
           product_id: product.id,
-          products: product, // Store as 'products' to match backend structure
-          product: product, // Keep both for compatibility
+          products: product,
+          product: product,
           quantity: quantity,
           price: product.price
         };
-        state.items.push(newItem);
+        state.itemsById[newItemId] = newItem;
+        state.itemIds.push(newItemId);
       }
-      
-      // Recalculate totals
-      state.totalItems = state.items.reduce((total, item) => total + (item.quantity || 0), 0);
-      state.totalPrice = state.items.reduce((total, item) => {
-        const price = parseFloat(item.products?.price || item.product?.price || item.price || 0);
-        const qty = item.quantity || 0;
-        return total + (price * qty);
-      }, 0);
-      
     },
     updateCartItem: (state, action) => {
       const { id, quantity } = action.payload;
-      const item = state.items.find(item => item.id === id);
       
-      if (item) {
-        item.quantity = quantity;
-        state.totalItems = state.items.reduce((total, item) => total + item.quantity, 0);
-        state.totalPrice = state.items.reduce((total, item) => total + (item.price * item.quantity), 0);
+      // Find item by id in normalized state
+      let itemId = null;
+      for (const currentItemId of state.itemIds) {
+        const item = state.itemsById[currentItemId];
+        if (item.id === id || 
+            item.product_id === id ||
+            (item.products && item.products.id === id)) {
+          itemId = currentItemId;
+          break;
+        }
+      }
+      
+      if (itemId && state.itemsById[itemId]) {
+        // Update quantity (don't auto-remove on quantity 0)
+        state.itemsById[itemId].quantity = quantity;
       }
     },
     removeFromCart: (state, action) => {
-      state.items = state.items.filter(item => item.id !== action.payload);
-      state.totalItems = state.items.reduce((total, item) => total + item.quantity, 0);
-      state.totalPrice = state.items.reduce((total, item) => total + (item.price * item.quantity), 0);
+      const itemId = action.payload;
+      
+      // Find and remove item from normalized state
+      let itemToRemove = null;
+      for (const currentItemId of state.itemIds) {
+        const item = state.itemsById[currentItemId];
+        if (item.id === itemId || 
+            item.product_id === itemId ||
+            (item.products && item.products.id === itemId)) {
+          itemToRemove = currentItemId;
+          break;
+        }
+      }
+      
+      if (itemToRemove) {
+        delete state.itemsById[itemToRemove];
+        state.itemIds = state.itemIds.filter(id => id !== itemToRemove);
+      }
     },
     // Revert optimistic update for failed addToCart
     revertAddToCart: (state, action) => {
       const { productId } = action.payload;
-      state.items = state.items.filter(item => 
-        item.product_id !== productId && 
-        item.products?.id !== productId && 
-        item.product?.id !== productId
-      );
-      state.totalItems = state.items.reduce((total, item) => total + item.quantity, 0);
-      state.totalPrice = state.items.reduce((total, item) => total + (item.price * item.quantity), 0);
+      
+      // Find and remove the optimistically added item
+      let itemToRemove = null;
+      for (const currentItemId of state.itemIds) {
+        const item = state.itemsById[currentItemId];
+        if ((item.product_id === productId) || 
+            (item.products?.id === productId) ||
+            (item.product?.id === productId)) {
+          itemToRemove = currentItemId;
+          break;
+        }
+      }
+      
+      if (itemToRemove) {
+        delete state.itemsById[itemToRemove];
+        state.itemIds = state.itemIds.filter(id => id !== itemToRemove);
+      }
+    },
+    // Revert optimistic update for failed updateCartItem
+    revertUpdateCartItem: (state, action) => {
+      const { cartItemId, originalQuantity } = action.payload;
+      
+      // Find item in normalized state
+      let itemId = null;
+      for (const currentItemId of state.itemIds) {
+        const item = state.itemsById[currentItemId];
+        if (item.id === cartItemId || 
+            item.product_id === cartItemId ||
+            (item.products && item.products.id === cartItemId)) {
+          itemId = currentItemId;
+          break;
+        }
+      }
+      
+      if (itemId && state.itemsById[itemId]) {
+        state.itemsById[itemId].quantity = originalQuantity;
+      }
+    },
+    // Revert optimistic update for failed removeFromCart
+    revertRemoveFromCart: (state, action) => {
+      const { item } = action.payload;
+      const itemId = item.id || `temp_${Date.now()}_${Math.random()}`;
+      state.itemsById[itemId] = item;
+      state.itemIds.push(itemId);
     },
     clearCart: (state) => {
-      state.items = [];
-      state.totalItems = 0;
-      state.totalPrice = 0;
+      state.itemsById = {};
+      state.itemIds = [];
+      state.cartId = null;
+      state.error = null;
     },
   }
 });
@@ -155,13 +180,9 @@ export const {
   updateCartItem,
   removeFromCart,
   revertAddToCart,
+  revertUpdateCartItem,
+  revertRemoveFromCart,
   clearCart
 } = cartSlice.actions;
 
 export default cartSlice.reducer;
-
-
-
-
-
-

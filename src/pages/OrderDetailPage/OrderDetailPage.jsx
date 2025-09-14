@@ -21,23 +21,23 @@ const OrderDetailPage = () => {
   const [repeatLoading, setRepeatLoading] = useState(false);
 
   useEffect(() => {
-    console.log('OrderDetailPage mounted with orderId:', orderId);
+    // console.log('OrderDetailPage mounted with orderId:', orderId);
     if (orderId) {
-      console.log('Fetching order with ID:', orderId);
+      // console.log('Fetching order with ID:', orderId);
       dispatch(fetchOrderById(orderId))
         .unwrap()
         .then((result) => {
-          console.log('Order fetched successfully:', result);
+          // console.log('Order fetched successfully:', result);
         })
         .catch((error) => {
           console.error('Failed to fetch order:', error);
           if (error.includes('404') || error.includes('Failed to fetch order: 404')) {
-            console.log('Order not found, redirecting to orders page');
+            // console.log('Order not found, redirecting to orders page');
             navigate(ROUTES.ORDERS);
           }
         });
     } else {
-      console.log('No orderId provided, redirecting to orders page');
+      // console.log('No orderId provided, redirecting to orders page');
       navigate(ROUTES.ORDERS);
     }
   }, [dispatch, orderId, navigate]);
