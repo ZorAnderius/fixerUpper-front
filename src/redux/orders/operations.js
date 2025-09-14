@@ -4,7 +4,7 @@ import { ordersServices } from '../../api/ordersServices';
 // Fetch all orders
 export const fetchAllOrders = createAsyncThunk(
   'orders/fetchAll',
-  async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
+  async ({ page = 1, limit = 5 } = {}, { rejectWithValue }) => {
     try {
       const response = await ordersServices.getAllOrders(page, limit);
       return response;

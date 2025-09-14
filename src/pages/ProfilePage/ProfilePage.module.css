@@ -445,6 +445,64 @@
   gap: var(--spacing-lg);
 }
 
+/* Pagination Styles */
+.pagination {
+  margin-top: var(--spacing-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.paginationInfo {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.paginationControls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.pageNumbers {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.pageButton {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-border-light);
+  background: var(--color-background-white);
+  color: var(--color-text-primary);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pageButton:hover {
+  background: var(--color-background-slate);
+  border-color: var(--color-border-medium);
+}
+
+.pageButton.active {
+  background: #f97316;
+  color: var(--color-background-white);
+  border-color: #f97316;
+}
+
+.pageButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .notAuthenticated h2 {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-semibold);

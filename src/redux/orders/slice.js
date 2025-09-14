@@ -6,7 +6,15 @@ const initialState = {
   currentOrder: null,
   isLoading: false,
   error: null,
-  isOrderModalOpen: false
+  isOrderModalOpen: false,
+  pagination: {
+    page: 1,
+    totalPages: 1,
+    totalItems: 0,
+    hasNextPage: false,
+    hasPreviousPage: false,
+    limit: 5
+  }
 };
 
 const ordersSlice = createSlice({
@@ -57,9 +65,23 @@ const ordersSlice = createSlice({
       .addCase(fetchAllOrders.fulfilled, (state, action) => {
         state.isLoading = false;
         state.error = null;
+        
         // Handle different response formats
         if (action.payload.data) {
-          state.items = Array.isArray(action.payload.data) ? action.payload.data : action.payload.data.orders || [];
+          const data = action.payload.data;
+          state.items = Array.isArray(data) ? data : data.orders || [];
+          
+          // Store pagination data if available
+          if (data.page !== undefined) {
+            state.pagination = {
+              page: data.page,
+              totalPages: data.totalPages || 1,
+              totalItems: data.totalItems || 0,
+              hasNextPage: data.hasNextPage || false,
+              hasPreviousPage: data.hasPreviousPage || false,
+              limit: data.limit || 5
+            };
+          }
         } else {
           state.items = Array.isArray(action.payload) ? action.payload : [];
         }

@@ -1,11 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { fetchAllOrders } from '../../redux/orders/operations';
 import { logoutUser } from '../../redux/auth/operations';
 import { openOrderModal } from '../../redux/orders/slice';
-import { selectOrders, selectOrdersLoading, selectOrdersError } from '../../redux/orders/selectors';
+import { 
+  selectOrders, 
+  selectOrdersLoading, 
+  selectOrdersError,
+  selectCurrentPage,
+  selectTotalPages,
+  selectHasNextPage,
+  selectHasPreviousPage,
+  selectTotalItems
+} from '../../redux/orders/selectors';
 import { selectUser } from '../../redux/auth/selectors';
 import { ROUTES } from '../../helpers/constants/routes';
 import Button from '../../components/Button/Button';
@@ -20,11 +29,19 @@ const ProfilePage = () => {
   const orders = useSelector(selectOrders);
   const isLoading = useSelector(selectOrdersLoading);
   const ordersError = useSelector(selectOrdersError);
-  const [showAllOrders, setShowAllOrders] = useState(false);
+  const currentPage = useSelector(selectCurrentPage);
+  const totalPages = useSelector(selectTotalPages);
+  const hasNextPage = useSelector(selectHasNextPage);
+  const hasPreviousPage = useSelector(selectHasPreviousPage);
+  const totalItems = useSelector(selectTotalItems);
+
+  const handlePageChange = (newPage) => {
+    dispatch(fetchAllOrders({ page: newPage, limit: 5 }));
+  };
 
   useEffect(() => {
     if (user) {
-      dispatch(fetchAllOrders())
+      dispatch(fetchAllOrders({ page: 1, limit: 5 }))
         .unwrap()
         .catch((error) => {
           console.error('Failed to fetch orders:', error);
@@ -77,8 +94,7 @@ const ProfilePage = () => {
     }
   };
 
-  const recentOrders = orders.slice(0, 5);
-  const displayOrders = showAllOrders ? orders : recentOrders;
+  // Remove showAllOrders logic - now using pagination
 
   if (!user) {
     return (
@@ -203,7 +219,7 @@ const ProfilePage = () => {
                   </div>
                 ) : (
                   <div className={styles.ordersList}>
-                    {displayOrders.map((order, index) => (
+                    {orders.map((order, index) => (
                       <motion.div
                         key={order.id}
                         className={styles.orderCard}
@@ -291,6 +307,146 @@ const ProfilePage = () => {
                         </div>
                       </motion.div>
                     ))}
+                  </div>
+                )}
+                
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className={styles.pagination}>
+                    <div className={styles.paginationInfo}>
+                      Showing {orders.length} of {totalItems} orders
+                    </div>
+                    <div className={styles.paginationControls}>
+                      {/* First Page */}
+                      <button
+                        className={styles.pageButton}
+                        onClick={() => handlePageChange(1)}
+                        disabled={currentPage === 1}
+                        title="First page"
+                      >
+                        ««
+                      </button>
+                      
+                      {/* Previous Page */}
+                      <button
+                        className={styles.pageButton}
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={!hasPreviousPage}
+                        title="Previous page"
+                      >
+                        «
+                      </button>
+                      
+                      {/* Page Numbers */}
+                      <div className={styles.pageNumbers}>
+                        {(() => {
+                          const pages = [];
+                          const maxVisiblePages = 5;
+                          
+                          if (totalPages <= maxVisiblePages) {
+                            // Show all pages if total is small
+                            for (let i = 1; i <= totalPages; i++) {
+                              pages.push(
+                                <button
+                                  key={i}
+                                  className={`${styles.pageButton} ${currentPage === i ? styles.active : ''}`}
+                                  onClick={() => handlePageChange(i)}
+                                >
+                                  {i}
+                                </button>
+                              );
+                            }
+                          } else {
+                            // Show smart pagination
+                            let startPage = Math.max(1, currentPage - 2);
+                            let endPage = Math.min(totalPages, currentPage + 2);
+                            
+                            // Adjust if we're near the beginning or end
+                            if (currentPage <= 3) {
+                              endPage = Math.min(5, totalPages);
+                            } else if (currentPage >= totalPages - 2) {
+                              startPage = Math.max(1, totalPages - 4);
+                            }
+                            
+                            // First page
+                            if (startPage > 1) {
+                              pages.push(
+                                <button
+                                  key={1}
+                                  className={`${styles.pageButton} ${currentPage === 1 ? styles.active : ''}`}
+                                  onClick={() => handlePageChange(1)}
+                                >
+                                  1
+                                </button>
+                              );
+                              if (startPage > 2) {
+                                pages.push(
+                                  <button key="ellipsis1" className={styles.pageButton} disabled>
+                                    ...
+                                  </button>
+                                );
+                              }
+                            }
+                            
+                            // Middle pages
+                            for (let i = startPage; i <= endPage; i++) {
+                              if (i === 1 && startPage > 1) continue;
+                              pages.push(
+                                <button
+                                  key={i}
+                                  className={`${styles.pageButton} ${currentPage === i ? styles.active : ''}`}
+                                  onClick={() => handlePageChange(i)}
+                                >
+                                  {i}
+                                </button>
+                              );
+                            }
+                            
+                            // Last page
+                            if (endPage < totalPages) {
+                              if (endPage < totalPages - 1) {
+                                pages.push(
+                                  <button key="ellipsis2" className={styles.pageButton} disabled>
+                                    ...
+                                  </button>
+                                );
+                              }
+                              pages.push(
+                                <button
+                                  key={totalPages}
+                                  className={`${styles.pageButton} ${currentPage === totalPages ? styles.active : ''}`}
+                                  onClick={() => handlePageChange(totalPages)}
+                                >
+                                  {totalPages}
+                                </button>
+                              );
+                            }
+                          }
+                          
+                          return pages;
+                        })()}
+                      </div>
+                      
+                      {/* Next Page */}
+                      <button
+                        className={styles.pageButton}
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={!hasNextPage}
+                        title="Next page"
+                      >
+                        »
+                      </button>
+                      
+                      {/* Last Page */}
+                      <button
+                        className={styles.pageButton}
+                        onClick={() => handlePageChange(totalPages)}
+                        disabled={currentPage === totalPages}
+                        title="Last page"
+                      >
+                        »»
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

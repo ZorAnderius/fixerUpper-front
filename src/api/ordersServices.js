@@ -2,7 +2,7 @@ import api from './client';
 
 export const ordersServices = {
   // Get all orders for current user
-  getAllOrders: async (page = 1, limit = 10) => {
+  getAllOrders: async (page = 1, limit = 5) => {
     try {
       const response = await api.get(`/orders?page=${page}&limit=${limit}`);
       return response.data;
