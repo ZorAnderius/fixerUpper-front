@@ -46,6 +46,11 @@ const sliceAuth = createSlice({
         state.user = action.payload.user;
         state.status = responseStatuses.SUCCEEDED;
         state.error = null;
+        
+        // Ensure token is saved to localStorage
+        if (action.payload.accessToken) {
+          localStorage.setItem('accessToken', action.payload.accessToken);
+        }
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.status = responseStatuses.FAILED;
@@ -61,6 +66,11 @@ const sliceAuth = createSlice({
         state.user = action.payload.user;
         state.status = responseStatuses.SUCCEEDED;
         state.error = null;
+        
+        // Ensure token is saved to localStorage
+        if (action.payload.accessToken) {
+          localStorage.setItem('accessToken', action.payload.accessToken);
+        }
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.status = responseStatuses.FAILED;
@@ -119,6 +129,11 @@ const sliceAuth = createSlice({
         state.user = action.payload.user;
         state.status = responseStatuses.SUCCEEDED;
         state.error = null;
+        
+        // Ensure token is saved to localStorage
+        if (action.payload.accessToken) {
+          localStorage.setItem('accessToken', action.payload.accessToken);
+        }
       })
       .addCase(authenticateWithGoogleOAuth.rejected, (state, action) => {
         state.status = responseStatuses.FAILED;

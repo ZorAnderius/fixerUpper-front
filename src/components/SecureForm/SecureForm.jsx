@@ -23,7 +23,6 @@ const SecureForm = ({
       const now = Date.now();
       if (now < lockoutEnd) {
         const remainingTime = Math.ceil((lockoutEnd - now) / 1000);
-        alert(`Form is locked. Please try again in ${remainingTime} seconds.`);
         return;
       } else {
         // Lockout expired, reset
@@ -37,7 +36,6 @@ const SecureForm = ({
     if (attempts >= maxAttempts) {
       setIsLocked(true);
       setLockoutEnd(Date.now() + lockoutDuration);
-      alert('Too many failed attempts. Form is temporarily locked.');
       return;
     }
 
@@ -73,7 +71,6 @@ const SecureForm = ({
         const passwordValidation = validatePasswordStrength(sanitizedData.password);
         if (!passwordValidation.isValid) {
           setAttempts(prev => prev + 1);
-          alert(`Password validation failed: ${passwordValidation.feedback.join(', ')}`);
           return;
         }
       }
@@ -89,7 +86,6 @@ const SecureForm = ({
       setAttempts(prev => prev + 1);
       
       // Generic error message to prevent information leakage
-      alert('An error occurred. Please try again.');
     }
   }, [attempts, isLocked, lockoutEnd, maxAttempts, lockoutDuration, onSubmit]);
 

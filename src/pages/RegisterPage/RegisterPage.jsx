@@ -207,6 +207,48 @@ const RegisterPage = () => {
             </Formik>
           </div>
         </motion.div>
+        
+        <motion.div 
+          className={styles.visualSection} 
+          initial={{ opacity: 0, x: 50 }} 
+          animate={{ opacity: 1, x: 0 }} 
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <div className={styles.visualContent}>
+            <div className={styles.toolsGrid}>
+              <div className={styles.toolItem}>
+                <div className={styles.toolImage}>
+                  🔨
+                </div>
+              </div>
+              <div className={styles.toolItem}>
+                <div className={styles.toolImage}>
+                  🔧
+                </div>
+              </div>
+              <div className={styles.toolItem}>
+                <div className={styles.toolImage}>
+                  ⚡
+                </div>
+              </div>
+              <div className={styles.toolItem}>
+                <div className={styles.toolImage}>
+                  🔩
+                </div>
+              </div>
+              <div className={styles.toolItem}>
+                <div className={styles.toolImage}>
+                  🪚
+                </div>
+              </div>
+              <div className={styles.toolItem}>
+                <div className={styles.toolImage}>
+                  ⚙️
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

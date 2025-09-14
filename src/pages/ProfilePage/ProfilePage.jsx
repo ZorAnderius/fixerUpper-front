@@ -296,7 +296,6 @@ const ProfilePage = () => {
                                   navigate(`${ROUTES.ORDERS}/${orderId}`);
                                 } else {
                                   console.error('No order ID found');
-                                  alert('Order ID not found');
                                 }
                               }}
                               className={styles.viewButton}

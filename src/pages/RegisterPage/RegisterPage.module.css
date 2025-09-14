@@ -350,6 +350,7 @@
   box-shadow: var(--shadow-lg);
   transition: all var(--transition-normal);
   animation: float 6s ease-in-out infinite;
+  font-size: 2rem;
 }
 
 .toolItem:nth-child(1) .toolImage {

@@ -1,4 +1,4 @@
-import { clearAuth, setAuth } from "../redux/auth/slice";
+// import { clearAuth, setAuth } from "../redux/auth/slice"; // Dynamic import to avoid circular dependency
 import { store } from "../redux/store";
 import { clearCSRFToken, setCSRFToken } from "./csrfService.js";
 
@@ -38,7 +38,42 @@ const initializeToken = () => {
 // Initialize token when module loads
 initializeToken();
 
-export const getAccessToken = () => accessToken;
+// Listen for Redux store changes to sync token (lazy initialization)
+let unsubscribe = null;
+
+const initializeStoreSubscription = async () => {
+  if (unsubscribe) return; // Already initialized
+  
+  try {
+    const { store } = await import('../redux/store');
+    unsubscribe = store.subscribe(() => {
+      const state = store.getState();
+      const authState = state.auth;
+      
+      // If user becomes authenticated but we don't have token in memory
+      if (authState?.isAuthenticated && !accessToken) {
+        const storedToken = localStorage.getItem('accessToken');
+        if (storedToken) {
+          accessToken = storedToken;
+        }
+      }
+      
+      // If user becomes unauthenticated, clear token
+      if (!authState?.isAuthenticated && accessToken) {
+        accessToken = null;
+      }
+    });
+  } catch (error) {
+  }
+};
+
+export const getAccessToken = () => {
+  // Initialize store subscription on first access (async, don't wait)
+  initializeStoreSubscription().catch(error => {
+  });
+  
+  return accessToken;
+};
 
 export const setAccessToken = (token, user = null) => {
   accessToken = token;
@@ -54,14 +89,34 @@ export const setAccessToken = (token, user = null) => {
   
   channel.postMessage({ type: "TOKEN_REFRESH", accessToken: token });
   if (token && user) {
-    store.dispatch(setAuth({ user }));
+    // Dynamic import to avoid circular dependency
+    import("../redux/auth/slice").then(({ setAuth }) => {
+      store.dispatch(setAuth({ user }));
+    });
   } else if (!token) {
-    store.dispatch(clearAuth());
+    // Dynamic import to avoid circular dependency
+    import("../redux/auth/slice").then(({ clearAuth }) => {
+      store.dispatch(clearAuth());
+    });
   }
 };
 
 export const refreshToken = async () => {
-  if (!accessToken) {
+  // Initialize store subscription on first access
+  await initializeStoreSubscription();
+  
+  
+  // If no token in memory, try to get from localStorage
+  let tokenToUse = accessToken;
+  if (!tokenToUse) {
+    const storedToken = localStorage.getItem('accessToken');
+    if (storedToken) {
+      tokenToUse = storedToken;
+      accessToken = storedToken; // Update memory token
+    }
+  }
+  
+  if (!tokenToUse) {
     return null;
   }
 
@@ -79,7 +134,7 @@ export const refreshToken = async () => {
     
     const response = await api.post('/users/refresh', {}, {
       headers: {
-        ...(accessToken && { Authorization: `Bearer ${accessToken}` })
+        ...(tokenToUse && { Authorization: `Bearer ${tokenToUse}` })
       }
     });
     

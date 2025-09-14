@@ -17,17 +17,10 @@ const PublicRoute = ({ children }) => {
       // Get the intended destination from state, or default to home
       const from = location.state?.from?.pathname || ROUTES.MAIN;
       
-      // Try both methods to ensure redirect works
+      // Use React Router navigation
       navigate(from, { replace: true });
-      
-      // Fallback: force redirect with window.location
-      setTimeout(() => {
-        if (window.location.pathname === location.pathname) {
-          window.location.href = from;
-        }
-      }, 100);
     }
-  }, [isAuthenticated, navigate, location.state?.from?.pathname, location.pathname]);
+  }, [isAuthenticated, navigate, location.state?.from?.pathname]);
 
   // If user is authenticated, don't render children
   if (isAuthenticated) {

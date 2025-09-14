@@ -1,6 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { authServices } from '../../api/authServices';
-import { setAuth, clearAuth } from './slice';
 import { clearCart } from '../cart/slice';
 import { fetchCartItems } from '../cart/operations';
 
@@ -79,11 +78,10 @@ export const updateUserAvatar = createAsyncThunk(
 // Google OAuth authentication
 export const authenticateWithGoogleOAuth = createAsyncThunk(
   'auth/authenticateWithGoogleOAuth',
-  async (data, { dispatch, rejectWithValue }) => {
+  async (data, { rejectWithValue }) => {
     try {
-      // If we already have accessToken and user, just set them
+      // If we already have accessToken and user, just return them
       if (data.accessToken && data.user) {
-        dispatch(setAuth({ user: data.user }));
         return { user: data.user, accessToken: data.accessToken };
       }
       

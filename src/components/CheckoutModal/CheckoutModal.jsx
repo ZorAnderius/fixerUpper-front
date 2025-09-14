@@ -19,12 +19,10 @@ const CheckoutModal = ({ isOpen, onClose }) => {
 
   const handleCheckout = async () => {
     if (!cartId) {
-      alert('Error: No cart ID found. Please refresh and try again.');
       return;
     }
 
     if (cartItems.length === 0) {
-      alert('Error: Your cart is empty. Please add items before checkout.');
       return;
     }
 
@@ -43,7 +41,6 @@ const CheckoutModal = ({ isOpen, onClose }) => {
       onClose();
     } catch (error) {
       console.error('Checkout failed:', error);
-      alert(`Checkout failed: ${error.message || 'Unknown error'}`);
     }
   };
 

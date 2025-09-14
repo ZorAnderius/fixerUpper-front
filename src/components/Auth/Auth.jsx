@@ -1,7 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { ROUTES } from '../../helpers/constants/routes';
 import { clearAuth } from '../../redux/auth/slice';
-import { setAccessToken } from '../../api/tokenManager';
+import { setAccessToken } from '../../api/authServices';
 import Button from '../Button/Button';
 import Link from '../Link/Link';
 import styles from './Auth.module.css';

@@ -1,21 +1,29 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { loginSuccess } from '../../redux/auth/slice';
+import { setAccessToken } from '../../api/tokenManager';
 import { ROUTES } from '../../helpers/constants/routes';
 import { redirectAfterAuth, redirectAfterAuthWithError } from '../../helpers/auth/redirectAfterAuth';
 import styles from './GoogleAuthCallback.module.css';
 
 const GoogleAuthCallback = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState('loading');
+  const [hasProcessed, setHasProcessed] = useState(false);
 
   useEffect(() => {
     const handleCallback = async () => {
+      // Prevent multiple calls
+      if (hasProcessed) {
+        return;
+      }
+      
       try {
+        setHasProcessed(true);
         setStatus('processing');
+        
+        // Clear any old tokens first
+        localStorage.removeItem('accessToken');
         
         // Get the full URL with all parameters
         const currentUrl = window.location.href;
@@ -28,7 +36,6 @@ const GoogleAuthCallback = () => {
         
 
         if (error) {
-          console.error('Google OAuth error:', error);
           setStatus('error');
           setTimeout(() => {
             redirectAfterAuthWithError(navigate, 'Google authentication failed. Please try again.', ROUTES.LOGIN);
@@ -40,39 +47,18 @@ const GoogleAuthCallback = () => {
         setStatus('authenticating');
         
         
-        // Send the code to our backend via POST
-        const requestBody = { code };
+        // Send the code to our backend via POST using API client
+        const { default: api } = await import('../../api/client.js');
         
-        const response = await fetch(`http://localhost:3000/api/users/confirm-oauth`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-No-CSRF': '1', // Disable CSRF check
-          },
-          // credentials: 'include', // Temporarily disabled
-          body: JSON.stringify(requestBody),
-        });
+        try {
+          const response = await api.post('/users/confirm-oauth', { code });
 
-
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            console.error('OAuth callback error response:', errorData);
-            throw new Error(`Failed to authenticate with Google: ${response.status} - ${errorData.message || 'Unknown error'}`);
-          }
-
-          const data = await response.json();
+          const data = response.data;
           
           // Store the user data and token
           if (data.data.accessToken && data.data.user) {
-            // Save access token to localStorage
-            localStorage.setItem('accessToken', data.data.accessToken);
-            
-            // Update Redux store
-            dispatch(loginSuccess({
-              user: data.data.user,
-              accessToken: data.data.accessToken
-            }));
+            // Save access token and update Redux store
+            setAccessToken(data.data.accessToken, data.data.user);
             
             setStatus('success');
             setTimeout(() => {
@@ -81,6 +67,10 @@ const GoogleAuthCallback = () => {
           } else {
             throw new Error('Invalid response from server');
           }
+        } catch (apiError) {
+          const errorData = apiError.response?.data || { message: apiError.message };
+          throw new Error(`Failed to authenticate with Google: ${apiError.response?.status || 'Unknown'} - ${errorData.message || 'Unknown error'}`);
+        }
         } else {
           setStatus('error');
           setTimeout(() => {
@@ -88,7 +78,6 @@ const GoogleAuthCallback = () => {
           }, 2000);
         }
       } catch (error) {
-        console.error('Google OAuth authentication failed:', error);
         setStatus('error');
         setTimeout(() => {
           redirectAfterAuthWithError(navigate, 'Google authentication failed. Please try again.', ROUTES.LOGIN);
@@ -97,7 +86,7 @@ const GoogleAuthCallback = () => {
     };
 
     handleCallback();
-  }, [searchParams, navigate, dispatch]);
+  }, []); // Empty dependency array - run only once
 
   const getStatusMessage = () => {
     switch (status) {

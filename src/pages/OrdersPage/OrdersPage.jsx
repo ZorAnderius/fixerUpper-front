@@ -44,23 +44,11 @@ const OrdersPage = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      // console.log('OrdersPage: Fetching orders...');
       dispatch(fetchAllOrders({ page: currentPage, limit: 5 }));
     }
   }, [dispatch, isAuthenticated]);
 
   useEffect(() => {
-    // console.log('OrdersPage: Orders state changed:', { 
-    //   orders: orders.length, 
-    //   isLoading, 
-    //   error,
-    //   isAuthenticated,
-    //   currentPage,
-    //   totalPages,
-    //   totalItems,
-    //   hasNextPage,
-    //   hasPreviousPage
-    // });
   }, [orders, isLoading, error, isAuthenticated, currentPage, totalPages, totalItems, hasNextPage, hasPreviousPage]);
 
   useEffect(() => {
@@ -230,7 +218,7 @@ const OrdersPage = () => {
               <Button
                 variant="primary"
                 size="lg"
-                onClick={() => window.location.href = ROUTES.PRODUCTS}
+                onClick={() => navigate(ROUTES.PRODUCTS)}
               >
                 Start Shopping
               </Button>
@@ -280,7 +268,6 @@ const OrdersPage = () => {
                       variant="secondary"
                       size="sm"
                       onClick={() => {
-                        // console.log('OrdersPage: Navigating to order details:', order.id);
                         navigate(`${ROUTES.ORDERS}/${order.id}`);
                       }}
                     >

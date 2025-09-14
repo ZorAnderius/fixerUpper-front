@@ -95,16 +95,13 @@ const OrderDetailPage = () => {
       if (addedItems > 0) {
         navigate(ROUTES.CART);
       } else {
-        alert('Unable to add any items to cart. All items might be out of stock or no longer available.');
       }
       
       // Show warning if some items failed
       if (failedItems.length > 0 && addedItems > 0) {
-        alert(`Successfully added ${addedItems} items to cart. Some items could not be added: ${failedItems.join(', ')}`);
       }
     } catch (error) {
       console.error('Failed to repeat order:', error);
-      alert('Failed to repeat order. Please try again.');
     } finally {
       setRepeatLoading(false);
     }

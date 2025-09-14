@@ -38,14 +38,11 @@ export const GoogleOAuthProvider = ({ children }) => {
         }
 
         const data = await response.json();
-        alert(`OAuth response data: ${JSON.stringify(data)}`);
         
         // Return the OAuth URL
         const oauthUrl = data.data?.url || data.url;
-        alert(`OAuth URL to redirect to: ${oauthUrl}`);
         return oauthUrl;
       } catch (fetchError) {
-        console.warn('Backend OAuth endpoint failed, using fallback:', fetchError);
         
         // Fallback: construct OAuth URL manually
         const baseUrl = window.location.origin; // http://localhost:5180
@@ -167,7 +164,6 @@ export const GoogleOAuthProvider = ({ children }) => {
       setIsLoading(true);
       setError(null);
 
-      alert('Starting Google OAuth redirect process...');
 
       // Get OAuth URL from backend (correct Client ID)
       const oauthUrl = await getOAuthUrl();
@@ -175,15 +171,10 @@ export const GoogleOAuthProvider = ({ children }) => {
         throw new Error('No OAuth URL received');
       }
 
-      alert(`OAuth URL received: ${oauthUrl}`);
-      alert(`Current origin: ${window.location.origin}`);
-      alert(`Expected callback URL should be: ${window.location.origin}/auth/google/callback`);
-      alert('About to redirect to Google...');
       
-      // Use setTimeout to ensure proper redirect
-      setTimeout(() => {
-        window.location.href = oauthUrl;
-      }, 100);
+      // Use window.location.href only for external OAuth redirect
+      // This is necessary because Google OAuth requires a full page redirect
+      window.location.href = oauthUrl;
       
     } catch (err) {
       console.error('Error redirecting to Google Auth:', err);

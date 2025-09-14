@@ -75,10 +75,8 @@ const LoginPage = () => {
     e.stopPropagation();
     
     try {
-      alert('Google auth button clicked');
       await redirectToGoogleAuth();
     } catch (error) {
-      alert(`Google OAuth error: ${error.message}`);
     }
   };
 

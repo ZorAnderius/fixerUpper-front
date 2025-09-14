@@ -8,7 +8,7 @@ import { getCSRFToken, clearCSRFToken } from "./csrfService.js";
 const rateLimiter = new RateLimiter(100, 60000); // 100 requests per minute
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -30,15 +30,22 @@ api.interceptors.request.use(async (config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
-  // Add CSRF token for state-changing requests (POST, PUT, PATCH, DELETE)
+  // Add CSRF token only for POST/PUT/PATCH/DELETE requests EXCEPT auth endpoints
   const method = config.method?.toUpperCase();
-  if (method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+  const requiresCSRF = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
+  const isAuthEndpoint = config.url?.includes('/users/login') || 
+                        config.url?.includes('/users/register') || 
+                        config.url?.includes('/users/confirm-oauth') ||
+                        config.url?.includes('/users/request-google-oauth');
+  
+  if (requiresCSRF && !isAuthEndpoint) {
     try {
       const csrfToken = await getCSRFToken();
-      config.headers['x-csrf-token'] = csrfToken;
+      if (csrfToken) {
+        config.headers['x-csrf-token'] = csrfToken;
+      }
     } catch (error) {
-      // If no CSRF token available, continue without it
-      // This allows initial requests (like register) to work
+      // Continue without CSRF token - some endpoints might not require it
     }
   }
 
@@ -72,8 +79,8 @@ api.interceptors.response.use(
       }
     }
     
-    // Handle token refresh on 401 errors
-    if (error.response?.status === 401 && error.config && !error.config._retry) {
+    // Handle token refresh on 401 and 403 errors
+    if ((error.response?.status === 401 || error.response?.status === 403) && error.config && !error.config._retry) {
       error.config._retry = true;
       try {
         await refreshToken();

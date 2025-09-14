@@ -9,6 +9,12 @@ export const ICONS = Object.freeze({
   INSTAGRAM: 'instagram',
   YOUTUBE: 'youtube',
   GOOGLE: 'google',
+  HAMMER: 'hammer',
+  WRENCH: 'wrench',
+  SCREWDRIVER: 'screwdriver',
+  DRILL: 'drill',
+  SAW: 'saw',
+  PLIERS: 'pliers',
 });
 
 export const ICON_SIZES = Object.freeze({

@@ -39,7 +39,7 @@ export const authServices = {
     } catch (error) {
       console.error('Logout request failed:', error);
     } finally {
-      // Always clear tokens and CSRF token on logout
+      // Always clear tokens on logout
       setAccessToken(null);
       clearCSRFToken();
     }
