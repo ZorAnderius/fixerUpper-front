@@ -64,7 +64,7 @@ api.interceptors.response.use(
         error.config._retry = true;
         try {
           const csrfToken = await getCSRFToken();
-          error.config.headers['X-CSRF-Token'] = csrfToken;
+          error.config.headers['x-csrf-token'] = csrfToken;
           return api.request(error.config);
         } catch (csrfError) {
           // Failed to retry with new CSRF token

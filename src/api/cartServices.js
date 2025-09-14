@@ -2,7 +2,7 @@ import api from './client';
 
 // Get user's cart
 export const getCartItems = async () => {
-  const response = await api.get('http://localhost:3000/api/carts');
+  const response = await api.get('/carts');
   
   // Backend returns {status: 200, message: "...", data: cart}
   // We need to extract cartItems from the cart object
@@ -25,7 +25,7 @@ export const getCartItems = async () => {
 
 // Add item to cart
 export const addToCart = async (productId, quantity = 1) => {
-  const response = await api.post('http://localhost:3000/api/carts/add', {
+  const response = await api.post('/carts/add', {
     product_id: productId,
     quantity
   });
@@ -34,7 +34,7 @@ export const addToCart = async (productId, quantity = 1) => {
 
 // Update cart item quantity
 export const updateCartItem = async (cartItemId, quantity) => {
-  const response = await api.patch(`http://localhost:3000/api/carts/${cartItemId}/update`, {
+  const response = await api.patch(`/carts/${cartItemId}/update`, {
     quantity
   });
   return response.data;
@@ -42,18 +42,18 @@ export const updateCartItem = async (cartItemId, quantity) => {
 
 // Remove item from cart
 export const removeFromCart = async (cartItemId) => {
-  const response = await api.delete(`http://localhost:3000/api/carts/${cartItemId}`);
+  const response = await api.delete(`/carts/${cartItemId}`);
   return response.data;
 };
 
 // Clear entire cart
 export const clearCart = async () => {
-  const response = await api.delete('http://localhost:3000/api/carts');
+  const response = await api.delete('/carts');
   return response.data;
 };
 
 // Checkout cart
 export const checkoutCart = async (cartId) => {
-  const response = await api.post(`http://localhost:3000/api/carts/${cartId}/checkout`);
+  const response = await api.post(`/carts/${cartId}/checkout`);
   return response.data;
 };
