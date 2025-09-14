@@ -16,7 +16,7 @@ import {
 import { selectIsAuthenticated } from '../../redux/auth/selectors';
 import { ROUTES } from '../../helpers/constants/routes';
 import Button from '../../components/Button/Button';
-import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner';
+import { ContentLoader } from '../../components/Loader';
 import Container from '../../widges/Container/Container';
 import Section from '../../widges/Section/Section';
 import styles from './OrdersPage.module.css';
@@ -96,10 +96,9 @@ const OrdersPage = () => {
     return (
       <Section>
         <Container>
-          <LoadingSpinner 
-            size="lg" 
+          <ContentLoader 
+            variant="ring"
             text="Loading orders..." 
-            className={styles.loadingContainer}
           />
         </Container>
       </Section>

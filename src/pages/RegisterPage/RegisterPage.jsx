@@ -15,6 +15,7 @@ import { redirectAfterAuth } from '../../helpers/auth/redirectAfterAuth';
 import Button from '../../components/Button/Button';
 import Icon from '../../components/Icon/Icon';
 import SecureForm from '../../components/SecureForm/SecureForm';
+import { ButtonLoader } from '../../components/Loader';
 import styles from './RegisterPage.module.css';
 
 const RegisterPage = () => {
@@ -178,7 +179,11 @@ const RegisterPage = () => {
                     className={styles.submitButton}
                     disabled={isSubmitting || isLoading}
                   >
-                    {isSubmitting || isLoading ? 'Signing up...' : 'Sign up'}
+                    {isSubmitting || isLoading ? (
+                      <ButtonLoader text="Signing up..." />
+                    ) : (
+                      'Sign up'
+                    )}
                   </button>
                   {error && <div className={styles.errorMessage}>{error}</div>}
                   <div className={styles.socialSection}>
@@ -192,7 +197,7 @@ const RegisterPage = () => {
                         disabled={googleLoading}
                       >
                         {googleLoading ? (
-                          <div className={styles.spinner}></div>
+                          <ButtonLoader text="" />
                         ) : (
                           <Icon name={ICONS.GOOGLE} size={ICON_SIZES.MD} />
                         )}

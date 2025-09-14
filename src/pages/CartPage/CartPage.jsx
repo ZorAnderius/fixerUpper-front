@@ -7,7 +7,7 @@ import { selectCartItems, selectCartLoading, selectCartError, selectCartTotalIte
 import { selectIsAuthenticated } from '../../redux/auth/selectors';
 import { ROUTES } from '../../helpers/constants/routes';
 import Button from '../../components/Button/Button';
-import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner';
+import { ContentLoader } from '../../components/Loader';
 import Container from '../../widges/Container/Container';
 import Section from '../../widges/Section/Section';
 import CheckoutModal from '../../components/CheckoutModal/CheckoutModal';
@@ -59,10 +59,9 @@ const CartPage = () => {
     return (
       <Section>
         <Container>
-          <LoadingSpinner 
-            size="lg" 
+          <ContentLoader 
+            variant="bars"
             text="Loading cart..." 
-            className={styles.loadingContainer}
           />
         </Container>
       </Section>

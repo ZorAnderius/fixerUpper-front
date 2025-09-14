@@ -7,9 +7,10 @@ import { refreshToken, getAccessToken } from '../api/tokenManager';
 import { getCurrentUser } from '../redux/auth/operations';
 import { GoogleOAuthProvider } from '../contexts/GoogleOAuthContext';
 import { store } from '../redux/store';
+import { PageLoader, ContentLoader } from '../components/Loader';
 
 function App() {
-  const [loading, setLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -36,24 +37,16 @@ function App() {
       } catch (err) {
         // If refresh fails, user is not authenticated - this is normal
       } finally {
-        setLoading(false);
+        setIsInitialized(true);
       }
     };
 
     initAuth();
   }, [dispatch]);
-  if (loading) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        fontSize: '18px'
-      }}>
-        Loading app...
-      </div>
-    );
+
+  // Only show loader on very first load
+  if (!isInitialized) {
+    return <PageLoader text="Initializing application..." />;
   }
 
   return (
@@ -61,15 +54,10 @@ function App() {
       <RouterProvider
         router={router}
         fallbackElement={
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
-            height: '100vh',
-            fontSize: '18px'
-          }}>
-            Loading page...
-          </div>
+          <ContentLoader 
+            variant="spinner"
+            text="Loading page..."
+          />
         }
       />
     </GoogleOAuthProvider>

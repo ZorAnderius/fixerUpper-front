@@ -8,7 +8,7 @@ import { useRef } from 'react';
 import ProductFilters from '../../components/ProductFilters/ProductFilters';
 import ProductCard from '../../components/ProductCard/ProductCard';
 import Pagination from '../../components/Pagination/Pagination';
-import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner';
+import { ContentLoader } from '../../components/Loader';
 import AuthModal from '../../components/AuthModal/AuthModal';
 import Container from '../../widges/Container/Container';
 import Section from '../../widges/Section/Section';
@@ -77,10 +77,9 @@ const ProductsPage = () => {
           <ProductFilters />
           
           {isLoading ? (
-            <LoadingSpinner 
-              size="lg" 
+            <ContentLoader 
+              variant="dots"
               text="Loading products..."
-              className={styles.loadingContainer}
             />
           ) : products.length === 0 ? (
             <div className={styles.emptyContainer}>
