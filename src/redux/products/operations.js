@@ -151,6 +151,7 @@ export const deleteProduct = createAsyncThunk(
       await deleteProductAPI(id);
       
       dispatch(removeProduct(id));
+      dispatch(setLoading(false)); // Add this line
       return id;
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message || 'Failed to delete product';

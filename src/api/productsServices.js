@@ -176,7 +176,7 @@ export const updateProduct = async (id, productData) => {
 // Delete product
 export const deleteProduct = async (id) => {
   try {
-    const response = await api.delete(`/products/${id}`);
+    const response = await api.delete(`/products/${id}/delete`);
     return response.data;
   } catch (error) {
     console.error('Error deleting product:', error);

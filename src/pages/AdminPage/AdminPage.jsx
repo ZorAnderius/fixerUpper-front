@@ -59,6 +59,9 @@ const AdminPage = () => {
         setProductToDelete(null);
       } catch (error) {
         console.error('Failed to delete product:', error);
+        // Error is already handled by Redux and displayed in UI
+        setShowDeleteConfirm(false);
+        setProductToDelete(null);
       }
     }
   };
