@@ -1,29 +1,36 @@
 import { useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { selectIsAuthenticated, selectUser } from '../../redux/auth/selectors';
+import { selectIsAuthenticated, selectUser, selectAuthStatus } from '../../redux/auth/selectors';
 import { ROUTES } from '../../helpers/constants/routes';
 import { useEffect } from 'react';
+import { responseStatuses } from '../../helpers/constants/responseStatus';
+import { ContentLoader } from '../Loader';
 
 const PublicRoute = ({ children }) => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
+  const authStatus = useSelector(selectAuthStatus);
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Show loader while auth is being determined
+  if (authStatus === responseStatuses.LOADING) {
+    return <ContentLoader variant="spinner" text="Checking authentication..." />;
+  }
 
   useEffect(() => {
-    // If user is authenticated, redirect to home page
-    if (isAuthenticated) {
+    // Only redirect if we're sure user is authenticated (not loading)
+    if (authStatus === responseStatuses.SUCCEEDED && isAuthenticated) {
       // Get the intended destination from state, or default to home
-      const from = location.state?.from?.pathname || ROUTES.MAIN;
+      const from = location.state?.from || ROUTES.MAIN;
       
       // Use React Router navigation
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate, location.state?.from?.pathname]);
+  }, [isAuthenticated, authStatus, navigate, location.state?.from]);
 
-  // If user is authenticated, don't render children
-  if (isAuthenticated) {
+  // If user is authenticated and auth is not loading, don't render children
+  if (authStatus === responseStatuses.SUCCEEDED && isAuthenticated) {
     return null; // or a loading spinner
   }
 

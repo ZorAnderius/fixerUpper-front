@@ -18,6 +18,7 @@ const OrderDetailPage = lazy(() => import("../../pages/OrderDetailPage/OrderDeta
 const CartPage = lazy(() => import("../../pages/CartPage/CartPage"));
 const ProfilePage = lazy(() => import("../../pages/ProfilePage/ProfilePage"));
 const AdminPage = lazy(() => import("../../pages/AdminPage/AdminPage"));
+const AddProductPage = lazy(() => import("../../pages/AdminPage/AddProductPage"));
 const GoogleAuthCallback = lazy(() => import("../../components/GoogleAuthCallback/GoogleAuthCallback"));
 
 // Error element component
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
       { path: ROUTES.CART, element: <PrivateRoute><CartPage /></PrivateRoute> },
       { path: ROUTES.PROFILE, element: <PrivateRoute><ProfilePage /></PrivateRoute> },
       { path: ROUTES.ADMIN, element: <PrivateRoute><AdminPage /></PrivateRoute> },
+      { path: ROUTES.ADMIN_ADD_PRODUCT, element: <PrivateRoute><AddProductPage /></PrivateRoute> },
       { path: ROUTES.GOOGLE_CALLBACK, element: <GoogleAuthCallback /> },
     ],
   },

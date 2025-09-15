@@ -49,8 +49,8 @@ api.interceptors.request.use(async (config) => {
     }
   }
 
-  // Sanitize request data
-  if (config.data && typeof config.data === 'object') {
+  // Sanitize request data (skip FormData)
+  if (config.data && typeof config.data === 'object' && !(config.data instanceof FormData)) {
     config.data = sanitizeRequestData(config.data);
   }
 

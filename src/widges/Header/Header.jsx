@@ -3,6 +3,7 @@ import Logo from '../../components/Logo/Logo';
 import MobileMenu from '../../components/MobileMenu/MobileMenu';
 import AnimatedAuth from '../../components/AnimatedAuth/AnimatedAuth';
 import CartIcon from '../../components/CartIcon/CartIcon';
+import AdminNav from '../../components/AdminNav/AdminNav';
 import Container from '../Container/Container';
 import useScrollObserver from '../../hooks/useScrollObserver';
 import styles from "./Header.module.css";
@@ -19,9 +20,12 @@ const Header = () => {
             <Logo />
           </div>
 
-          {/* Right side - Cart and Auth */}
+          {/* Right side - Cart, Admin Nav and Auth */}
           <div className={styles.headerRight}>
             <div className={styles.desktopActions}>
+              {/* Admin Navigation */}
+              <AdminNav />
+              
               {/* Cart Icon */}
               <CartIcon />
               

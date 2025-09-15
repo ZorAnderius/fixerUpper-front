@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { ROUTES } from '../../helpers/constants/routes';
 import { logoutUser } from '../../redux/auth/operations';
+import { selectIsAdmin } from '../../redux/auth/selectors';
 import Button from '../Button/Button';
 import Link from '../Link/Link';
 import styles from './MobileMenu.module.css';
@@ -13,6 +14,7 @@ const MobileMenu = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useSelector(state => state.auth);
+  const isAdmin = useSelector(selectIsAdmin);
 
   const toggleMenu = () => {
     // Don't open menu on desktop
@@ -159,6 +161,34 @@ const MobileMenu = () => {
                 Home
               </NavLink>
             </li>
+            
+            {/* Admin Links */}
+            {isAuthenticated && isAdmin && (
+              <>
+                <li className={styles.mobileNavItem}>
+                  <NavLink 
+                    to={ROUTES.ADMIN} 
+                    className={({ isActive }) => 
+                      `${styles.mobileNavLink} ${styles.adminLink} ${isActive ? styles.mobileNavLinkActive : ''}`
+                    }
+                    onClick={closeMenu}
+                  >
+                    🛠️ Admin Panel
+                  </NavLink>
+                </li>
+                <li className={styles.mobileNavItem}>
+                  <NavLink 
+                    to={ROUTES.ADMIN_ADD_PRODUCT} 
+                    className={({ isActive }) => 
+                      `${styles.mobileNavLink} ${styles.adminLink} ${isActive ? styles.mobileNavLinkActive : ''}`
+                    }
+                    onClick={closeMenu}
+                  >
+                    ➕ Add Product
+                  </NavLink>
+                </li>
+              </>
+            )}
           </ul>
           
           <div className={styles.mobileAuthSection}>

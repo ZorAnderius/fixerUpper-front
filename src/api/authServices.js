@@ -48,8 +48,13 @@ export const authServices = {
   getCurrentUser: async () => {
     const response = await api.get('/users/current');
     
+    console.log('getCurrentUser response:', response.data);
+    
     // Extract data from nested structure
-    const { user } = response.data.data;
+    // API returns { message: "...", data: { user data } }
+    const user = response.data.data;
+    
+    console.log('Extracted user:', user);
     
     return { user };
   },

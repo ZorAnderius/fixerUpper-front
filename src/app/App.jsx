@@ -29,10 +29,21 @@ function App() {
         // Only try to refresh token if we have one
         const existingToken = getAccessToken();
         if (existingToken) {
-          // Try to refresh token first - this will also set user data if successful
+          // Try to refresh token first
           await refreshToken();
-          // No need to call getCurrentUser since refresh now returns user data
+          // Always call getCurrentUser to ensure we have complete user data including role
+          try {
+            await dispatch(getCurrentUser()).unwrap();
+          } catch (error) {
+            console.error('getCurrentUser failed after refresh:', error);
+          }
         } else {
+          // If no token, try to get current user anyway (in case of session restoration)
+          try {
+            await dispatch(getCurrentUser()).unwrap();
+          } catch (error) {
+            // This is expected if user is not authenticated
+          }
         }
       } catch (err) {
         // If refresh fails, user is not authenticated - this is normal

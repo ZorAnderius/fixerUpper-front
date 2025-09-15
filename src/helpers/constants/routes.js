@@ -11,5 +11,6 @@ export const ROUTES = Object.freeze({
   PROFILE: "/profile",
   CHECKOUT: "/checkout",
   ADMIN: "/admin",
+  ADMIN_ADD_PRODUCT: "/admin/products/add",
   GOOGLE_CALLBACK: "/auth/google/callback",
 });

@@ -9,6 +9,7 @@ const sliceAuth = createSlice({
   initialState,
   reducers: {
     setAuth(state, action) {
+      console.log('setAuth called with:', action.payload);
       state.isAuthenticated = true;
       state.user = action.payload.user;
       state.status = responseStatuses.SUCCEEDED;
@@ -96,14 +97,18 @@ const sliceAuth = createSlice({
         state.error = null;
       })
       .addCase(getCurrentUser.fulfilled, (state, action) => {
+        console.log('getCurrentUser.fulfilled called with:', action.payload);
         state.isAuthenticated = true;
         state.user = action.payload.user;
         state.status = responseStatuses.SUCCEEDED;
         state.error = null;
       })
       .addCase(getCurrentUser.rejected, (state, action) => {
+        console.error('getCurrentUser rejected:', action.payload);
         state.status = responseStatuses.FAILED;
         state.error = action.payload;
+        state.isAuthenticated = false;
+        state.user = null;
       })
       // Update user avatar
       .addCase(updateUserAvatar.pending, (state) => {

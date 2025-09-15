@@ -3,7 +3,7 @@ import { responseStatuses } from "../../helpers/constants/responseStatus";
 const initialState = {
   user: null,
   isAuthenticated: false,
-  status: responseStatuses.IDLE,
+  status: responseStatuses.LOADING, // Start with loading to prevent premature redirects
   error: null,
 };
 

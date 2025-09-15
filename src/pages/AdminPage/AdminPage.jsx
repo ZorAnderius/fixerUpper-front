@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { fetchAllProducts, deleteProduct } from '../../redux/products/operations';
 import { selectProducts, selectProductsLoading, selectProductsError } from '../../redux/products/selectors';
-import { selectUser } from '../../redux/auth/selectors';
+import { selectUser, selectIsAdmin } from '../../redux/auth/selectors';
 import { ROUTES } from '../../helpers/constants/routes';
 import { useNavigate } from 'react-router-dom';
 import ProductModal from '../../components/ProductModal/ProductModal';
@@ -16,6 +16,7 @@ const AdminPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
+  const isAdmin = useSelector(selectIsAdmin);
   const products = useSelector(selectProducts);
   const isLoading = useSelector(selectProductsLoading);
   const error = useSelector(selectProductsError);
@@ -27,15 +28,14 @@ const AdminPage = () => {
   const [productToDelete, setProductToDelete] = useState(null);
 
   useEffect(() => {
-    if (user?.role === 'admin') {
+    if (isAdmin) {
       dispatch(fetchAllProducts());
     }
-  }, [dispatch, user]);
+    // Don't redirect here, let the component handle the access denied message
+  }, [dispatch, isAdmin]);
 
   const handleCreateProduct = () => {
-    setModalMode('create');
-    setSelectedProduct(null);
-    setIsModalOpen(true);
+    navigate(ROUTES.ADMIN_ADD_PRODUCT);
   };
 
   const handleEditProduct = (product) => {
@@ -82,13 +82,13 @@ const AdminPage = () => {
       <Section>
         <Container>
           <div className={styles.notAuthenticated}>
-            <h2>Потрібна авторизація</h2>
-            <p>Увійдіть в систему, щоб отримати доступ до адмін панелі</p>
+            <h2>Authentication Required</h2>
+            <p>Please log in to access the admin panel</p>
             <Button 
               variant="primary" 
               onClick={() => navigate(ROUTES.LOGIN)}
             >
-              Увійти
+              Log In
             </Button>
           </div>
         </Container>
@@ -96,18 +96,18 @@ const AdminPage = () => {
     );
   }
 
-  if (user.role !== 'admin') {
+  if (user.role !== 'administrator') {
     return (
       <Section>
         <Container>
           <div className={styles.accessDenied}>
-            <h2>Доступ заборонено</h2>
-            <p>У вас немає прав для доступу до адмін панелі</p>
+            <h2>Access Denied</h2>
+            <p>You don't have permission to access the admin panel</p>
             <Button 
               variant="primary" 
               onClick={() => navigate(ROUTES.PRODUCTS)}
             >
-              Повернутися до каталогу
+              Return to Catalog
             </Button>
           </div>
         </Container>
@@ -127,8 +127,8 @@ const AdminPage = () => {
           {/* Header */}
           <div className={styles.adminHeader}>
             <div className={styles.headerInfo}>
-              <h1 className={styles.adminTitle}>Адмін панель</h1>
-              <p className={styles.adminSubtitle}>Управління товарами</p>
+              <h1 className={styles.adminTitle}>Admin Panel</h1>
+              <p className={styles.adminSubtitle}>Product Management</p>
             </div>
             <Button
               variant="primary"
@@ -137,7 +137,7 @@ const AdminPage = () => {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              Додати товар
+              Add Product
             </Button>
           </div>
 
@@ -145,17 +145,17 @@ const AdminPage = () => {
           {isLoading ? (
             <div className={styles.loadingContainer}>
               <div className={styles.loadingSpinner}></div>
-              <p>Завантаження товарів...</p>
+              <p>Loading products...</p>
             </div>
           ) : error ? (
             <div className={styles.errorContainer}>
-              <h3>Помилка завантаження</h3>
+              <h3>Loading Error</h3>
               <p>{error}</p>
               <Button 
                 variant="primary" 
                 onClick={() => dispatch(fetchAllProducts())}
               >
-                Спробувати знову
+                Try Again
               </Button>
             </div>
           ) : products.length === 0 ? (
@@ -165,13 +165,13 @@ const AdminPage = () => {
                   <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <h3>Немає товарів</h3>
-              <p>Створіть перший товар, щоб почати</p>
+              <h3>No Products</h3>
+              <p>Create your first product to get started</p>
               <Button 
                 variant="primary" 
                 onClick={handleCreateProduct}
               >
-                Створити товар
+                Create Product
               </Button>
             </div>
           ) : (
@@ -185,9 +185,9 @@ const AdminPage = () => {
                   transition={{ duration: 0.4, delay: index * 0.1 }}
                 >
                   <div className={styles.productImage}>
-                    {product.product_image ? (
+                    {product.image_url ? (
                       <img 
-                        src={product.product_image} 
+                        src={product.image_url} 
                         alt={product.title}
                         className={styles.productImageImg}
                       />
@@ -222,14 +222,14 @@ const AdminPage = () => {
                       size="sm"
                       onClick={() => handleEditProduct(product)}
                     >
-                      Редагувати
+                      Edit
                     </Button>
                     <Button
                       variant="danger"
                       size="sm"
                       onClick={() => handleDeleteProduct(product)}
                     >
-                      Видалити
+                      Delete
                     </Button>
                   </div>
                 </motion.div>
@@ -255,10 +255,10 @@ const AdminPage = () => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
             >
-              <h3>Підтвердження видалення</h3>
+              <h3>Confirm Deletion</h3>
               <p>
-                Ви впевнені, що хочете видалити товар "{productToDelete?.title}"? 
-                Цю дію неможливо скасувати.
+                Are you sure you want to delete the product "{productToDelete?.title}"? 
+                This action cannot be undone.
               </p>
               <div className={styles.modalActions}>
                 <Button
@@ -268,13 +268,13 @@ const AdminPage = () => {
                     setProductToDelete(null);
                   }}
                 >
-                  Скасувати
+                  Cancel
                 </Button>
                 <Button
                   variant="danger"
                   onClick={confirmDelete}
                 >
-                  Видалити
+                  Delete
                 </Button>
               </div>
             </motion.div>

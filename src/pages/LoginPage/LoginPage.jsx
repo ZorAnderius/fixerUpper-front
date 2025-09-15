@@ -4,13 +4,14 @@ import { useNavigate, Link, useLocation, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Formik, Form, Field } from 'formik';
 import { loginUser } from '../../redux/auth/operations';
-import { selectAuthLoading, selectAuthError, selectIsAuthenticated, selectUser } from '../../redux/auth/selectors';
+import { selectAuthLoading, selectAuthError, selectIsAuthenticated, selectUser, selectAuthStatus } from '../../redux/auth/selectors';
 import { ROUTES } from '../../helpers/constants/routes';
 import { loginSchema } from '../../helpers/validation/schemas';
 import { ICONS, ICON_SIZES } from '../../helpers/constants/icons';
 import { sanitizeEmail, sanitizeInput } from '../../helpers/security/sanitize';
 import { useGoogleOAuth } from '../../contexts/GoogleOAuthContext';
 import { redirectAfterAuth } from '../../helpers/auth/redirectAfterAuth';
+import { responseStatuses } from '../../helpers/constants/responseStatus';
 import Button from '../../components/Button/Button';
 import Icon from '../../components/Icon/Icon';
 import SecureForm from '../../components/SecureForm/SecureForm';
@@ -24,6 +25,7 @@ const LoginPage = () => {
   const error = useSelector(selectAuthError);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
+  const authStatus = useSelector(selectAuthStatus);
   const { redirectToGoogleAuth, isLoading: googleLoading, error: googleError } = useGoogleOAuth();
   
   // Simple redirect - to home page or from location.state
@@ -32,13 +34,14 @@ const LoginPage = () => {
   
   // useEffect for automatic redirection after login
   useEffect(() => {
-    if (isAuthenticated) {
+    // Only redirect if auth is successful and user is authenticated
+    if (authStatus === responseStatuses.SUCCEEDED && isAuthenticated) {
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, from, navigate, user]);
+  }, [isAuthenticated, authStatus, from, navigate]);
 
-  // If user is already authenticated, redirect immediately
-  if (isAuthenticated) {
+  // If user is already authenticated and auth is not loading, redirect immediately
+  if (authStatus === responseStatuses.SUCCEEDED && isAuthenticated) {
     return <Navigate to={from} replace />;
   }
 

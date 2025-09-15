@@ -41,7 +41,7 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
           status_id: product.status_id || '',
           product_image: null
         });
-        setImagePreview(product.product_image || null);
+        setImagePreview(product.image_url || null);
       } else {
         setFormData({
           title: '',
