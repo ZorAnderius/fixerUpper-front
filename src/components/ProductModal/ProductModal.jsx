@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { motion, AnimatePresence } from 'framer-motion';
 import { createProduct, updateProduct } from '../../redux/products/operations';
 import { selectCategories, selectProductStatuses, selectProductsLoading } from '../../redux/products/selectors';
 import { fetchCategories, fetchProductStatuses } from '../../redux/products/operations';
@@ -8,10 +7,16 @@ import Button from '../Button/Button';
 import styles from './ProductModal.module.css';
 
 const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
+  // console.log('ProductModal props:', { isOpen, product, mode });
+  
   const dispatch = useDispatch();
   const categories = useSelector(selectCategories);
   const productStatuses = useSelector(selectProductStatuses);
   const isLoading = useSelector(selectProductsLoading);
+  
+  // console.log('ProductModal data:', { categories, productStatuses, isLoading });
+  // console.log('Categories details:', categories);
+  // console.log('Statuses details:', productStatuses);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -25,20 +30,28 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
 
   const [errors, setErrors] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
+  
+  // console.log('Form data:', formData);
 
   useEffect(() => {
     if (isOpen) {
       dispatch(fetchCategories());
       dispatch(fetchProductStatuses());
-      
+      setErrors({});
+    }
+  }, [isOpen, dispatch]);
+
+  useEffect(() => {
+    if (isOpen) {
       if (mode === 'edit' && product) {
+        // console.log('Setting form data for edit mode:', product);
         setFormData({
           title: product.title || '',
           description: product.description || '',
           price: product.price || '',
           quantity: product.quantity || '',
-          category_id: product.category_id || '',
-          status_id: product.status_id || '',
+          category_id: product.category?.id || '',
+          status_id: product.status?.id || '',
           product_image: null
         });
         setImagePreview(product.image_url || null);
@@ -54,9 +67,20 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
         });
         setImagePreview(null);
       }
-      setErrors({});
     }
-  }, [isOpen, mode, product, dispatch]);
+  }, [isOpen, mode, product]);
+
+  // Additional useEffect to update form data when categories/statuses are loaded
+  useEffect(() => {
+    if (isOpen && mode === 'edit' && product && categories.length > 0 && productStatuses.length > 0) {
+      // console.log('Updating form data after categories/statuses loaded:', product);
+      setFormData(prev => ({
+        ...prev,
+        category_id: product.category?.id || '',
+        status_id: product.status?.id || ''
+      }));
+    }
+  }, [isOpen, mode, product, categories, productStatuses]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -137,7 +161,18 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
       if (mode === 'create') {
         await dispatch(createProduct(formData)).unwrap();
       } else {
-        await dispatch(updateProduct({ id: product.id, productData: formData })).unwrap();
+        // For update, only send changed fields
+        const updateData = {};
+        if (formData.title !== product.title) updateData.title = formData.title;
+        if (formData.description !== product.description) updateData.description = formData.description;
+        if (formData.price !== product.price) updateData.price = formData.price;
+        if (formData.quantity !== product.quantity) updateData.quantity = formData.quantity;
+        if (formData.category_id !== product.category?.id) updateData.category_id = formData.category_id;
+        if (formData.status_id !== product.status?.id) updateData.status_id = formData.status_id;
+        if (formData.product_image) updateData.product_image = formData.product_image;
+        
+        // console.log('Updating product with changed fields:', updateData);
+        await dispatch(updateProduct({ id: product.id, productData: updateData })).unwrap();
       }
       onClose();
     } catch (error) {
@@ -160,27 +195,44 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
     onClose();
   };
 
+  // console.log('ProductModal render - isOpen:', isOpen);
+  
+  if (!isOpen) return null;
+  
+  // console.log('ProductModal rendering with isOpen:', isOpen);
+  
+  
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            className={styles.modalBackdrop}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={handleClose}
-          />
-          
-          {/* Modal */}
-          <motion.div
-            className={styles.modal}
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-          >
+    <>
+      {/* Backdrop */}
+      <div
+        onClick={handleClose}
+        style={{ 
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.8)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      />
+      
+      {/* Modal */}
+      <div
+        data-testid="product-modal"
+        className={styles.modal}
+        style={{ 
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 10000
+        }}
+      >
             <div className={styles.modalHeader}>
               <h2 className={styles.modalTitle}>
                 {mode === 'create' ? 'Create Product' : 'Edit Product'}
@@ -265,7 +317,7 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
                     className={`${styles.select} ${errors.category_id ? styles.inputError : ''}`}
                   >
                     <option value="">Select category</option>
-                    {categories.map(category => (
+                    {Array.isArray(categories) && categories.map(category => (
                       <option key={category.id} value={category.id}>
                         {category.name}
                       </option>
@@ -287,7 +339,7 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
                     className={`${styles.select} ${errors.status_id ? styles.inputError : ''}`}
                   >
                     <option value="">Select status</option>
-                    {productStatuses.map(status => (
+                    {Array.isArray(productStatuses) && productStatuses.map(status => (
                       <option key={status.id} value={status.id}>
                         {status.name}
                       </option>
@@ -362,10 +414,8 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
                 </Button>
               </div>
             </form>
-          </motion.div>
+          </div>
         </>
-      )}
-    </AnimatePresence>
   );
 };
 

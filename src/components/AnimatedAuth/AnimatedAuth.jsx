@@ -13,7 +13,7 @@ const AnimatedAuth = () => {
   const { isAuthenticated, user } = useSelector(state => state.auth);
   
   // Debug logging
-  console.log('AnimatedAuth render:', { isAuthenticated, user, authState: useSelector(state => state.auth) });
+  // console.log('AnimatedAuth render:', { isAuthenticated, user, authState: useSelector(state => state.auth) });
   
 
   const handleLogout = async () => {

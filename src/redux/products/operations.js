@@ -128,8 +128,12 @@ export const updateProduct = createAsyncThunk(
       dispatch(setLoading(true));
       const response = await updateProductAPI(id, productData);
       
-      dispatch(updateProductAction(response));
-      return response;
+      // Extract the updated product data from response
+      const updatedProduct = response.data || response;
+      
+      dispatch(updateProductAction(updatedProduct));
+      dispatch(setLoading(false)); // Add this line
+      return updatedProduct;
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message || 'Failed to update product';
       dispatch(setError(errorMessage));

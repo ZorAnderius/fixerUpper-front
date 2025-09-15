@@ -19,7 +19,7 @@
   height: 32px;
   border-radius: var(--radius-full);
   overflow: hidden;
-  background-color: var(--color-primary-blue);
+  background-color: var(--color-primary-orange);
   display: flex;
   align-items: center;
   justify-content: center;

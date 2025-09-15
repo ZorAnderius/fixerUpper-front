@@ -24,6 +24,8 @@ const AdminPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('create');
   const [selectedProduct, setSelectedProduct] = useState(null);
+  
+  // console.log('AdminPage state:', { isModalOpen, modalMode, selectedProduct });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
 

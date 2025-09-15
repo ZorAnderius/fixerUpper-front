@@ -89,7 +89,7 @@ export const setAccessToken = (token, user = null) => {
   
   channel.postMessage({ type: "TOKEN_REFRESH", accessToken: token });
   if (token && user) {
-    console.log('setAccessToken: calling setAuth with user:', user);
+    // console.log('setAccessToken: calling setAuth with user:', user);
     // Dynamic import to avoid circular dependency
     import("../redux/auth/slice").then(({ setAuth }) => {
       store.dispatch(setAuth({ user }));
@@ -141,9 +141,9 @@ export const refreshToken = async () => {
     });
     
     // Extract data from nested structure
-    console.log('refreshToken response:', response.data);
+    // console.log('refreshToken response:', response.data);
     const { accessToken: newAccessToken, user } = response.data.data || response.data;
-    console.log('Extracted from refresh:', { newAccessToken, user });
+    // console.log('Extracted from refresh:', { newAccessToken, user });
     
     if (newAccessToken) {
       setAccessToken(newAccessToken, user);
