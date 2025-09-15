@@ -281,9 +281,6 @@ const OrdersPage = () => {
           {/* Pagination */}
           {totalPages > 1 && (
             <div className={styles.pagination}>
-              <div className={styles.paginationInfo}>
-                Showing {orders.length} of {totalItems} orders
-              </div>
               <div className={styles.paginationControls}>
                 {/* First Page */}
                 <button

@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { fetchAllProducts, deleteProduct } from '../../redux/products/operations';
-import { selectProducts, selectProductsLoading, selectProductsError } from '../../redux/products/selectors';
+import { selectProducts, selectProductsLoading, selectProductsError, selectProductsPagination } from '../../redux/products/selectors';
 import { selectUser, selectIsAdmin } from '../../redux/auth/selectors';
 import { ROUTES } from '../../helpers/constants/routes';
 import { useNavigate } from 'react-router-dom';
 import ProductModal from '../../components/ProductModal/ProductModal';
+import Pagination from '../../components/Pagination/Pagination';
 import Button from '../../components/Button/Button';
 import Container from '../../widges/Container/Container';
 import Section from '../../widges/Section/Section';
@@ -20,6 +21,7 @@ const AdminPage = () => {
   const products = useSelector(selectProducts);
   const isLoading = useSelector(selectProductsLoading);
   const error = useSelector(selectProductsError);
+  const pagination = useSelector(selectProductsPagination);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('create');
@@ -133,7 +135,14 @@ const AdminPage = () => {
           <div className={styles.adminHeader}>
             <div className={styles.headerInfo}>
               <h1 className={styles.adminTitle}>Admin Panel</h1>
-              <p className={styles.adminSubtitle}>Product Management</p>
+              <p className={styles.adminSubtitle}>
+                Product Management 
+                {pagination.totalItems > 0 && (
+                  <span className={styles.productCount}>
+                    ({pagination.totalItems} products)
+                  </span>
+                )}
+              </p>
             </div>
             <Button
               variant="primary"
@@ -241,6 +250,9 @@ const AdminPage = () => {
               ))}
             </div>
           )}
+          
+          {/* Pagination */}
+          {products.length > 0 && <Pagination />}
         </motion.div>
 
         {/* Product Modal */}

@@ -15,6 +15,8 @@ import {
   setCurrentProduct,
   setCategories,
   setProductStatuses,
+  setFilters,
+  setPagination,
   addProduct,
   updateProduct as updateProductAction,
   removeProduct
@@ -23,10 +25,17 @@ import {
 // Fetch all products
 export const fetchAllProducts = createAsyncThunk(
   'products/fetchAll',
-  async (filters, { dispatch, rejectWithValue }) => {
+  async (filters, { dispatch, rejectWithValue, getState }) => {
     try {
       dispatch(setLoading(true));
-      const response = await getAllProductsAPI(filters);
+      
+      // Get current filters from state and merge with provided filters
+      const currentState = getState();
+      const currentFilters = currentState.products.filters;
+      const mergedFilters = { ...currentFilters, ...(filters || {}) };
+      
+      
+      const response = await getAllProductsAPI(mergedFilters);
       
       // Handle different response formats from API
       let products;
@@ -56,19 +65,33 @@ export const fetchAllProducts = createAsyncThunk(
       
       dispatch(setProducts(products));
       
-      // Handle pagination from different response formats
+      // Handle pagination from API response
       let pagination;
-      if (response.data && response.data.pagination) {
-        pagination = response.data.pagination;
-      } else if (response.pagination) {
-        pagination = response.pagination;
+      
+      
+      // Extract pagination from response.data (backend structure)
+      if (response.data && response.data.totalPages) {
+        pagination = {
+          currentPage: response.data.page || 1,
+          totalPages: response.data.totalPages || 1,
+          totalItems: response.data.totalItems || 0,
+          itemsPerPage: response.data.limit || 9,
+          hasNextPage: response.data.hasNextPage || false,
+          hasPreviousPage: response.data.hasPreviousPage || false
+        };
       }
       
       if (pagination) {
-        dispatch({
-          type: 'products/setPagination',
-          payload: pagination
-        });
+        dispatch(setPagination(pagination));
+      } else {
+        // If no pagination data, create default pagination
+        const defaultPagination = {
+          currentPage: mergedFilters.page || 1,
+          totalPages: Math.ceil(products.length / 9),
+          totalItems: products.length,
+          itemsPerPage: 9
+        };
+        dispatch(setPagination(defaultPagination));
       }
       
       return response;
@@ -145,13 +168,14 @@ export const updateProduct = createAsyncThunk(
 // Delete product (Admin)
 export const deleteProduct = createAsyncThunk(
   'products/delete',
-  async (id, { dispatch, rejectWithValue }) => {
+  async (id, { dispatch, rejectWithValue, getState }) => {
     try {
       dispatch(setLoading(true));
       await deleteProductAPI(id);
       
       dispatch(removeProduct(id));
-      dispatch(setLoading(false)); // Add this line
+      dispatch(setLoading(false));
+      
       return id;
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message || 'Failed to delete product';

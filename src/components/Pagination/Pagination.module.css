@@ -1,8 +1,7 @@
 /* Mobile First Approach */
 .pagination {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
+  justify-content: center;
   align-items: center;
   padding: var(--spacing-xl) 0;
 }
@@ -28,12 +27,36 @@
 }
 
 .pageButton {
-  min-width: 40px;
+  width: 40px;
   height: 40px;
-  padding: 0;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+}
+
+.pageButton:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.pageButton.active {
+  background: #f97316;
+  color: white;
+  border-color: #f97316;
+}
+
+.pageButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .ellipsis {
@@ -49,13 +72,7 @@
 /* Tablet and up */
 @media (min-width: 768px) {
   .pagination {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .paginationInfo {
-    text-align: left;
+    justify-content: center;
   }
   
   .paginationControls {

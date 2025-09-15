@@ -28,9 +28,8 @@ export const getAllProducts = async (filters = {}) => {
     if (filters.page) {
       sanitizedFilters.page = parseInt(filters.page) || 1;
     }
-    if (filters.limit) {
-      sanitizedFilters.limit = parseInt(filters.limit) || 12;
-    }
+    // Always set limit to 9
+    sanitizedFilters.limit = 9;
     
     // Only add params if they exist
     const params = new URLSearchParams();

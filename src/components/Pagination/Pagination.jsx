@@ -1,13 +1,23 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
+import { useEffect } from 'react';
 import { setFilters } from '../../redux/products/slice';
-import { selectProductsPagination } from '../../redux/products/selectors';
-import Button from '../Button/Button';
+import { selectProductsPagination, selectProductsFilters } from '../../redux/products/selectors';
+import { fetchAllProducts } from '../../redux/products/operations';
 import styles from './Pagination.module.css';
 
 const Pagination = () => {
   const dispatch = useDispatch();
   const pagination = useSelector(selectProductsPagination);
+  const filters = useSelector(selectProductsFilters);
+
+
+  // Fetch products when page changes
+  useEffect(() => {
+    if (filters.page && filters.page > 1) {
+      dispatch(fetchAllProducts(filters));
+    }
+  }, [dispatch, filters.page, filters.category, filters.search, filters.sortBy]);
 
   const handlePageChange = (page) => {
     dispatch(setFilters({ page }));
@@ -51,21 +61,26 @@ const Pagination = () => {
 
   return (
     <div className={styles.pagination}>
-      <div className={styles.paginationInfo}>
-        Показано {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1}-
-        {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} 
-        з {pagination.totalItems} товарів
-      </div>
-      
       <div className={styles.paginationControls}>
-        <Button
-          variant="outline"
-          size="sm"
+        {/* First Page */}
+        <button
+          className={styles.pageButton}
+          onClick={() => handlePageChange(1)}
+          disabled={pagination.currentPage === 1}
+          title="First page"
+        >
+          ««
+        </button>
+        
+        {/* Previous Page */}
+        <button
+          className={styles.pageButton}
           onClick={() => handlePageChange(pagination.currentPage - 1)}
           disabled={pagination.currentPage === 1}
+          title="Previous page"
         >
-          Попередня
-        </Button>
+          «
+        </button>
         
         <div className={styles.pageNumbers}>
           {generatePageNumbers().map((page, index) => (
@@ -77,27 +92,36 @@ const Pagination = () => {
               {page === '...' ? (
                 <span className={styles.ellipsis}>...</span>
               ) : (
-                <Button
-                  variant={page === pagination.currentPage ? "primary" : "outline"}
-                  size="sm"
+                <button
+                  className={`${styles.pageButton} ${page === pagination.currentPage ? styles.active : ''}`}
                   onClick={() => handlePageChange(page)}
-                  className={styles.pageButton}
                 >
                   {page}
-                </Button>
+                </button>
               )}
             </motion.div>
           ))}
         </div>
         
-        <Button
-          variant="outline"
-          size="sm"
+        {/* Next Page */}
+        <button
+          className={styles.pageButton}
           onClick={() => handlePageChange(pagination.currentPage + 1)}
           disabled={pagination.currentPage === pagination.totalPages}
+          title="Next page"
         >
-          Наступна
-        </Button>
+          »
+        </button>
+        
+        {/* Last Page */}
+        <button
+          className={styles.pageButton}
+          onClick={() => handlePageChange(pagination.totalPages)}
+          disabled={pagination.currentPage === pagination.totalPages}
+          title="Last page"
+        >
+          »»
+        </button>
       </div>
     </div>
   );

@@ -12,13 +12,13 @@ const initialState = {
     search: '',
     sortBy: 'newest',
     page: 1,
-    limit: 12
+    limit: 9
   },
   pagination: {
     currentPage: 1,
     totalPages: 1,
     totalItems: 0,
-    itemsPerPage: 12
+    itemsPerPage: 9
   }
 };
 
@@ -75,6 +75,16 @@ const productsSlice = createSlice({
       state.items = state.items.filter(item => item.id !== action.payload);
       if (state.currentProduct && state.currentProduct.id === action.payload) {
         state.currentProduct = null;
+      }
+      
+      // Update pagination
+      state.pagination.totalItems = Math.max(0, state.pagination.totalItems - 1);
+      state.pagination.totalPages = Math.ceil(state.pagination.totalItems / state.pagination.itemsPerPage);
+      
+      // If current page is now empty and not the first page, go to previous page
+      if (state.items.length === 0 && state.pagination.currentPage > 1) {
+        state.pagination.currentPage = state.pagination.currentPage - 1;
+        state.filters.page = state.pagination.currentPage;
       }
     },
     clearCurrentProduct: (state) => {

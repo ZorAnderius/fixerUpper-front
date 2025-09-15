@@ -34,6 +34,11 @@
   margin: 0;
 }
 
+.productCount {
+  color: var(--color-primary-orange);
+  font-weight: var(--font-weight-medium);
+}
+
 .productsList {
   display: grid;
   grid-template-columns: 1fr;
@@ -307,6 +312,7 @@
 @media (min-width: 1024px) {
   .productsList {
     grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
   }
   
   .productCard {
@@ -327,7 +333,8 @@
 /* Large desktop and up */
 @media (min-width: 1280px) {
   .productsList {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-2xl);
   }
 }
 
