@@ -80,7 +80,7 @@ export const createProduct = async (productData) => {
     formData.append('status_id', productData.status_id);
     
     // Add image file if present
-    if (productData.product_image) {
+    if (productData.product_image && productData.product_image instanceof File) {
       formData.append('product_image', productData.product_image);
     }
     
@@ -124,28 +124,13 @@ export const updateProduct = async (id, productData) => {
     }
     
     // Add image file if present
-    if (productData.product_image) {
+    if (productData.product_image && productData.product_image instanceof File) {
       formData.append('product_image', productData.product_image);
     }
     
-    // console.log('Updating product with data:', {
-    //   id,
-    //   title: productData.title,
-    //   description: productData.description,
-    //   price: productData.price,
-    //   quantity: productData.quantity,
-    //   category_id: productData.category_id,
-    //   status_id: productData.status_id,
-    //   hasImage: !!productData.product_image
-    // });
     
-    // Debug FormData contents
-    // console.log('FormData entries:');
-    // for (let [key, value] of formData.entries()) {
-    //   console.log(`${key}:`, value);
-    // }
     
-    const response = await api.patch(`/products/${id}/edit`, formData, {
+    const response = await api.patch(`/products/${id}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -173,11 +158,9 @@ export const getAllCategories = async () => {
   
   try {
     const response = await api.get('/categories');
-    // console.log('getAllCategories response:', response.data);
     // API returns { status, message, data: [...] }
     // We need to return the data array
     const categories = response.data.data || response.data;
-    // console.log('Extracted categories:', categories);
     return categories;
   } catch (error) {
     console.error('Error fetching categories:', error);
@@ -195,14 +178,12 @@ export const getAllCategories = async () => {
 export const getAllProductStatuses = async () => {
   try {
     const response = await api.get('/product-statuses');
-    // console.log('getAllProductStatuses response:', response.data);
     // API returns { status, message, data: [...] }
     // We need to return the data array and map status field to name field
     const statuses = response.data.data.map(item => ({
       id: item.id,
       name: item.status // Map 'status' field to 'name' field for consistency
     }));
-    // console.log('Mapped statuses:', statuses);
     return statuses;
   } catch (error) {
     console.error('Error fetching product statuses:', error);

@@ -29,7 +29,6 @@ const AdminPage = () => {
   const [modalMode, setModalMode] = useState('create');
   const [selectedProduct, setSelectedProduct] = useState(null);
   
-  // console.log('AdminPage state:', { isModalOpen, modalMode, selectedProduct });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
 
@@ -70,7 +69,18 @@ const AdminPage = () => {
         setProductToDelete(null);
       } catch (error) {
         console.error('Failed to delete product:', error);
-        // Error is already handled by Redux and displayed in UI
+        
+        // Show user-friendly error message
+        let errorMessage = 'Failed to delete product';
+        if (error.includes('currently in users\' carts')) {
+          errorMessage = error; // Use the specific message from Redux
+        } else if (error.includes('foreign key constraint')) {
+          errorMessage = 'Cannot delete product: it is currently in users\' carts. Please remove it from all carts first.';
+        }
+        
+        // You could show a toast notification here
+        alert(errorMessage);
+        
         setShowDeleteConfirm(false);
         setProductToDelete(null);
       }

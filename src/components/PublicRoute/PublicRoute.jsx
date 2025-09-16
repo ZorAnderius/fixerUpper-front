@@ -13,11 +13,6 @@ const PublicRoute = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Show loader while auth is being determined
-  if (authStatus === responseStatuses.LOADING) {
-    return <ContentLoader variant="spinner" text="Checking authentication..." />;
-  }
-
   useEffect(() => {
     // Only redirect if we're sure user is authenticated (not loading)
     if (authStatus === responseStatuses.SUCCEEDED && isAuthenticated) {
@@ -28,6 +23,11 @@ const PublicRoute = ({ children }) => {
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, authStatus, navigate, location.state?.from]);
+
+  // Show loader while auth is being determined
+  if (authStatus === responseStatuses.LOADING) {
+    return <ContentLoader variant="spinner" text="Checking authentication..." />;
+  }
 
   // If user is authenticated and auth is not loading, don't render children
   if (authStatus === responseStatuses.SUCCEEDED && isAuthenticated) {

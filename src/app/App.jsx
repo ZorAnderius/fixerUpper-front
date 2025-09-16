@@ -37,14 +37,8 @@ function App() {
           } catch (error) {
             console.error('getCurrentUser failed after refresh:', error);
           }
-        } else {
-          // If no token, try to get current user anyway (in case of session restoration)
-          try {
-            await dispatch(getCurrentUser()).unwrap();
-          } catch (error) {
-            // This is expected if user is not authenticated
-          }
         }
+        // If no token, don't try to get current user - user is not authenticated
       } catch (err) {
         // If refresh fails, user is not authenticated - this is normal
       } finally {

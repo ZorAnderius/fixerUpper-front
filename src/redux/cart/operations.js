@@ -18,6 +18,7 @@ import {
   revertRemoveFromCart,
   clearCart
 } from './slice';
+import { addToCartSchema, updateCartItemSchema, removeFromCartSchema, validateForm } from '../../utils/validation';
 
 // Fetch cart items - ONLY for initial load, not for sync
 export const fetchCartItems = createAsyncThunk(
@@ -34,7 +35,6 @@ export const fetchCartItems = createAsyncThunk(
     } catch (error) {
       // If cart doesn't exist (404), that's normal for new users - just set empty cart
       if (error.response?.status === 404) {
-        // console.log('fetchCartItems: Cart not found (404) - setting empty cart');
         dispatch(setCartItems({ cartItems: [], cartId: null }));
         dispatch(setLoading(false));
         return { cartItems: [], cartId: null };
@@ -49,8 +49,19 @@ export const fetchCartItems = createAsyncThunk(
   }
 );
 
-// Add item to cart - SIMPLE action creator, no async thunk
-export const addToCart = ({ productId, quantity = 1 }) => async (dispatch, getState) => {
+// Add item to cart - async thunk that returns a promise
+export const addToCart = createAsyncThunk(
+  'cart/addItem',
+  async ({ productId, quantity = 1 }, { dispatch, getState, rejectWithValue }) => {
+  // Validate input data
+  const validationResult = validateForm({ productId, quantity }, addToCartSchema);
+  
+  if (!validationResult.isValid && validationResult.errors) {
+    const errorMessage = Object.values(validationResult.errors).join(', ');
+    dispatch(setError(errorMessage));
+    return;
+  }
+
   const state = getState();
   const product = state.products.items.find(p => p.id === productId);
   
@@ -81,11 +92,22 @@ export const addToCart = ({ productId, quantity = 1 }) => async (dispatch, getSt
     
     const errorMessage = error.response?.data?.message || error.message || 'Failed to add to cart';
     dispatch(setError(errorMessage));
+    return rejectWithValue(errorMessage);
   }
-};
+  }
+);
 
 // Update cart item quantity - SIMPLE action creator, no async thunk
 export const updateCartItem = ({ cartItemId, quantity }) => async (dispatch, getState) => {
+  // Validate input data
+  const validationResult = validateForm({ quantity }, updateCartItemSchema);
+  
+  if (!validationResult.isValid && validationResult.errors) {
+    const errorMessage = Object.values(validationResult.errors).join(', ');
+    dispatch(setError(errorMessage));
+    return;
+  }
+
   // Store original quantity for potential revert
   const state = getState();
   let originalQuantity = null;
@@ -123,6 +145,15 @@ export const updateCartItem = ({ cartItemId, quantity }) => async (dispatch, get
 
 // Remove item from cart - SIMPLE action creator, no async thunk
 export const removeFromCart = (cartItemId) => async (dispatch, getState) => {
+  // Validate input data
+  const validationResult = validateForm({ productId: cartItemId }, removeFromCartSchema);
+  
+  if (!validationResult.isValid && validationResult.errors) {
+    const errorMessage = Object.values(validationResult.errors).join(', ');
+    dispatch(setError(errorMessage));
+    return;
+  }
+
   // Store original item for potential revert (before any changes)
   const state = getState();
   let originalItem = null;

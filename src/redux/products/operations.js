@@ -178,7 +178,25 @@ export const deleteProduct = createAsyncThunk(
       
       return id;
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to delete product';
+      console.error('Delete product error:', error);
+      
+      let errorMessage = 'Failed to delete product';
+      
+      // Handle specific error types
+      if (error.response?.data?.message) {
+        const backendMessage = error.response.data.message;
+        
+        // Check for foreign key constraint errors
+        if (backendMessage.includes('foreign key constraint') || 
+            backendMessage.includes('cartItems_product_id_fkey')) {
+          errorMessage = 'Cannot delete product: it is currently in users\' carts. Please remove it from all carts first.';
+        } else {
+          errorMessage = backendMessage;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       dispatch(setError(errorMessage));
       return rejectWithValue(errorMessage);
     }

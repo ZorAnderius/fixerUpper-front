@@ -7,9 +7,8 @@ import { selectAuthLoading, selectAuthError } from '../../redux/auth/selectors';
 // import { transferPendingCartToCart } from '../../redux/pending/operations';
 // import { clearPendingState } from '../../redux/pending/slice';
 import { ROUTES } from '../../helpers/constants/routes';
-import { registerSchema } from '../../helpers/validation/schemas';
 import { ICONS, ICON_SIZES } from '../../helpers/constants/icons';
-import { sanitizeEmail, sanitizeInput, sanitizePhone } from '../../helpers/security/sanitize';
+import { sanitizeInput } from '../../utils/security';
 import { useGoogleOAuth } from '../../contexts/GoogleOAuthContext';
 import { redirectAfterAuth } from '../../helpers/auth/redirectAfterAuth';
 import Button from '../../components/Button/Button';
@@ -41,26 +40,82 @@ const RegisterPage = () => {
     agreeToTerms: false
   };
 
-  const handleSubmit = async (values, { setSubmitting }) => {
+  // Form validation function for Formik
+  const validateForm = (values) => {
+    const errors = {};
+    
+    // Validate first name
+    if (!values.firstName) {
+      errors.firstName = 'First name is required';
+    } else if (values.firstName.length < 2) {
+      errors.firstName = 'First name must be at least 2 characters';
+    } else if (values.firstName.length > 50) {
+      errors.firstName = 'First name must be less than 50 characters';
+    } else if (!/^[a-zA-Z\s\-'\.]+$/.test(values.firstName)) {
+      errors.firstName = 'First name contains invalid characters';
+    }
+
+    // Validate last name
+    if (!values.lastName) {
+      errors.lastName = 'Last name is required';
+    } else if (values.lastName.length < 2) {
+      errors.lastName = 'Last name must be at least 2 characters';
+    } else if (values.lastName.length > 50) {
+      errors.lastName = 'Last name must be less than 50 characters';
+    } else if (!/^[a-zA-Z\s\-'\.]+$/.test(values.lastName)) {
+      errors.lastName = 'Last name contains invalid characters';
+    }
+
+    // Validate email using backend regex
+    if (!values.email) {
+      errors.email = 'Email is required';
+    } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(values.email)) {
+      errors.email = 'Invalid email format';
+    } else if (values.email.length > 255) {
+      errors.email = 'Email must be less than 255 characters';
+    }
+
+    // Validate phone number using backend regex (required format: 07XXXXXXXX)
+    if (!values.phoneNumber) {
+      errors.phoneNumber = 'Phone number is required';
+    } else if (!/^07\d{8}$/.test(values.phoneNumber)) {
+      errors.phoneNumber = 'Phone number must be in format 07XXXXXXXX (10 digits starting with 07)';
+    }
+
+    // Validate password
+    if (!values.password) {
+      errors.password = 'Password is required';
+    } else if (values.password.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+    } else if (values.password.length > 128) {
+      errors.password = 'Password must be less than 128 characters';
+    }
+
+    // Validate confirm password
+    if (!values.confirmPassword) {
+      errors.confirmPassword = 'Password confirmation is required';
+    } else if (values.password !== values.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+
+    // Validate terms agreement
+    if (!values.agreeToTerms) {
+      errors.agreeToTerms = 'You must agree to the terms of use';
+    }
+
+    return errors;
+  };
+
+  const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
     try {
-      // Sanitize input data
-      const sanitizedData = {
-        firstName: sanitizeInput(values.firstName, 30),
-        lastName: sanitizeInput(values.lastName, 30),
-        email: sanitizeEmail(values.email),
-        password: sanitizeInput(values.password, 128),
-        phoneNumber: sanitizePhone(values.phoneNumber)
-      };
-
-      // Log the data being sent
-
-      // Validate sanitized data
-      if (!sanitizedData.email) {
-        throw new Error('Invalid email format');
-      }
-      if (!sanitizedData.phoneNumber) {
-        throw new Error('Invalid phone number format');
-      }
+        // Sanitize input data
+        const sanitizedData = {
+          firstName: sanitizeInput(values.firstName, 50),
+          lastName: sanitizeInput(values.lastName, 50),
+          email: sanitizeInput(values.email, 255),
+          password: values.password, // Don't sanitize password
+          phoneNumber: sanitizeInput(values.phoneNumber, 20)
+        };
 
       await dispatch(registerUser(sanitizedData)).unwrap();
       
@@ -76,6 +131,10 @@ const RegisterPage = () => {
       // dispatch(clearPendingState());
     } catch (error) {
       console.error('Registration failed:', error);
+      // Set general error message
+      if (error.message) {
+        setFieldError('email', error.message);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -104,7 +163,7 @@ const RegisterPage = () => {
             </div>
             <Formik
               initialValues={initialValues}
-              validationSchema={registerSchema}
+              validate={validateForm}
               onSubmit={handleSubmit}
             >
               {({ errors, touched, isSubmitting, values }) => (
@@ -151,7 +210,7 @@ const RegisterPage = () => {
                       id="phoneNumber" 
                       name="phoneNumber" 
                       className={`${styles.input} ${errors.phoneNumber && touched.phoneNumber ? styles.inputError : ''} ${!errors.phoneNumber && touched.phoneNumber && values.phoneNumber ? styles.valid : ''}`} 
-                      placeholder="07XXXXXXXXX"
+                      placeholder="07XXXXXXXX (10 digits)"
                     />
                     {errors.phoneNumber && touched.phoneNumber && <span className={styles.error}>{errors.phoneNumber}</span>}
                   </div>

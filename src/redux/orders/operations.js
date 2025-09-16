@@ -19,9 +19,7 @@ export const fetchOrderById = createAsyncThunk(
   'orders/fetchById',
   async (orderId, { rejectWithValue }) => {
     try {
-      // console.log('fetchOrderById called with:', orderId);
       const response = await ordersServices.getOrderById(orderId);
-      // console.log('fetchOrderById response:', response);
       return response;
     } catch (error) {
       console.error('fetchOrderById error:', error);

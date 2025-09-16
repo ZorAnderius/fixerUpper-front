@@ -3,20 +3,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createProduct, updateProduct } from '../../redux/products/operations';
 import { selectCategories, selectProductStatuses, selectProductsLoading } from '../../redux/products/selectors';
 import { fetchCategories, fetchProductStatuses } from '../../redux/products/operations';
+import { productSchema, validateForm } from '../../utils/validation';
+import { sanitizeInput } from '../../utils/security';
 import Button from '../Button/Button';
 import styles from './ProductModal.module.css';
 
 const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
-  // console.log('ProductModal props:', { isOpen, product, mode });
   
   const dispatch = useDispatch();
   const categories = useSelector(selectCategories);
   const productStatuses = useSelector(selectProductStatuses);
   const isLoading = useSelector(selectProductsLoading);
   
-  // console.log('ProductModal data:', { categories, productStatuses, isLoading });
-  // console.log('Categories details:', categories);
-  // console.log('Statuses details:', productStatuses);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -31,7 +29,6 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
   const [errors, setErrors] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
   
-  // console.log('Form data:', formData);
 
   useEffect(() => {
     if (isOpen) {
@@ -44,7 +41,6 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
   useEffect(() => {
     if (isOpen) {
       if (mode === 'edit' && product) {
-        // console.log('Setting form data for edit mode:', product);
         setFormData({
           title: product.title || '',
           description: product.description || '',
@@ -73,7 +69,6 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
   // Additional useEffect to update form data when categories/statuses are loaded
   useEffect(() => {
     if (isOpen && mode === 'edit' && product && categories.length > 0 && productStatuses.length > 0) {
-      // console.log('Updating form data after categories/statuses loaded:', product);
       setFormData(prev => ({
         ...prev,
         category_id: product.category?.id || '',
@@ -115,68 +110,50 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.title.trim()) {
-      newErrors.title = 'Product title is required';
-    } else if (formData.title.length < 3) {
-      newErrors.title = 'Title must contain at least 3 characters';
-    }
-
-    if (!formData.description.trim()) {
-      newErrors.description = 'Product description is required';
-    } else if (formData.description.length < 10) {
-      newErrors.description = 'Description must contain at least 10 characters';
-    }
-
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-      newErrors.price = 'Price must be greater than 0';
-    }
-
-    if (!formData.quantity || parseInt(formData.quantity) < 0) {
-      newErrors.quantity = 'Quantity cannot be negative';
-    }
-
-    if (!formData.category_id) {
-      newErrors.category_id = 'Please select a category';
-    }
-
-    if (!formData.status_id) {
-      newErrors.status_id = 'Please select a status';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateForm()) {
+    // Validate form data using Joi schema
+    const validationResult = validateForm(formData, productSchema);
+    
+    if (!validationResult.isValid) {
+      setErrors(validationResult.errors);
       return;
     }
 
     try {
+      // Sanitize input data
+      const sanitizedData = {
+        title: sanitizeInput(formData.title, 100),
+        description: sanitizeInput(formData.description, 1000),
+        price: parseFloat(formData.price),
+        quantity: parseInt(formData.quantity),
+        category_id: formData.category_id,
+        status_id: formData.status_id,
+        product_image: formData.product_image
+      };
+
       if (mode === 'create') {
-        await dispatch(createProduct(formData)).unwrap();
+        await dispatch(createProduct(sanitizedData)).unwrap();
       } else {
         // For update, only send changed fields
         const updateData = {};
-        if (formData.title !== product.title) updateData.title = formData.title;
-        if (formData.description !== product.description) updateData.description = formData.description;
-        if (formData.price !== product.price) updateData.price = formData.price;
-        if (formData.quantity !== product.quantity) updateData.quantity = formData.quantity;
-        if (formData.category_id !== product.category?.id) updateData.category_id = formData.category_id;
-        if (formData.status_id !== product.status?.id) updateData.status_id = formData.status_id;
-        if (formData.product_image) updateData.product_image = formData.product_image;
+        if (sanitizedData.title !== product.title) updateData.title = sanitizedData.title;
+        if (sanitizedData.description !== product.description) updateData.description = sanitizedData.description;
+        if (sanitizedData.price !== product.price) updateData.price = sanitizedData.price;
+        if (sanitizedData.quantity !== product.quantity) updateData.quantity = sanitizedData.quantity;
+        if (sanitizedData.category_id !== product.category?.id) updateData.category_id = sanitizedData.category_id;
+        if (sanitizedData.status_id !== product.status?.id) updateData.status_id = sanitizedData.status_id;
+        if (sanitizedData.product_image) updateData.product_image = sanitizedData.product_image;
         
-        // console.log('Updating product with changed fields:', updateData);
         await dispatch(updateProduct({ id: product.id, productData: updateData })).unwrap();
       }
       onClose();
     } catch (error) {
       console.error('Failed to save product:', error);
+      // Set general error
+      setErrors({ general: error.message || 'Failed to save product' });
     }
   };
 
@@ -195,11 +172,9 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
     onClose();
   };
 
-  // console.log('ProductModal render - isOpen:', isOpen);
   
   if (!isOpen) return null;
   
-  // console.log('ProductModal rendering with isOpen:', isOpen);
   
   
   return (

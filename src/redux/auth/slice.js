@@ -9,7 +9,6 @@ const sliceAuth = createSlice({
   initialState,
   reducers: {
     setAuth(state, action) {
-      // console.log('setAuth called with:', action.payload);
       state.isAuthenticated = true;
       state.user = action.payload.user;
       state.status = responseStatuses.SUCCEEDED;
@@ -97,7 +96,6 @@ const sliceAuth = createSlice({
         state.error = null;
       })
       .addCase(getCurrentUser.fulfilled, (state, action) => {
-        // console.log('getCurrentUser.fulfilled called with:', action.payload);
         state.isAuthenticated = true;
         state.user = action.payload.user;
         state.status = responseStatuses.SUCCEEDED;

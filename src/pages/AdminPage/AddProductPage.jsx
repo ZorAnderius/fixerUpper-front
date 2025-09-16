@@ -7,8 +7,8 @@ import { createProduct, fetchCategories, fetchProductStatuses } from '../../redu
 import { selectCategories, selectProductStatuses, selectProductsLoading, selectProductsError } from '../../redux/products/selectors';
 import { selectIsAdmin } from '../../redux/auth/selectors';
 import { ROUTES } from '../../helpers/constants/routes';
-import { createProductSchema } from '../../helpers/validation/schemas';
-import { sanitizeInput, sanitizeEmail } from '../../helpers/security/sanitize';
+import { sanitizeProductData } from '../../utils/security';
+import { sanitizeInput } from '../../utils/security';
 import Button from '../../components/Button/Button';
 import Icon from '../../components/Icon/Icon';
 import { ICONS, ICON_SIZES } from '../../helpers/constants/icons';
@@ -52,23 +52,106 @@ const AddProductPage = () => {
     product_image: null
   };
 
-  const handleSubmit = async (values, { setSubmitting }) => {
+  // Form validation function for Formik
+  const validateForm = (values) => {
+    const errors = {};
+    
+    // Validate title
+    if (!values.title) {
+      errors.title = 'Product title is required';
+    } else if (values.title.length < 2) {
+      errors.title = 'Product title must be at least 2 characters';
+    } else if (values.title.length > 255) {
+      errors.title = 'Product title must be less than 255 characters';
+    }
+
+    // Validate description
+    if (!values.description) {
+      errors.description = 'Product description is required';
+    } else if (values.description.length < 10) {
+      errors.description = 'Product description must be at least 10 characters';
+    } else if (values.description.length > 1000) {
+      errors.description = 'Product description must be less than 1000 characters';
+    }
+
+    // Validate price
+    if (!values.price) {
+      errors.price = 'Product price is required';
+    } else if (isNaN(values.price) || parseFloat(values.price) <= 0) {
+      errors.price = 'Product price must be a positive number';
+    }
+
+    // Validate quantity
+    if (!values.quantity) {
+      errors.quantity = 'Product quantity is required';
+    } else if (isNaN(values.quantity) || parseInt(values.quantity) < 0) {
+      errors.quantity = 'Product quantity must be a non-negative number';
+    }
+
+    // Validate category
+    if (!values.category_id) {
+      errors.category_id = 'Product category is required';
+    }
+
+    // Validate status
+    if (!values.status_id) {
+      errors.status_id = 'Product status is required';
+    }
+
+    // Validate image file if present
+    if (values.product_image && values.product_image instanceof File) {
+      // Check file size (max 5MB)
+      if (values.product_image.size > 5 * 1024 * 1024) {
+        errors.product_image = 'Image file size must be less than 5MB';
+      }
+      
+      // Check file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(values.product_image.type)) {
+        errors.product_image = 'Only JPEG, PNG, GIF, and WebP images are allowed';
+      }
+    }
+
+    return errors;
+  };
+
+  const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
     try {
+      // Validate file if present
+      if (values.product_image && values.product_image instanceof File) {
+        // Check file size (max 5MB)
+        if (values.product_image.size > 5 * 1024 * 1024) {
+          setFieldError('product_image', 'Image file size must be less than 5MB');
+          return;
+        }
+        
+        // Check file type
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(values.product_image.type)) {
+          setFieldError('product_image', 'Only JPEG, PNG, GIF, and WebP images are allowed');
+          return;
+        }
+      }
+
       // Sanitize input data
-      const sanitizedData = {
-        title: sanitizeInput(values.title, 100),
-        description: sanitizeInput(values.description, 1000),
+      const sanitizedData = sanitizeProductData({
+        title: values.title,
+        description: values.description,
         price: parseFloat(values.price),
         quantity: parseInt(values.quantity),
-        category_id: values.category_id, // Keep as string (UUID)
-        status_id: values.status_id, // Keep as string (UUID)
+        category_id: values.category_id,
+        status_id: values.status_id,
         product_image: values.product_image
-      };
+      });
 
       await dispatch(createProduct(sanitizedData)).unwrap();
       navigate(ROUTES.ADMIN);
     } catch (error) {
       console.error('Failed to create product:', error);
+      // Set general error message
+      if (error.message) {
+        setFieldError('title', error.message);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -134,7 +217,7 @@ const AddProductPage = () => {
         >
           <Formik
             initialValues={initialValues}
-            validationSchema={createProductSchema}
+            validate={validateForm}
             onSubmit={handleSubmit}
           >
             {({ errors, touched, isSubmitting, values, setFieldValue }) => (

@@ -73,6 +73,17 @@ const ProductDetailsPage = () => {
         navigate(ROUTES.PRODUCTS);
       } catch (error) {
         console.error('Failed to delete product:', error);
+        
+        // Show user-friendly error message
+        let errorMessage = 'Failed to delete product';
+        if (error.includes('currently in users\' carts')) {
+          errorMessage = error; // Use the specific message from Redux
+        } else if (error.includes('foreign key constraint')) {
+          errorMessage = 'Cannot delete product: it is currently in users\' carts. Please remove it from all carts first.';
+        }
+        
+        // Show error message to user
+        alert(errorMessage);
       }
     }
   };

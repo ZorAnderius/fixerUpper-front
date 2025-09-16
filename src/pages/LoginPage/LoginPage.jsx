@@ -6,9 +6,8 @@ import { Formik, Form, Field } from 'formik';
 import { loginUser } from '../../redux/auth/operations';
 import { selectAuthLoading, selectAuthError, selectIsAuthenticated, selectUser, selectAuthStatus } from '../../redux/auth/selectors';
 import { ROUTES } from '../../helpers/constants/routes';
-import { loginSchema } from '../../helpers/validation/schemas';
+import { sanitizeInput } from '../../utils/security';
 import { ICONS, ICON_SIZES } from '../../helpers/constants/icons';
-import { sanitizeEmail, sanitizeInput } from '../../helpers/security/sanitize';
 import { useGoogleOAuth } from '../../contexts/GoogleOAuthContext';
 import { redirectAfterAuth } from '../../helpers/auth/redirectAfterAuth';
 import { responseStatuses } from '../../helpers/constants/responseStatus';
@@ -47,27 +46,51 @@ const LoginPage = () => {
 
   const initialValues = {
     email: '',
-    password: '',
-    rememberMe: false
+    password: ''
   };
 
-  const handleSubmit = async (values, { setSubmitting }) => {
+  // Form validation function for Formik
+  const validateForm = (values) => {
+    const errors = {};
+    
+    // Validate email using backend regex
+    if (!values.email) {
+      errors.email = 'Email is required';
+    } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(values.email)) {
+      errors.email = 'Invalid email format';
+    } else if (values.email.length > 255) {
+      errors.email = 'Email must be less than 255 characters';
+    }
+
+    // Validate password
+    if (!values.password) {
+      errors.password = 'Password is required';
+    } else if (values.password.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+    } else if (values.password.length > 128) {
+      errors.password = 'Password must be less than 128 characters';
+    }
+
+    return errors;
+  };
+
+  const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
     try {
       // Sanitize input data
       const sanitizedData = {
-        email: sanitizeEmail(values.email),
-        password: sanitizeInput(values.password, 128)
+        email: sanitizeInput(values.email, 255),
+        password: values.password // Don't sanitize password
       };
-
-      if (!sanitizedData.email) {
-        throw new Error('Invalid email format');
-      }
 
       await dispatch(loginUser(sanitizedData)).unwrap();
       
       // Navigation now happens automatically through useEffect
     } catch (error) {
       console.error('Login failed:', error);
+      // Set general error message
+      if (error.message) {
+        setFieldError('email', error.message);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -113,7 +136,7 @@ const LoginPage = () => {
             {/* Form */}
             <Formik
               initialValues={initialValues}
-              validationSchema={loginSchema}
+              validate={validateForm}
               onSubmit={handleSubmit}
             >
               {({ errors, touched, isSubmitting }) => (
@@ -148,16 +171,8 @@ const LoginPage = () => {
                     )}
                   </div>
 
-                  {/* Remember Me & Forgot Password */}
+                  {/* Forgot Password */}
                   <div className={styles.formOptions}>
-                    <label className={styles.checkboxLabel}>
-                      <Field
-                        type="checkbox"
-                        name="rememberMe"
-                        className={styles.checkbox}
-                      />
-                      <span className={styles.checkboxText}>Remember me?</span>
-                    </label>
                     <Link to="/forgot-password" className={styles.forgotLink}>
                       Forgot Password
                     </Link>

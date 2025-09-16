@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanitization Tests</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .pass { background-color: #d4edda; border-color: #c3e6cb; }
+        .fail { background-color: #f8d7da; border-color: #f5c6cb; }
+        .result { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Sanitization Functions Test</h1>
+    <div id="results"></div>
+
+    <script type="module">
+        import { sanitizeHtml, sanitizeInput, sanitizeProductData, sanitizeUserInput, sanitizeSearchQuery } from './index.js';
+
+        const results = document.getElementById('results');
+
+        function runTest(name, testFn) {
+            try {
+                const result = testFn();
+                const div = document.createElement('div');
+                div.className = `test ${result ? 'pass' : 'fail'}`;
+                div.innerHTML = `<div class="result">${result ? 'PASS' : 'FAIL'}: ${name}</div>`;
+                results.appendChild(div);
+                return result;
+            } catch (error) {
+                const div = document.createElement('div');
+                div.className = 'test fail';
+                div.innerHTML = `<div class="result">ERROR: ${name}</div><div>${error.message}</div>`;
+                results.appendChild(div);
+                return false;
+            }
+        }
+
+        // Test sanitizeHtml
+        runTest('sanitizeHtml - escape script tags', () => {
+            const input = '<script>alert("xss")</script>';
+            const expected = '&lt;script&gt;alert(&quot;xss&quot;)&lt;&#x2F;script&gt;';
+            return sanitizeHtml(input) === expected;
+        });
+
+        runTest('sanitizeHtml - handle empty string', () => {
+            return sanitizeHtml('') === '';
+        });
+
+        // Test sanitizeInput
+        runTest('sanitizeInput - remove script tags', () => {
+            const input = 'Hello <script>alert("xss")</script> World';
+            const expected = 'Hello  World';
+            return sanitizeInput(input) === expected;
+        });
+
+        runTest('sanitizeInput - remove javascript protocol', () => {
+            const input = 'Click javascript:alert("xss") here';
+            const expected = 'Click  here';
+            return sanitizeInput(input) === expected;
+        });
+
+        // Test sanitizeProductData
+        runTest('sanitizeProductData - sanitize title and description', () => {
+            const productData = {
+                title: 'Test <script>alert("xss")</script> Product',
+                description: 'Description with <img src="x" onerror="alert(1)">',
+                price: 100,
+                quantity: 5
+            };
+            const result = sanitizeProductData(productData);
+            return result.title === 'Test  Product' && 
+                   result.description === 'Description with ' &&
+                   result.price === 100;
+        });
+
+        // Test sanitizeUserInput
+        runTest('sanitizeUserInput - sanitize email and name', () => {
+            const userData = {
+                email: 'user<script>alert("xss")</script>@example.com',
+                name: 'John <img src="x" onerror="alert(1)"> Doe',
+                password: 'secret123'
+            };
+            const result = sanitizeUserInput(userData);
+            return result.email === 'user@example.com' && 
+                   result.name === 'John  Doe' &&
+                   result.password === 'secret123';
+        });
+
+        // Test sanitizeSearchQuery
+        runTest('sanitizeSearchQuery - remove special characters', () => {
+            const input = 'test@#$%^&*()query';
+            const expected = 'test query';
+            return sanitizeSearchQuery(input) === expected;
+        });
+
+        runTest('sanitizeSearchQuery - normalize whitespace', () => {
+            const input = '  multiple    spaces   ';
+            const expected = 'multiple spaces';
+            return sanitizeSearchQuery(input) === expected;
+        });
+
+        // Summary
+        setTimeout(() => {
+            const totalTests = results.children.length;
+            const passedTests = results.querySelectorAll('.pass').length;
+            const summary = document.createElement('div');
+            summary.className = 'test';
+            summary.innerHTML = `<div class="result">SUMMARY: ${passedTests}/${totalTests} tests passed</div>`;
+            results.appendChild(summary);
+        }, 100);
+    </script>
+</body>
+</html>
