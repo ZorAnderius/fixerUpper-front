@@ -80,9 +80,9 @@ const OrderDetailPage = () => {
         if (item.products && item.quantity > 0) {
           try {
             await dispatch(addToCart({
-              product_id: item.products.id,
+              productId: item.products.id,
               quantity: item.quantity
-            })).unwrap();
+            }));
             addedItems++;
           } catch (itemError) {
             console.error(`Failed to add item ${item.products.title}:`, itemError);
