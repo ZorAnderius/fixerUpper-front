@@ -5,10 +5,14 @@
     <link rel="icon" type="image/png" href="/fixer.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>fixerUpper</title>
-    <link rel="preload" href="/src/main.jsx" as="script" />
-    <link rel="preload" href="/fixer.png" as="image" />
-    <link rel="preload" href="/critical.css" as="style" />
+    <!-- Critical CSS - load immediately -->
     <link rel="stylesheet" href="/critical.css" />
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/fixer.png" as="image" type="image/png" />
+    
+    <!-- DNS prefetch for external resources -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
   </head>
   <body>
     <div id="root"></div>
