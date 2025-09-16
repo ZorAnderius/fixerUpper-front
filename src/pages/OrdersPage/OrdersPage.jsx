@@ -278,8 +278,8 @@ const OrdersPage = () => {
             </div>
           )}
           
-          {/* Pagination */}
-          {totalPages > 1 && (
+          {/* Pagination - Hide when showing success message */}
+          {totalPages > 1 && !showSuccessMessage && (
             <div className={styles.pagination}>
               <div className={styles.paginationControls}>
                 {/* First Page */}

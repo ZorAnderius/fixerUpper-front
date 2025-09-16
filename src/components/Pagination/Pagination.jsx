@@ -14,7 +14,7 @@ const Pagination = () => {
 
   // Fetch products when page changes
   useEffect(() => {
-    if (filters.page && filters.page > 1) {
+    if (filters.page) {
       dispatch(fetchAllProducts(filters));
     }
   }, [dispatch, filters.page, filters.category, filters.search, filters.sortBy]);

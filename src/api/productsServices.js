@@ -84,21 +84,6 @@ export const createProduct = async (productData) => {
       formData.append('product_image', productData.product_image);
     }
     
-    console.log('Sending product data:', {
-      title: productData.title,
-      description: productData.description,
-      price: productData.price,
-      quantity: productData.quantity,
-      category_id: productData.category_id,
-      status_id: productData.status_id,
-      hasImage: !!productData.product_image
-    });
-    
-    // Debug FormData contents
-    console.log('FormData entries:');
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}:`, value);
-    }
     
     const response = await api.post('/products', formData, {
       headers: {
