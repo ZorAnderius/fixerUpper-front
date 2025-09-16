@@ -138,17 +138,6 @@ const MobileMenu = () => {
             className={`${styles.mobileNav} ${isAnimating ? styles.mobileNavOpen : ''}`}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close button */}
-            <button 
-              className={styles.closeButton}
-              onClick={closeMenu}
-              aria-label="Close menu"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            
             <ul className={styles.mobileNavList}>
             <li className={styles.mobileNavItem}>
               <NavLink 
@@ -159,6 +148,18 @@ const MobileMenu = () => {
                 onClick={closeMenu}
               >
                 Home
+              </NavLink>
+            </li>
+            
+            <li className={styles.mobileNavItem}>
+              <NavLink 
+                to={ROUTES.PRODUCTS} 
+                className={({ isActive }) => 
+                  `${styles.mobileNavLink} ${isActive ? styles.mobileNavLinkActive : ''}`
+                }
+                onClick={closeMenu}
+              >
+                Catalog
               </NavLink>
             </li>
             
@@ -173,7 +174,7 @@ const MobileMenu = () => {
                     }
                     onClick={closeMenu}
                   >
-                    🛠️ Admin Panel
+                    Admin Panel
                   </NavLink>
                 </li>
                 <li className={styles.mobileNavItem}>
@@ -184,7 +185,7 @@ const MobileMenu = () => {
                     }
                     onClick={closeMenu}
                   >
-                    ➕ Add Product
+                    Add Product
                   </NavLink>
                 </li>
               </>

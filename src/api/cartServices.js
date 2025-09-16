@@ -2,25 +2,39 @@ import api from './client';
 
 // Get user's cart
 export const getCartItems = async () => {
-  const response = await api.get('/carts');
-  
-  // Backend returns {status: 200, message: "...", data: cart}
-  // We need to extract cartItems from the cart object
-  const backendData = response.data;
-  if (backendData.status === 200 && backendData.data) {
-    const cart = backendData.data;
-    // Extract cartItems from cart object
-    const cartItems = cart.cartItems || cart.items || [];
+  try {
+    const response = await api.get('/carts');
     
-    const transformedResponse = {
-      ...backendData,
-      cartItems: cartItems,
-      cartId: cart.id || cart.cart_id // Add cart ID
-    };
-    return transformedResponse;
+    // Backend returns {status: 200, message: "...", data: cart}
+    // We need to extract cartItems from the cart object
+    const backendData = response.data;
+    if (backendData.status === 200 && backendData.data) {
+      const cart = backendData.data;
+      // Extract cartItems from cart object
+      const cartItems = cart.cartItems || cart.items || [];
+      
+      const transformedResponse = {
+        ...backendData,
+        cartItems: cartItems,
+        cartId: cart.id || cart.cart_id // Add cart ID
+      };
+      return transformedResponse;
+    }
+    
+    return backendData;
+  } catch (error) {
+    // If cart doesn't exist (404) or user not authenticated, return empty cart
+    if (error.response?.status === 404 || error.response?.status === 401) {
+      return {
+        status: 200,
+        message: 'Cart is empty',
+        cartItems: [],
+        cartId: null
+      };
+    }
+    // Re-throw other errors
+    throw error;
   }
-  
-  return backendData;
 };
 
 // Add item to cart

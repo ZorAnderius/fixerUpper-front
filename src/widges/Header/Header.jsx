@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Logo from '../../components/Logo/Logo';
+import Navigation from '../../components/Navigation/Navigation';
 import MobileMenu from '../../components/MobileMenu/MobileMenu';
 import AnimatedAuth from '../../components/AnimatedAuth/AnimatedAuth';
 import CartIcon from '../../components/CartIcon/CartIcon';
@@ -18,6 +19,11 @@ const Header = () => {
           {/* Left side - Logo */}
           <div className={styles.headerLeft}>
             <Logo />
+          </div>
+
+          {/* Center - Navigation */}
+          <div className={styles.headerCenter}>
+            <Navigation />
           </div>
 
           {/* Right side - Cart, Admin Nav and Auth */}

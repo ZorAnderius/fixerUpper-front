@@ -13,7 +13,7 @@ const Navigation = () => {
               `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
             }
           >
-            Products
+            Catalog
           </NavLink>
         </li>
       </ul>

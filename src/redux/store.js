@@ -16,13 +16,13 @@ import cartReducer from "./cart/slice";
 import ordersReducer from "./orders/slice";
 import { authMiddleware } from "./middleware/authMiddleware";
 
-// Конфігурація для персистенції
+// Persist configuration
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth', 'cart', 'products'], // Зберігаємо auth, cart та products
+  whitelist: ['auth', 'cart', 'products'], // Store auth, cart and products
   transforms: [],
-  debug: true,
+  debug: false,
 };
 
 // Створюємо основний reducer
