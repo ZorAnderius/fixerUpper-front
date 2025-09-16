@@ -11,6 +11,8 @@ import { selectCartItemById } from '../../redux/cart/selectors';
 import { ROUTES } from '../../helpers/constants/routes';
 import Button from '../../components/Button/Button';
 import AuthModal from '../../components/AuthModal/AuthModal';
+import Container from '../../widges/Container/Container';
+import Section from '../../widges/Section/Section';
 import styles from './ProductDetailsPage.module.css';
 
 const ProductDetailsPage = () => {
@@ -92,30 +94,40 @@ const ProductDetailsPage = () => {
 
   if (isLoading) {
     return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.loadingSpinner}></div>
-        <p>Loading product...</p>
-      </div>
+      <Section>
+        <Container>
+          <div className={styles.loadingContainer}>
+            <div className={styles.loadingSpinner}></div>
+            <p>Loading product...</p>
+          </div>
+        </Container>
+      </Section>
     );
   }
 
   if (error || !product) {
     return (
-      <div className={styles.errorContainer}>
-        <h2>Product not found</h2>
-        <p>{error || 'Product with this ID does not exist'}</p>
-        <Button 
-          variant="primary"
-          onClick={() => navigate(ROUTES.PRODUCTS)}
-        >
-          Return to catalogue
-        </Button>
-      </div>
+      <Section>
+        <Container>
+          <div className={styles.errorContainer}>
+            <h2>Product not found</h2>
+            <p>{error || 'Product with this ID does not exist'}</p>
+            <Button 
+              variant="primary"
+              onClick={() => navigate(ROUTES.PRODUCTS)}
+            >
+              Return to catalogue
+            </Button>
+          </div>
+        </Container>
+      </Section>
     );
   }
 
   return (
-    <div className={styles.productDetails}>
+    <Section>
+      <Container>
+        <div className={styles.productDetails}>
       {/* Breadcrumbs */}
       <div className={styles.breadcrumb}>
         <button
@@ -289,7 +301,9 @@ const ProductDetailsPage = () => {
           </div>
         </div>
       )}
-    </div>
+        </div>
+      </Container>
+    </Section>
   );
 };
 

@@ -107,6 +107,12 @@ const OrderDetailPage = () => {
     }
   };
 
+  const handleProductClick = (productId) => {
+    if (productId) {
+      navigate(`${ROUTES.PRODUCTS}/${productId}`);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'completed':
@@ -224,7 +230,15 @@ const OrderDetailPage = () => {
                   </div>
                   
                   <div className={styles.itemInfo}>
-                    <h4 className={styles.itemTitle}>
+                    <h4 
+                      className={styles.itemTitle}
+                      onClick={() => handleProductClick(item.products?.id)}
+                      style={{ 
+                        cursor: 'pointer',
+                        color: 'var(--color-primary-orange)',
+                        textDecoration: 'underline'
+                      }}
+                    >
                       {item.products?.title || 'Unknown Product'}
                     </h4>
                     {item.products?.description && (

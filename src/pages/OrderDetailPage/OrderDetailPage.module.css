@@ -214,6 +214,11 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0 0 var(--spacing-xs) 0;
+  transition: color var(--transition-fast);
+}
+
+.itemTitle:hover {
+  color: var(--color-primary-orange);
 }
 
 .itemDescription {
