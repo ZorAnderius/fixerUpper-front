@@ -11,3 +11,9 @@ export { sanitizeSearchQuery } from './sanitizeSearchQuery.js';
 
 // Export SQL injection protection utilities
 export * from './sqlProtection/index.js';
+
+// Export rate limiting and DDoS protection utilities
+export * from './rateLimiting/index.js';
+
+// Export web security utilities
+export * from './webSecurity/index.js';
