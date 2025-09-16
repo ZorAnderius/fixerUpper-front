@@ -15,15 +15,15 @@ const Hero = () => {
       <div className={styles.heroContent}>
         <motion.div
           className={styles.heroText}
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
         >
           <motion.h1 
             className={styles.heroTitle}
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 0.4, delay: 0.05, ease: "easeOut" }}
           >
             Professional Tools
             <span className={styles.heroTitleAccent}> for Craftsmen</span>
@@ -33,7 +33,7 @@ const Hero = () => {
             className={styles.heroSubtitle}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
           >
             Discover a world of quality tools: drills, jigsaws, measuring instruments and much more. 
             Everything for professional work and home projects.
@@ -43,13 +43,14 @@ const Hero = () => {
             className={styles.heroButtons}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
+            transition={{ duration: 0.4, delay: 0.15, ease: "easeOut" }}
           >
             <motion.button 
               className={styles.heroButtonPrimary}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleBrowseCatalog}
+              transition={{ duration: 0.2 }}
             >
               Browse Catalogue
             </motion.button>
@@ -58,9 +59,9 @@ const Hero = () => {
         
         <motion.div 
           className={styles.heroImage}
-          initial={{ opacity: 0, x: 50 }}
+          initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
+          transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
         >
           <div className={styles.heroImagePlaceholder}>
             <div className={styles.toolIcon}>

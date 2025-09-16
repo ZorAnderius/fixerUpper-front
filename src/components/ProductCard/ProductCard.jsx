@@ -93,6 +93,8 @@ const ProductCard = ({ product, index = 0, onAuthRequired }) => {
             src={product.image_url} 
             alt={product.title}
             className={styles.productImageImg}
+            loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className={styles.productImagePlaceholder}>

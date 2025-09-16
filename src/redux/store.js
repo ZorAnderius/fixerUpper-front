@@ -20,7 +20,7 @@ import { authMiddleware } from "./middleware/authMiddleware";
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth', 'cart', 'products'], // Store auth, cart and products
+  whitelist: ['auth', 'cart'], // Only store essential data
   transforms: [],
   debug: false,
 };

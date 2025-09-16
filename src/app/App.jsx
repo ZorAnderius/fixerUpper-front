@@ -17,7 +17,7 @@ function App() {
     const initAuth = async () => {
       try {
         // Wait a bit for Redux persist to rehydrate
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 50));
         
         // Check Redux state first
         const state = store.getState();

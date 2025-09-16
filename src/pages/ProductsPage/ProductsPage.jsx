@@ -31,6 +31,7 @@ const ProductsPage = () => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
+
   // Fetch products when filters change
   useEffect(() => {
     dispatch(fetchAllProducts(filters));
@@ -92,27 +93,18 @@ const ProductsPage = () => {
               <p>Try adjusting your search or filter criteria</p>
             </div>
           ) : (
-            <motion.div
-              ref={ref}
-              className={styles.productsGrid}
-              variants={staggerContainer}
-              initial="hidden"
-              animate="show"
+            <div
+              className={styles.productsList}
             >
               {products.map((product, index) => (
-                <motion.div
+                <ProductCard 
                   key={product.id}
-                  variants={staggerItem}
-                  custom={index}
-                >
-                  <ProductCard 
-                    product={product} 
-                    index={index} 
-                    onAuthRequired={handleAuthRequired}
-                  />
-                </motion.div>
+                  product={product} 
+                  index={index} 
+                  onAuthRequired={handleAuthRequired}
+                />
               ))}
-            </motion.div>
+            </div>
           )}
           
           <Pagination />

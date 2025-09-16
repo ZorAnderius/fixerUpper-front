@@ -13,7 +13,7 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: import.meta.env.VITE_API_TIMEOUT || 15000,
+  timeout: import.meta.env.VITE_API_TIMEOUT || 10000,
 });
 
 // Request interceptor for security

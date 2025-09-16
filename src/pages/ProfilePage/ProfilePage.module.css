@@ -1,11 +1,11 @@
 /* Mobile First Approach */
 .profilePage {
-  padding: var(--spacing-lg) 0;
-  min-height: 100vh;
+  padding: var(--spacing-lg) 0 var(--spacing-md) 0;
+  min-height: auto;
 }
 
 .pageTitle {
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: var(--spacing-lg);
   text-align: left;
 }
 
@@ -26,7 +26,7 @@
 .profileLayout {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xl);
+  gap: var(--spacing-lg);
 }
 
 /* User Panel */
@@ -447,11 +447,11 @@
 
 /* Pagination Styles */
 .pagination {
-  margin-top: var(--spacing-xl);
+  margin-top: var(--spacing-lg);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 .paginationInfo {
