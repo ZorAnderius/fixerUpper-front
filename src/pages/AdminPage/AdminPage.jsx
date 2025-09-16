@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { fetchAllProducts, deleteProduct } from '../../redux/products/operations';
-import { selectProducts, selectProductsLoading, selectProductsError, selectProductsPagination } from '../../redux/products/selectors';
+import { selectProducts, selectProductsLoading, selectProductsError, selectProductsPagination, selectProductsFilters } from '../../redux/products/selectors';
 import { selectUser, selectIsAdmin } from '../../redux/auth/selectors';
 import { ROUTES } from '../../helpers/constants/routes';
 import { useNavigate } from 'react-router-dom';
 import ProductModal from '../../components/ProductModal/ProductModal';
+import ProductFilters from '../../components/ProductFilters/ProductFilters';
 import Pagination from '../../components/Pagination/Pagination';
 import Button from '../../components/Button/Button';
 import Container from '../../widges/Container/Container';
@@ -22,6 +23,7 @@ const AdminPage = () => {
   const isLoading = useSelector(selectProductsLoading);
   const error = useSelector(selectProductsError);
   const pagination = useSelector(selectProductsPagination);
+  const filters = useSelector(selectProductsFilters);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('create');
@@ -37,6 +39,13 @@ const AdminPage = () => {
     }
     // Don't redirect here, let the component handle the access denied message
   }, [dispatch, isAdmin]);
+
+  // Fetch products when filters change
+  useEffect(() => {
+    if (isAdmin) {
+      dispatch(fetchAllProducts(filters));
+    }
+  }, [dispatch, filters, isAdmin]);
 
   const handleCreateProduct = () => {
     navigate(ROUTES.ADMIN_ADD_PRODUCT);
@@ -154,6 +163,9 @@ const AdminPage = () => {
               Add Product
             </Button>
           </div>
+
+          {/* Filters */}
+          <ProductFilters />
 
           {/* Products List */}
           {isLoading ? (
