@@ -3,7 +3,7 @@
  * Protects against DDoS attacks and excessive API usage
  */
 
-import { SECURITY_CONFIG } from './constants.js';
+import { SECURITY_CONFIG } from './constants/index.js';
 
 class RateLimiter {
   constructor(options = {}) {

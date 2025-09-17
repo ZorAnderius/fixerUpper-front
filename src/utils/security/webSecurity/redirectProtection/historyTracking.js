@@ -137,7 +137,7 @@ export const getGlobalRedirectStats = (redirectHistory, suspiciousRedirects) => 
   const oneDayAgo = now - (24 * 60 * 60 * 1000);
 
   let totalRedirects = 0;
-  let suspiciousRedirects = 0;
+  let suspiciousRedirectCount = 0;
   let blockedRedirects = 0;
   let activeUsers = 0;
 
@@ -152,13 +152,13 @@ export const getGlobalRedirectStats = (redirectHistory, suspiciousRedirects) => 
 
   suspiciousRedirects.forEach((suspicious, identifier) => {
     const recentSuspicious = suspicious.filter(entry => entry.timestamp > oneDayAgo);
-    suspiciousRedirects += recentSuspicious.length;
+    suspiciousRedirectCount += recentSuspicious.length;
     blockedRedirects += recentSuspicious.length;
   });
 
   return {
     totalRedirects,
-    suspiciousRedirects,
+    suspiciousRedirects: suspiciousRedirectCount,
     blockedRedirects,
     activeUsers,
     totalUsers: redirectHistory.size
