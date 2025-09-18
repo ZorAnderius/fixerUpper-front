@@ -1118,26 +1118,285 @@ The project implements comprehensive brute force protection through the brute fo
 
 **Files**: `src/utils/validation/`, `src/utils/security/sanitize*.js`
 
+### Password Security
+
+**Important Note**: Password security is primarily a **backend responsibility**. The frontend provides basic validation, but comprehensive password security must be implemented on the server side.
+
+**Current Frontend Implementation**:
+- Basic length validation (6-128 characters)
+- Password confirmation matching
+- Input sanitization (passwords are NOT sanitized, which is correct)
+
+**Backend Requirements** (see `BACKEND_PASSWORD_SECURITY.md` for detailed implementation):
+- Password hashing (bcrypt/argon2)
+- Password complexity requirements
+- Rate limiting for authentication attempts
+- Account lockout protection
+- Password history tracking
+- Secure password reset functionality
+- Session management
+- Audit logging
+
+**Attack Scenarios**:
+
+**Scenario 1: Password Cracking Attack**
+```
+Step 1: Attacker targets weak passwords
+- Attacker obtains user database (through SQL injection or data breach)
+- Discovers passwords stored in plain text or with weak hashing
+- Uses rainbow tables or brute force to crack hashed passwords
+
+Step 2: Attacker launches cracking attack
+- Downloads common password lists (rockyou.txt, etc.)
+- Uses tools like John the Ripper or Hashcat
+- Tests millions of password combinations per second
+
+Step 3: Without protection - what happens:
+- Weak passwords cracked in minutes
+- Common passwords like "password123" cracked instantly
+- Attacker gains access to user accounts
+- Can perform unauthorized actions, steal data
+
+Step 4: With proper backend protection - what happens:
+- Strong bcrypt hashing makes cracking extremely slow
+- Account lockout prevents brute force attempts
+- Rate limiting blocks automated attacks
+- Password complexity requirements prevent weak passwords
+
+Step 5: Consequences comparison:
+Without protection: Mass account compromise, data theft, business reputation damage
+With protection: Attack mitigated, accounts remain secure, business protected
+```
+
+**Scenario 2: Credential Stuffing Attack**
+```
+Step 1: Attacker acquires breached credentials
+- Attacker purchases database from previous data breach
+- Contains millions of username/password combinations
+- Includes FixerUpper users from other compromised sites
+
+Step 2: Attacker launches automated attack
+- Uses automated tools to test credentials
+- Tests 10,000+ combinations per hour
+- Distributes attack across multiple IP addresses
+
+Step 3: Without protection - what happens:
+- Automated testing finds reused passwords
+- Attacker gains access to accounts with reused credentials
+- Can perform unauthorized actions, steal sensitive data
+
+Step 4: With proper backend protection - what happens:
+- Rate limiting blocks rapid authentication attempts
+- Account lockout prevents successful credential stuffing
+- Password history prevents password reuse
+- Monitoring detects suspicious login patterns
+
+Step 5: Consequences comparison:
+Without protection: Mass account takeover, data breach, customer trust lost
+With protection: Attack blocked, accounts remain secure, business continues
+```
+
+**Frontend Security Measures**:
+- Input validation for password fields
+- Secure form handling
+- No password storage in browser
+- Proper error handling (no user enumeration)
+
+**Backend Security Measures** (to be implemented):
+- Strong password hashing algorithms
+- Password complexity enforcement
+- Rate limiting and account lockout
+- Secure session management
+- Password reset with secure tokens
+- Audit logging for authentication events
+
+**Files**: 
+- Frontend: `src/pages/LoginPage/`, `src/pages/RegisterPage/`
+- Backend Guide: `BACKEND_PASSWORD_SECURITY.md`
+
+### Token Security (Access Token/Refresh Token)
+
+**Threat Description**: Token-based attacks target authentication tokens to gain unauthorized access, perform session hijacking, or bypass authentication mechanisms.
+
+**Attack Scenarios**:
+
+**Scenario 1: Access Token Theft Attack**
+```
+Step 1: Attacker identifies token storage location
+- Attacker analyzes FixerUpper's client-side code
+- Discovers access tokens stored in localStorage
+- Identifies token transmission via Authorization header
+- Finds tokens are sent with every API request
+
+Step 2: Attacker exploits XSS vulnerability
+- Attacker injects malicious script through product review
+- Script executes: localStorage.getItem('accessToken')
+- Token stolen: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+- Attacker copies token for later use
+
+Step 3: Without protection - what happens:
+- Attacker uses stolen token to make API calls
+- Can access user's profile, modify account settings
+- Can view order history, personal information
+- Can perform actions as the legitimate user
+- Token remains valid until natural expiration
+
+Step 4: With our protection - what happens:
+- Token stored securely with proper validation
+- Short token expiration times (15 minutes)
+- Refresh token rotation prevents long-term access
+- Suspicious activity monitoring detects unauthorized usage
+- Automatic token invalidation on suspicious behavior
+
+Step 5: Consequences comparison:
+Without protection: Complete account takeover, data theft, unauthorized actions
+With protection: Limited exposure time, automatic detection, account protection
+```
+
+**Scenario 2: Refresh Token Abuse Attack**
+```
+Step 1: Attacker targets refresh token endpoint
+- Attacker discovers /api/users/refresh endpoint
+- Identifies that refresh tokens have longer expiration
+- Plans to abuse refresh mechanism for persistent access
+
+Step 2: Attacker launches automated refresh attack
+- Uses stolen refresh token to generate new access tokens
+- Automates token refresh every 10 minutes
+- Maintains persistent access without re-authentication
+- Can continue accessing account for extended periods
+
+Step 3: Without protection - what happens:
+- Refresh tokens valid for 7+ days
+- No rate limiting on refresh endpoint
+- No detection of abnormal refresh patterns
+- Attacker maintains access for full token lifetime
+- Can continuously generate new access tokens
+
+Step 4: With our protection - what happens:
+- Refresh tokens rotated on each use (one-time use)
+- Rate limiting prevents rapid refresh attempts
+- Geographic/device fingerprinting detects anomalies
+- Suspicious refresh patterns trigger security alerts
+- Automatic token revocation on suspicious activity
+
+Step 5: Consequences comparison:
+Without protection: Long-term persistent access, undetected compromise
+With protection: Limited refresh attempts, automatic detection, security alerts
+```
+
+**Scenario 3: Token Replay Attack**
+```
+Step 1: Attacker intercepts network traffic
+- Attacker uses network sniffing tools
+- Captures HTTP requests containing Authorization headers
+- Records access tokens from intercepted traffic
+- Stores tokens for replay attacks
+
+Step 2: Attacker launches replay attack
+- Uses captured tokens to make identical requests
+- Replays legitimate user's API calls
+- Attempts to modify orders, change settings
+- Uses tokens on different devices/IPs
+
+Step 3: Without protection - what happens:
+- Tokens can be reused multiple times
+- No detection of token reuse from different sources
+- Attacker can perform actions as legitimate user
+- No protection against token replay across sessions
+
+Step 4: With our protection - what happens:
+- Token binding to device/IP prevents replay
+- JWT claims include device fingerprinting
+- Unusual usage patterns trigger security alerts
+- Token invalidation on suspicious replay attempts
+- Rate limiting prevents rapid token reuse
+
+Step 5: Consequences comparison:
+Without protection: Successful replay attacks, unauthorized actions, data manipulation
+With protection: Replay attempts blocked, security alerts triggered, tokens invalidated
+```
+
+**Potential Impact**:
+- Unauthorized access to user accounts
+- Data theft and privacy violations
+- Account takeover and identity theft
+- Unauthorized transactions and modifications
+- Session hijacking and impersonation
+
+**How Protection Works in This Project**:
+
+The project implements comprehensive token security through multiple layers:
+
+1. **Secure Token Storage** (`src/api/tokenManager.js`):
+   - Access tokens stored in memory with localStorage backup
+   - Automatic token cleanup on logout
+   - BroadcastChannel for cross-tab synchronization
+   - Token validation before API requests
+
+2. **Token Refresh Mechanism**:
+   - Automatic token refresh before expiration
+   - Queue system prevents multiple refresh requests
+   - Error handling for failed refresh attempts
+   - Token cleanup on refresh failure
+
+3. **CSRF Protection** (`src/api/csrfService.js`):
+   - CSRF tokens for state-changing operations
+   - Cookie-based CSRF token storage
+   - Token expiration and rotation
+   - Automatic CSRF cleanup on logout
+
+4. **Request Interceptors** (`src/api/client.js`):
+   - Automatic Authorization header injection
+   - CSRF token attachment for protected requests
+   - Request sanitization and validation
+   - Error handling for token-related failures
+
+5. **Security Headers**:
+   - Secure cookie settings (httpOnly, secure, sameSite)
+   - Proper CORS configuration
+   - Content Security Policy headers
+   - X-Frame-Options protection
+
+**Testing Procedures**:
+1. Test token expiration handling
+2. Attempt token replay attacks
+3. Test refresh token abuse scenarios
+4. Verify CSRF token validation
+5. Test cross-tab token synchronization
+6. Validate secure cookie settings
+
+**Files**: 
+- `src/api/tokenManager.js` - Token lifecycle management
+- `src/api/csrfService.js` - CSRF token handling
+- `src/api/client.js` - Request interceptors and security
+- `src/api/authServices.js` - Authentication service integration
+
 ## Use Cases
 
 ### User Authentication Flow
 ```
-User Registration → Input Validation → Sanitization → Database Storage → Session Creation
+User Registration → Input Validation → Sanitization → Database Storage → Token Generation → Session Creation
+```
+
+### Token Security Flow
+```
+User Login → Access Token Issued → Token Storage → API Requests → Token Validation → Auto Refresh → Token Rotation
 ```
 
 ### Product Management Flow
 ```
-Admin Login → Product Creation → File Upload Validation → Security Checks → Database Storage
+Admin Login → Token Validation → Product Creation → File Upload Validation → Security Checks → Database Storage
 ```
 
 ### Order Processing Flow
 ```
-User Login → Cart Management → Order Placement → Payment Processing → Order Confirmation
+User Login → Token Authentication → Cart Management → Order Placement → Payment Processing → Order Confirmation
 ```
 
 ### Security Monitoring Flow
 ```
-Request Reception → Security Checks → Threat Detection → Response Generation → Logging
+Request Reception → Token Validation → Security Checks → Threat Detection → Response Generation → Logging
 ```
 
 ## Testing Security
