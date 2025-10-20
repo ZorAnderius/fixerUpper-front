@@ -3,60 +3,58 @@ import { router } from './routes/index.jsx';
 import './App.css'
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { refreshToken, getAccessToken } from '../api/tokenManager';
+import { PersistGate } from 'redux-persist/integration/react';
+import { refreshToken, getAccessToken, setAccessToken } from '../api/tokenManager';
 import { getCurrentUser } from '../redux/auth/operations';
 import { GoogleOAuthProvider } from '../contexts/GoogleOAuthContext';
-import { store } from '../redux/store';
+import { store, persistor } from '../redux/store';
 import { PageLoader, ContentLoader } from '../components/Loader';
 
 function App() {
-  const [isInitialized, setIsInitialized] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Wait a bit for Redux persist to rehydrate
-        await new Promise(resolve => setTimeout(resolve, 50));
+        // Wait for Redux persist to rehydrate
+        await new Promise(resolve => setTimeout(resolve, 200));
         const existingToken = getAccessToken();
         if (existingToken) {
           // Try to refresh token first
-          await refreshToken();
-          // Always call getCurrentUser to ensure we have complete user data including role
           try {
+            await refreshToken();
+            // Always call getCurrentUser to ensure we have complete user data including role
             await dispatch(getCurrentUser()).unwrap();
           } catch (error) {
-            console.error('getCurrentUser failed after refresh:', error);
+            console.error('Auth initialization failed:', error);
+            // Clear invalid token
+            setAccessToken(null);
           }
         }
         // If no token, don't try to get current user - user is not authenticated
       } catch (err) {
+        console.error('Auth initialization error:', err);
         // If refresh fails, user is not authenticated - this is normal
-      } finally {
-        setIsInitialized(true);
       }
     };
 
     initAuth();
   }, [dispatch]);
 
-  // Only show loader on very first load
-  if (!isInitialized) {
-    return <PageLoader text="Initializing application..." />;
-  }
-
   return (
-    <GoogleOAuthProvider>
-      <RouterProvider
-        router={router}
-        fallbackElement={
-          <ContentLoader 
-            variant="spinner"
-            text="Loading page..."
-          />
-        }
-      />
-    </GoogleOAuthProvider>
+    <PersistGate loading={<PageLoader text="Loading application..." />} persistor={persistor}>
+      <GoogleOAuthProvider>
+        <RouterProvider
+          router={router}
+          fallbackElement={
+            <ContentLoader 
+              variant="spinner"
+              text="Loading page..."
+            />
+          }
+        />
+      </GoogleOAuthProvider>
+    </PersistGate>
   );
 }
 

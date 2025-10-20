@@ -44,6 +44,20 @@ const LoginPage = () => {
     return <Navigate to={from} replace />;
   }
 
+  // Show loading only when actually loading
+  if (isLoading) {
+    return (
+      <div className={styles.loginPage}>
+        <div className={styles.loginContainer}>
+          <div className={styles.loadingContainer}>
+            <div className={styles.spinner}></div>
+            <p>Signing in...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const initialValues = {
     email: '',
     password: ''

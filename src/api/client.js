@@ -13,6 +13,18 @@ const api = axios.create({
   timeout: import.meta.env.VITE_API_TIMEOUT || 10000,
 });
 
+// Add request logging for debugging
+api.interceptors.request.use(
+  (config) => {
+    console.log('API Request:', config.method?.toUpperCase(), config.url, config.data);
+    return config;
+  },
+  (error) => {
+    console.error('API Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
 
 api.interceptors.request.use(async (config) => {
   // Add access token
@@ -48,8 +60,12 @@ api.interceptors.request.use(async (config) => {
 
 // Response interceptor for handling errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('API Response:', response.status, response.config.url, response.data);
+    return response;
+  },
   async (error) => {
+    console.error('API Response Error:', error.response?.status, error.config?.url, error.response?.data);
     // Handle CSRF token errors
     if (error.response?.status === 403 && 
         (error.response?.data?.message === 'CSRF header missing' || 
