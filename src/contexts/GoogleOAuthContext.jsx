@@ -22,23 +22,32 @@ export const GoogleOAuthProvider = ({ children }) => {
       setIsLoading(true);
       setError(null);
 
-      // Generate OAuth URL directly on frontend (correct approach)
-      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-      if (!clientId) {
-        throw new Error('Google Client ID not configured');
+      // Get OAuth URL from backend (correct approach)
+      const getApiBaseUrl = () => {
+        if (window.location.hostname.includes('vercel.app')) {
+          return 'https://fixerupper-back.onrender.com/api';
+        }
+        return import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+      };
+      
+      const apiBaseUrl = getApiBaseUrl();
+      const response = await fetch(`${apiBaseUrl}/users/request-google-oauth`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get OAuth URL: ${response.status}`);
       }
+
+      const data = await response.json();
       
-      const redirectUri = window.location.origin + '/auth/google/callback';
-      const scope = 'openid email profile';
-      
-      const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${clientId}&` +
-        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-        `response_type=code&` +
-        `scope=${encodeURIComponent(scope)}&` +
-        `access_type=offline&` +
-        `prompt=consent`;
-      
+      // Return the OAuth URL from backend
+      const oauthUrl = data.data?.url || data.url;
       return oauthUrl;
     } catch (err) {
       console.error('Error getting OAuth URL:', err);
