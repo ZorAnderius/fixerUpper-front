@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { selectIsAuthenticated, selectUser, selectAuthStatus } from '../../redux/auth/selectors';
+import { selectIsAuthenticated, selectAuthStatus } from '../../redux/auth/selectors';
 import { ROUTES } from '../../helpers/constants/routes';
 import { useEffect } from 'react';
 import { responseStatuses } from '../../helpers/constants/responseStatus';
@@ -8,7 +8,6 @@ import { ContentLoader } from '../Loader';
 
 const PublicRoute = ({ children }) => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
-  const user = useSelector(selectUser);
   const authStatus = useSelector(selectAuthStatus);
   const location = useLocation();
   const navigate = useNavigate();

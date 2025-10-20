@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: fixerupper-web
+    env: node
+    buildCommand: NODE_OPTIONS="--max-old-space-size=4096" npm run build
+    startCommand: serve -s dist -l $PORT
+    healthCheckPath: /
+    region: frankfurt
+    autoDeploy: true

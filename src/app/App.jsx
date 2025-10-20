@@ -18,15 +18,6 @@ function App() {
       try {
         // Wait a bit for Redux persist to rehydrate
         await new Promise(resolve => setTimeout(resolve, 50));
-        
-        // Check Redux state first
-        const state = store.getState();
-        const authState = state.auth;
-        
-        // Check localStorage directly
-        const storedToken = localStorage.getItem('accessToken');
-        
-        // Only try to refresh token if we have one
         const existingToken = getAccessToken();
         if (existingToken) {
           // Try to refresh token first

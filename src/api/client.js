@@ -1,11 +1,8 @@
 import axios from "axios";
 import { getAccessToken, refreshToken } from "./tokenManager.js";
 import { sanitizeInput } from "../utils/security/sanitizeInput.js";
-// import { RateLimiter } from "../helpers/security/validation.js";
 import { getCSRFToken, clearCSRFToken } from "./csrfService.js";
 
-// Rate limiter for API requests (temporarily disabled)
-// const rateLimiter = new RateLimiter(100, 60000); // 100 requests per minute
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api",
@@ -16,21 +13,14 @@ const api = axios.create({
   timeout: import.meta.env.VITE_API_TIMEOUT || 10000,
 });
 
-// Request interceptor for security
-api.interceptors.request.use(async (config) => {
-  // Rate limiting check (temporarily disabled)
-  // const clientId = getClientId();
-  // if (!rateLimiter.isAllowed(clientId)) {
-  //   return Promise.reject(new Error('Rate limit exceeded. Please try again later.'));
-  // }
 
+api.interceptors.request.use(async (config) => {
   // Add access token
   const token = getAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
-  // Add CSRF token only for POST/PUT/PATCH/DELETE requests EXCEPT auth endpoints
   const method = config.method?.toUpperCase();
   const requiresCSRF = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
   const isAuthEndpoint = config.url?.includes('/users/login') || 
@@ -45,11 +35,10 @@ api.interceptors.request.use(async (config) => {
         config.headers['x-csrf-token'] = csrfToken;
       }
     } catch (error) {
-      // Continue without CSRF token - some endpoints might not require it
+      console.error('Failed to get CSRF token:', error);
     }
   }
 
-  // Sanitize request data (skip FormData)
   if (config.data && typeof config.data === 'object' && !(config.data instanceof FormData)) {
     config.data = sanitizeRequestData(config.data);
   }
@@ -74,7 +63,7 @@ api.interceptors.response.use(
           error.config.headers['x-csrf-token'] = csrfToken;
           return api.request(error.config);
         } catch (csrfError) {
-          // Failed to retry with new CSRF token
+          console.error('Failed to retry with new CSRF token:', csrfError);
         }
       }
     }
@@ -97,14 +86,6 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-// Helper function to get client ID for rate limiting (temporarily disabled)
-// const getClientId = () => {
-//   // Use a combination of user agent and IP-like identifier
-//   const userAgent = navigator.userAgent;
-//   const screenResolution = `${screen.width}x${screen.height}`;
-//   return btoa(userAgent + screenResolution).substring(0, 16);
-// };
 
 // Helper function to sanitize request data
 const sanitizeRequestData = (data) => {

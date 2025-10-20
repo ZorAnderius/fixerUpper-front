@@ -21,17 +21,13 @@ const AdminPage = lazy(() => import("../../pages/AdminPage/AdminPage"));
 const AddProductPage = lazy(() => import("../../pages/AdminPage/AddProductPage"));
 const GoogleAuthCallback = lazy(() => import("../../components/GoogleAuthCallback/GoogleAuthCallback"));
 
-// Error element component
-const ErrorElement = () => {
-  return <NotFoundPage />;
-};
 
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <SharedLayout />,
-    errorElement: <ErrorElement />,
+    errorElement:<NotFoundPage />,
     children: [
       { index: true, element: <HomePage /> },
       { path: ROUTES.REGISTER, element: <PublicRoute><RegisterPage /></PublicRoute> },

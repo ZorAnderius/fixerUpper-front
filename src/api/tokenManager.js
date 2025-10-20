@@ -1,6 +1,6 @@
 // import { clearAuth, setAuth } from "../redux/auth/slice"; // Dynamic import to avoid circular dependency
 import { store } from "../redux/store";
-import { clearCSRFToken, setCSRFToken } from "./csrfService.js";
+import { clearCSRFToken} from "./csrfService.js";
 
 let accessToken = null;
 let isRefreshing = false;
@@ -64,12 +64,14 @@ const initializeStoreSubscription = async () => {
       }
     });
   } catch (error) {
+    console.error('Failed to initialize store subscription:', error);
   }
 };
 
 export const getAccessToken = () => {
   // Initialize store subscription on first access (async, don't wait)
   initializeStoreSubscription().catch(error => {
+    console.error('Failed to initialize store subscription:', error);
   });
   
   return accessToken;

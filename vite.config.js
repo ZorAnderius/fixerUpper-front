@@ -5,55 +5,26 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   build: {
-    sourcemap: true,
-    // Optimize chunks for better caching
+    sourcemap: false, // Вимикаємо sourcemap для зменшення розміру build'у
+    outDir: 'dist',
+    assetsDir: 'assets',
+    // Налаштування для оптимізації bundle size
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
+        // Розбивка на менші chunks для оптимізації пам'яті
         manualChunks: {
           vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          redux: ['@reduxjs/toolkit', 'react-redux'],
-          ui: ['framer-motion']
-        }
-      }
+          redux: ['@reduxjs/toolkit', 'react-redux', 'redux-persist'],
+          ui: ['framer-motion', 'react-router-dom'],
+        },
+      },
     },
-    // Optimize build size
-    minify: 'esbuild',
-    // Remove console logs in production
-    esbuild: {
-      drop: ['console', 'debugger']
-    }
   },
   server: {
-    historyApiFallback: true,
-    port: 5180,
-    strictPort: true, // Fail if port is already in use
-    force: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-        secure: false,
-        configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
-          });
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
-          });
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
-          });
-        },
-      }
-    }
+    port: 5179,
+    strictPort: true,
   },
-  // Optimize dependencies
-  optimizeDeps: {
-    include: [
-      'react',
-      'react-dom',
-      'react-router-dom',
-      '@reduxjs/toolkit',
-      'react-redux',
-      'framer-motion'
-    ]
-  }
+  // Вимікаємо base для правильного deploy на Vercel
+  // base: './',
 });
