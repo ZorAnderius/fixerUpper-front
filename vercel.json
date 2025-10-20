@@ -38,7 +38,7 @@
       "destination": "/assets/$1"
     },
     {
-      "source": "/oauth/callback",
+      "source": "/auth/google/callback",
       "destination": "/index.html"
     },
     {
