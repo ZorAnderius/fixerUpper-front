@@ -24,7 +24,16 @@ export const GoogleOAuthProvider = ({ children }) => {
 
       // Try to get OAuth URL from backend
       try {
-        const response = await fetch(`/api/users/request-google-oauth`, {
+        // Determine API base URL
+        const getApiBaseUrl = () => {
+          if (window.location.hostname.includes('vercel.app')) {
+            return 'https://fixerupper-back.onrender.com/api';
+          }
+          return import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+        };
+        
+        const apiBaseUrl = getApiBaseUrl();
+        const response = await fetch(`${apiBaseUrl}/users/request-google-oauth`, {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -45,8 +54,8 @@ export const GoogleOAuthProvider = ({ children }) => {
       } catch (fetchError) {
         
         // Fallback: construct OAuth URL manually
-        const baseUrl = window.location.origin; // http://localhost:5180
-        return `${baseUrl}/api/users/request-google-oauth`;
+        const apiBaseUrl = getApiBaseUrl();
+        return `${apiBaseUrl}/users/request-google-oauth`;
       }
     } catch (err) {
       console.error('Error getting OAuth URL:', err);
@@ -63,7 +72,16 @@ export const GoogleOAuthProvider = ({ children }) => {
       setError(null);
 
 
-      const response = await fetch(`/api/users/confirm-oauth`, {
+      // Determine API base URL
+      const getApiBaseUrl = () => {
+        if (window.location.hostname.includes('vercel.app')) {
+          return 'https://fixerupper-back.onrender.com/api';
+        }
+        return import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+      };
+      
+      const apiBaseUrl = getApiBaseUrl();
+      const response = await fetch(`${apiBaseUrl}/users/confirm-oauth`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
