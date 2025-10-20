@@ -4,8 +4,26 @@ import { sanitizeInput } from "../utils/security/sanitizeInput.js";
 import { getCSRFToken, clearCSRFToken } from "./csrfService.js";
 
 
+// Determine API URL based on environment
+const getApiUrl = () => {
+  // Check if we're on Vercel (production)
+  if (window.location.hostname.includes('vercel.app')) {
+    return 'https://fixerupper-back.onrender.com/api';
+  }
+  // Check if we're on localhost
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+  }
+  // Default to environment variable or localhost
+  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+};
+
+const baseURL = getApiUrl();
+console.log('API Base URL:', baseURL);
+console.log('Current hostname:', window.location.hostname);
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api",
+  baseURL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -16,11 +34,13 @@ const api = axios.create({
 // Add request logging for debugging
 api.interceptors.request.use(
   (config) => {
-    console.log('API Request:', config.method?.toUpperCase(), config.url, config.data);
+    console.log('🚀 API Request:', config.method?.toUpperCase(), config.baseURL + config.url);
+    console.log('📦 Request data:', config.data);
+    console.log('🔑 Headers:', config.headers);
     return config;
   },
   (error) => {
-    console.error('API Request Error:', error);
+    console.error('❌ API Request Error:', error);
     return Promise.reject(error);
   }
 );
@@ -61,11 +81,13 @@ api.interceptors.request.use(async (config) => {
 // Response interceptor for handling errors
 api.interceptors.response.use(
   (response) => {
-    console.log('API Response:', response.status, response.config.url, response.data);
+    console.log('✅ API Response:', response.status, response.config.url);
+    console.log('📄 Response data:', response.data);
     return response;
   },
   async (error) => {
-    console.error('API Response Error:', error.response?.status, error.config?.url, error.response?.data);
+    console.error('❌ API Response Error:', error.response?.status, error.config?.url);
+    console.error('💥 Error details:', error.response?.data);
     // Handle CSRF token errors
     if (error.response?.status === 403 && 
         (error.response?.data?.message === 'CSRF header missing' || 

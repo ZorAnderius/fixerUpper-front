@@ -9,11 +9,6 @@ const PrivateRoute = ({ children }) => {
   const authStatus = useSelector(selectAuthStatus);
   const location = useLocation();
 
-  // Show loader while auth is being determined
-  if (authStatus === responseStatuses.LOADING) {
-    return <ContentLoader variant="spinner" text="Checking authentication..." />;
-  }
-
   // Only redirect if we're sure user is not authenticated (not loading)
   if (authStatus === responseStatuses.FAILED || (authStatus === responseStatuses.IDLE && !isAuthenticated)) {
     // Redirect to login while preserving current page

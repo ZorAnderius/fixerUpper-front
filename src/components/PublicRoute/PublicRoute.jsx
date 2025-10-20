@@ -23,11 +23,6 @@ const PublicRoute = ({ children }) => {
     }
   }, [isAuthenticated, authStatus, navigate, location.state?.from]);
 
-  // Show loader while auth is being determined
-  if (authStatus === responseStatuses.LOADING) {
-    return <ContentLoader variant="spinner" text="Checking authentication..." />;
-  }
-
   // If user is authenticated and auth is not loading, don't render children
   if (authStatus === responseStatuses.SUCCEEDED && isAuthenticated) {
     return null; // or a loading spinner
