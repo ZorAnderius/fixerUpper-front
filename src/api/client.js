@@ -19,8 +19,6 @@ const getApiUrl = () => {
 };
 
 const baseURL = getApiUrl();
-console.log('API Base URL:', baseURL);
-console.log('Current hostname:', window.location.hostname);
 
 const api = axios.create({
   baseURL,
@@ -31,19 +29,6 @@ const api = axios.create({
   timeout: import.meta.env.VITE_API_TIMEOUT || 10000,
 });
 
-// Add request logging for debugging
-api.interceptors.request.use(
-  (config) => {
-    console.log('🚀 API Request:', config.method?.toUpperCase(), config.baseURL + config.url);
-    console.log('📦 Request data:', config.data);
-    console.log('🔑 Headers:', config.headers);
-    return config;
-  },
-  (error) => {
-    console.error('❌ API Request Error:', error);
-    return Promise.reject(error);
-  }
-);
 
 
 api.interceptors.request.use(async (config) => {
@@ -80,14 +65,8 @@ api.interceptors.request.use(async (config) => {
 
 // Response interceptor for handling errors
 api.interceptors.response.use(
-  (response) => {
-    console.log('✅ API Response:', response.status, response.config.url);
-    console.log('📄 Response data:', response.data);
-    return response;
-  },
+  (response) => response,
   async (error) => {
-    console.error('❌ API Response Error:', error.response?.status, error.config?.url);
-    console.error('💥 Error details:', error.response?.data);
     // Handle CSRF token errors
     if (error.response?.status === 403 && 
         (error.response?.data?.message === 'CSRF header missing' || 
