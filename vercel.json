@@ -6,7 +6,8 @@
   "installCommand": "npm install",
   "devCommand": "npm run dev",
   "env": {
-    "VITE_API_BASE_URL": "https://fixerupper-back.onrender.com/api"
+    "VITE_API_BASE_URL": "https://fixerupper-back.onrender.com/api",
+    "VITE_GOOGLE_CLIENT_ID": "YOUR_GOOGLE_CLIENT_ID"
   },
   "headers": [
     {
