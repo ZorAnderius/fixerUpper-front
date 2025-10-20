@@ -63,7 +63,6 @@ export const GoogleOAuthProvider = ({ children }) => {
       setIsLoading(true);
       setError(null);
 
-
       // Determine API base URL
       const getApiBaseUrl = () => {
         if (window.location.hostname.includes('vercel.app')) {
@@ -78,12 +77,10 @@ export const GoogleOAuthProvider = ({ children }) => {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'X-No-CSRF': '1', // Disable CSRF check
         },
         credentials: 'include',
         body: JSON.stringify({ code }),
       });
-
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -95,8 +92,8 @@ export const GoogleOAuthProvider = ({ children }) => {
       
       // Dispatch the authentication action
       await dispatch(authenticateWithGoogleOAuth({
-        accessToken: data.accessToken,
-        user: data.user
+        accessToken: data.data.accessToken,
+        user: data.data.user
       })).unwrap();
 
       return data;

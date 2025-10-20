@@ -68,6 +68,7 @@ const GoogleAuthCallback = () => {
             throw new Error('Invalid response from server');
           }
         } catch (apiError) {
+          console.error('Google OAuth API Error:', apiError);
           const errorData = apiError.response?.data || { message: apiError.message };
           throw new Error(`Failed to authenticate with Google: ${apiError.response?.status || 'Unknown'} - ${errorData.message || 'Unknown error'}`);
         }
