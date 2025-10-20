@@ -15,7 +15,7 @@ const getCSRFTokenFromCookie = () => {
   
   for (let cookie of cookies) {
     const [name, value] = cookie.trim().split('=');
-    if (name === 'csrf_token' || name === 'csrfToken') {
+    if (name === 'csrfToken') {
       const token = decodeURIComponent(value);
       return token;
     }
@@ -60,7 +60,7 @@ export const clearCSRFToken = () => {
   tokenExpiry = null;
   
   // Clear cookie by setting it to expire in the past
-  document.cookie = 'csrf_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'csrfToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 };
 
 /**
