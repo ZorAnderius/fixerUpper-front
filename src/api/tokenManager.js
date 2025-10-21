@@ -74,11 +74,31 @@ export const getAccessToken = () => {
     console.error('Failed to initialize store subscription:', error);
   });
   
+  // If no token in memory, try to get from localStorage
+  if (!accessToken) {
+    const storedToken = localStorage.getItem('accessToken');
+    if (storedToken) {
+      accessToken = storedToken;
+    }
+  }
+  
+  // Temporary debug log to check token
+  if (!accessToken) {
+    console.warn('No access token available');
+  }
+  
   return accessToken;
 };
 
 export const setAccessToken = (token, user = null) => {
   accessToken = token;
+  
+  // Temporary debug log
+  if (token) {
+    console.log('Token set:', token.substring(0, 10) + '...');
+  } else {
+    console.log('Token cleared');
+  }
   
   // Save to localStorage
   if (token) {
@@ -90,11 +110,19 @@ export const setAccessToken = (token, user = null) => {
   }
   
   channel.postMessage({ type: "TOKEN_REFRESH", accessToken: token });
+  
+  // Update Redux store synchronously
   if (token && user) {
-    // Dynamic import to avoid circular dependency
-    import("../redux/auth/slice").then(({ setAuth }) => {
-      store.dispatch(setAuth({ user }));
-    });
+    // Check if user is already in Redux store to avoid conflicts
+    const currentState = store.getState();
+    const currentUser = currentState.auth.user;
+    
+    if (!currentUser || currentUser.id !== user.id) {
+      // Dynamic import to avoid circular dependency
+      import("../redux/auth/slice").then(({ setAuth }) => {
+        store.dispatch(setAuth({ user }));
+      });
+    }
   } else if (!token) {
     // Dynamic import to avoid circular dependency
     import("../redux/auth/slice").then(({ clearAuth }) => {
@@ -140,6 +168,7 @@ export const refreshToken = async () => {
       }
     });
     
+    
     // Extract data from nested structure
     const { accessToken: newAccessToken, user } = response.data.data || response.data;
     
@@ -148,9 +177,9 @@ export const refreshToken = async () => {
       processQueue(null, newAccessToken);
       return newAccessToken;
     }
-    
     return null;
   } catch (err) {
+    // Token refresh failed
     processQueue(err, null);
     setAccessToken(null);
     throw err;

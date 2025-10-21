@@ -9,9 +9,10 @@ import { store, persistor } from "./redux/store";
 createRoot(document.getElementById("root")).render(
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
-      <StrictMode>
+      {/* Temporarily disabled StrictMode to test duplicate requests */}
+      {/* <StrictMode> */}
         <App />
-      </StrictMode>
+      {/* </StrictMode> */}
     </PersistGate>
   </Provider>
 );

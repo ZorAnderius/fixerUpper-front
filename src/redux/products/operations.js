@@ -9,17 +9,14 @@ import {
   getAllProductStatuses as getAllProductStatusesAPI
 } from '../../api/productsServices';
 import {
+  setProducts,
   setLoading,
   setError,
-  setProducts,
-  setCurrentProduct,
+  setPagination,
   setCategories,
   setProductStatuses,
-  setFilters,
-  setPagination,
-  addProduct,
-  updateProduct as updateProductAction,
-  removeProduct
+  removeProduct,
+  clearError
 } from './slice';
 
 // Fetch all products
@@ -27,15 +24,18 @@ export const fetchAllProducts = createAsyncThunk(
   'products/fetchAll',
   async (filters, { dispatch, rejectWithValue, getState }) => {
     try {
-      dispatch(setLoading(true));
-      
-      // Get current filters from state and merge with provided filters
+      // Check if products are already loaded with the same filters
       const currentState = getState();
-      const currentFilters = currentState.products.filters;
-      const mergedFilters = { ...currentFilters, ...(filters || {}) };
+      const existingProducts = currentState.products.products;
+      const existingFilters = currentState.products.filters;
+      const filtersChanged = JSON.stringify(filters) !== JSON.stringify(existingFilters);
       
-      
-      const response = await getAllProductsAPI(mergedFilters);
+      if (existingProducts && existingProducts.length > 0 && !filtersChanged) {
+        return existingProducts;
+      }
+      dispatch(setLoading(true));
+      dispatch(clearError());
+      const response = await getAllProductsAPI(filters);
       
       // Handle different response formats from API
       let products;
@@ -62,12 +62,10 @@ export const fetchAllProducts = createAsyncThunk(
         products = response;
       }
       
-      
       dispatch(setProducts(products));
       
       // Handle pagination from API response
       let pagination;
-      
       
       // Extract pagination from response.data (backend structure)
       if (response.data && response.data.totalPages) {
@@ -79,25 +77,32 @@ export const fetchAllProducts = createAsyncThunk(
           hasNextPage: response.data.hasNextPage || false,
           hasPreviousPage: response.data.hasPreviousPage || false
         };
-      }
-      
-      if (pagination) {
-        dispatch(setPagination(pagination));
-      } else {
-        // If no pagination data, create default pagination
-        const defaultPagination = {
-          currentPage: mergedFilters.page || 1,
-          totalPages: Math.ceil(products.length / 9),
-          totalItems: products.length,
-          itemsPerPage: 9
+      } else if (response.totalPages) {
+        // Fallback for direct response structure
+        pagination = {
+          currentPage: response.currentPage,
+          totalPages: response.totalPages,
+          totalItems: response.totalItems,
+          itemsPerPage: response.itemsPerPage,
         };
-        dispatch(setPagination(defaultPagination));
+      } else {
+        // Default pagination if not provided
+        pagination = {
+          currentPage: filters?.page || 1,
+          totalPages: 1,
+          totalItems: products.length,
+          itemsPerPage: filters?.limit || products.length,
+        };
       }
       
-      return response;
+      dispatch(setPagination(pagination));
+      dispatch(setLoading(false));
+      return { products, pagination };
     } catch (error) {
+      console.error('fetchAllProducts error:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch products';
       dispatch(setError(errorMessage));
+      dispatch(setLoading(false));
       return rejectWithValue(errorMessage);
     }
   }
@@ -114,18 +119,19 @@ export const fetchProductById = createAsyncThunk(
       // Extract the actual product data from response.data
       const productData = response.data || response;
       
-      dispatch(setCurrentProduct(productData));
+      dispatch(setLoading(false));
       return productData;
     } catch (error) {
-      console.error('fetchProductById: Error occurred:', error);
+      console.error('fetchProductById error:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch product';
       dispatch(setError(errorMessage));
+      dispatch(setLoading(false));
       return rejectWithValue(errorMessage);
     }
   }
 );
 
-// Create product (Admin)
+// Create product
 export const createProduct = createAsyncThunk(
   'products/create',
   async (productData, { dispatch, rejectWithValue }) => {
@@ -133,17 +139,20 @@ export const createProduct = createAsyncThunk(
       dispatch(setLoading(true));
       const response = await createProductAPI(productData);
       
-      dispatch(addProduct(response));
-      return response;
+      const newProduct = response.data || response;
+      dispatch(setLoading(false));
+      return newProduct;
     } catch (error) {
+      console.error('createProduct error:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to create product';
       dispatch(setError(errorMessage));
+      dispatch(setLoading(false));
       return rejectWithValue(errorMessage);
     }
   }
 );
 
-// Update product (Admin)
+// Update product
 export const updateProduct = createAsyncThunk(
   'products/update',
   async ({ id, productData }, { dispatch, rejectWithValue }) => {
@@ -151,53 +160,35 @@ export const updateProduct = createAsyncThunk(
       dispatch(setLoading(true));
       const response = await updateProductAPI(id, productData);
       
-      // Extract the updated product data from response
       const updatedProduct = response.data || response;
-      
-      dispatch(updateProductAction(updatedProduct));
-      dispatch(setLoading(false)); // Add this line
+      dispatch(setLoading(false));
       return updatedProduct;
     } catch (error) {
+      console.error('updateProduct error:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to update product';
       dispatch(setError(errorMessage));
+      dispatch(setLoading(false));
       return rejectWithValue(errorMessage);
     }
   }
 );
 
-// Delete product (Admin)
+// Delete product
 export const deleteProduct = createAsyncThunk(
   'products/delete',
-  async (id, { dispatch, rejectWithValue, getState }) => {
+  async (id, { dispatch, rejectWithValue }) => {
     try {
       dispatch(setLoading(true));
       await deleteProductAPI(id);
       
       dispatch(removeProduct(id));
       dispatch(setLoading(false));
-      
       return id;
     } catch (error) {
-      console.error('Delete product error:', error);
-      
-      let errorMessage = 'Failed to delete product';
-      
-      // Handle specific error types
-      if (error.response?.data?.message) {
-        const backendMessage = error.response.data.message;
-        
-        // Check for foreign key constraint errors
-        if (backendMessage.includes('foreign key constraint') || 
-            backendMessage.includes('cartItems_product_id_fkey')) {
-          errorMessage = 'Cannot delete product: it is currently in users\' carts. Please remove it from all carts first.';
-        } else {
-          errorMessage = backendMessage;
-        }
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
+      console.error('deleteProduct error:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to delete product';
       dispatch(setError(errorMessage));
+      dispatch(setLoading(false));
       return rejectWithValue(errorMessage);
     }
   }
@@ -226,13 +217,18 @@ export const fetchCategories = createAsyncThunk(
 
 // Fetch product statuses
 export const fetchProductStatuses = createAsyncThunk(
-  'products/fetchStatuses',
+  'products/fetchProductStatuses',
   async (_, { dispatch, rejectWithValue }) => {
     try {
       const response = await getAllProductStatusesAPI();
-      dispatch(setProductStatuses(response));
-      return response;
+      
+      // Handle different response formats
+      const statuses = response.data || response;
+      
+      dispatch(setProductStatuses(statuses));
+      return statuses;
     } catch (error) {
+      console.error('fetchProductStatuses error:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch product statuses';
       dispatch(setError(errorMessage));
       return rejectWithValue(errorMessage);

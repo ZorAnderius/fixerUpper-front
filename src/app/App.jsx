@@ -13,34 +13,34 @@ import { PageLoader, ContentLoader } from '../components/Loader';
 function App() {
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        // Wait for Redux persist to rehydrate
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const existingToken = getAccessToken();
-        
-        if (existingToken) {
-          // Try to refresh token first
+      useEffect(() => {
+        const initAuth = async () => {
           try {
-            await refreshToken();
-            // Always call getCurrentUser to ensure we have complete user data including role
-            await dispatch(getCurrentUser()).unwrap();
-          } catch (error) {
-            console.error('Auth initialization failed:', error);
-            // Clear invalid token
-            setAccessToken(null);
+            // Wait for Redux persist to rehydrate
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            const existingToken = getAccessToken();
+            
+            if (existingToken) {
+              // Try to refresh token first
+              try {
+                await refreshToken();
+              } catch (error) {
+                // Clear invalid token and force Redux state update
+                setAccessToken(null);
+                // Force clear Redux auth state
+                import('../redux/auth/slice').then(({ clearAuth }) => {
+                  store.dispatch(clearAuth());
+                });
+              }
+            }
+          } catch (err) {
+            // If refresh fails, user is not authenticated - this is normal
           }
-        }
-      } catch (err) {
-        console.error('Auth initialization error:', err);
-        // If refresh fails, user is not authenticated - this is normal
-      }
-    };
+        };
 
-    // Always try to initialize auth
-    initAuth();
-  }, [dispatch]);
+        // Always try to initialize auth
+        initAuth();
+      }, [dispatch]);
 
   return (
     <PersistGate loading={null} persistor={persistor}>

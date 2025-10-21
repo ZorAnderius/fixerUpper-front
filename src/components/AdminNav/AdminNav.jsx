@@ -12,6 +12,7 @@ const AdminNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isAdmin = useSelector(selectIsAdmin);
+  const user = useSelector(state => state.auth.user);
   const [isOpen, setIsOpen] = useState(false);
 
   if (!isAdmin) {

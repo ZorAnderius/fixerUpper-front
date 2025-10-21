@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { fetchAllProducts, fetchCategories } from '../../redux/products/operations';
 import { selectFilteredProducts, selectProductsLoading, selectProductsError, selectProductsFilters } from '../../redux/products/selectors';
 import { staggerContainer, staggerItem } from '../../helpers/animations/variants';
-import { useRef } from 'react';
 import ProductFilters from '../../components/ProductFilters/ProductFilters';
 import ProductCard from '../../components/ProductCard/ProductCard';
 import Pagination from '../../components/Pagination/Pagination';
@@ -21,21 +20,31 @@ const ProductsPage = () => {
   const error = useSelector(selectProductsError);
   const filters = useSelector(selectProductsFilters);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   // Simplified animation - no staggered visibility
   const ref = useRef(null);
 
+  // Fetch categories only once on component mount
   useEffect(() => {
-    // Fetch products and categories on component mount
-    dispatch(fetchAllProducts());
+    // Clear any previous errors when entering products page
+    import('../../redux/products/slice').then(({ clearError }) => {
+      dispatch(clearError());
+    });
     dispatch(fetchCategories());
   }, [dispatch]);
-
 
   // Fetch products when filters change
   useEffect(() => {
     dispatch(fetchAllProducts(filters));
   }, [dispatch, filters]);
+
+  // Show error modal when there's an error - ONLY IN MODAL, NEVER ON PAGE
+  useEffect(() => {
+    if (error) {
+      setShowErrorModal(true);
+    }
+  }, [error]);
 
   const handleAuthRequired = () => {
     setShowAuthModal(true);
@@ -45,27 +54,14 @@ const ProductsPage = () => {
     setShowAuthModal(false);
   };
 
-  if (error) {
-    return (
-      <Section>
-        <Container>
-          <div className={styles.errorContainer}>
-            <h2>Error loading products</h2>
-            <p>{error}</p>
-            <button 
-              onClick={() => {
-                dispatch(fetchAllProducts());
-                dispatch(fetchCategories());
-              }}
-              className={styles.retryButton}
-            >
-              Try Again
-            </button>
-          </div>
-        </Container>
-      </Section>
-    );
-  }
+  const handleCloseErrorModal = () => {
+    setShowErrorModal(false);
+  };
+
+  const handleRetryProducts = () => {
+    setShowErrorModal(false);
+    dispatch(fetchAllProducts(filters));
+  };
 
   return (
     <Section>
@@ -77,34 +73,38 @@ const ProductsPage = () => {
         >
           <ProductFilters />
           
-          {isLoading ? (
+          {isLoading && products.length === 0 ? (
             <ContentLoader 
               variant="dots"
               text="Loading products..."
             />
-          ) : products.length === 0 ? (
-            <div className={styles.emptyContainer}>
-              <div className={styles.emptyIcon}>
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <h3>No Products Found</h3>
-              <p>Try adjusting your search or filter criteria</p>
-            </div>
           ) : (
-            <div
-              className={styles.productsList}
-            >
-              {products.map((product, index) => (
-                <ProductCard 
-                  key={product.id}
-                  product={product} 
-                  index={index} 
-                  onAuthRequired={handleAuthRequired}
-                />
-              ))}
-            </div>
+            <>
+              {products.length === 0 ? (
+                <div className={styles.emptyContainer}>
+                  <div className={styles.emptyIcon}>
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <h3>No Products Found</h3>
+                  <p>Try adjusting your search or filter criteria</p>
+                </div>
+              ) : (
+                <div
+                  className={styles.productsList}
+                >
+                  {products.map((product, index) => (
+                    <ProductCard 
+                      key={product.id}
+                      product={product} 
+                      index={index} 
+                      onAuthRequired={handleAuthRequired}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
           
           <Pagination />
@@ -116,6 +116,30 @@ const ProductsPage = () => {
         isOpen={showAuthModal}
         onClose={handleCloseAuthModal}
       />
+      
+      {/* Error Modal */}
+      {showErrorModal && (
+        <div className={styles.errorModal}>
+          <div className={styles.errorModalContent}>
+            <h3>Error Loading Products</h3>
+            <p>{error}</p>
+            <div className={styles.errorModalActions}>
+              <button 
+                onClick={handleRetryProducts}
+                className={styles.retryButton}
+              >
+                Try Again
+              </button>
+              <button 
+                onClick={handleCloseErrorModal}
+                className={styles.closeButton}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Section>
   );
 };

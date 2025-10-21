@@ -338,6 +338,81 @@
   }
 }
 
+/* Error Modal Styles */
+.errorModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.errorModalContent {
+  background: white;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.errorModalContent h3 {
+  color: var(--color-red-600);
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.errorModalContent p {
+  color: var(--color-gray-600);
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+.errorModalActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.closeButton {
+  background: var(--color-gray-500);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.closeButton:hover {
+  background: var(--color-gray-600);
+}
+
+/* Spinner for delete button */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 
 
 

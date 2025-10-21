@@ -31,13 +31,28 @@ const AdminPage = () => {
   
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (isAdmin) {
+      // Clear any previous errors when entering admin page
+      import('../../redux/products/slice').then(({ clearError }) => {
+        dispatch(clearError());
+      });
       dispatch(fetchAllProducts());
     }
     // Don't redirect here, let the component handle the access denied message
   }, [dispatch, isAdmin]);
+
+  // Show error modal when there's an error - ONLY IN MODAL, NEVER ON PAGE
+  useEffect(() => {
+    if (error) {
+      setErrorMessage(error);
+      setShowErrorModal(true);
+    }
+  }, [error]);
 
   // Fetch products when filters change
   useEffect(() => {
@@ -63,6 +78,7 @@ const AdminPage = () => {
 
   const confirmDelete = async () => {
     if (productToDelete) {
+      setIsDeleting(true);
       try {
         await dispatch(deleteProduct(productToDelete.id)).unwrap();
         setShowDeleteConfirm(false);
@@ -80,11 +96,13 @@ const AdminPage = () => {
         
         // Show user-friendly error message
         console.error('Delete product error:', errorMessage);
-        // TODO: Replace with proper toast notification
-        alert(errorMessage);
+        setErrorMessage(errorMessage);
+        setShowErrorModal(true);
         
         setShowDeleteConfirm(false);
         setProductToDelete(null);
+      } finally {
+        setIsDeleting(false);
       }
     }
   };
@@ -180,21 +198,10 @@ const AdminPage = () => {
           <ProductFilters />
 
           {/* Products List */}
-          {isLoading ? (
+          {isLoading && products.length === 0 ? (
             <div className={styles.loadingContainer}>
               <div className={styles.loadingSpinner}></div>
               <p>Loading products...</p>
-            </div>
-          ) : error ? (
-            <div className={styles.errorContainer}>
-              <h3>Loading Error</h3>
-              <p>{error}</p>
-              <Button 
-                variant="primary" 
-                onClick={() => dispatch(fetchAllProducts())}
-              >
-                Try Again
-              </Button>
             </div>
           ) : products.length === 0 ? (
             <div className={styles.emptyState}>
@@ -308,20 +315,47 @@ const AdminPage = () => {
                     setShowDeleteConfirm(false);
                     setProductToDelete(null);
                   }}
+                  disabled={isDeleting}
                 >
                   Cancel
                 </Button>
                 <Button
                   variant="danger"
                   onClick={confirmDelete}
+                  disabled={isDeleting}
                 >
-                  Delete
+                  {isDeleting ? (
+                    <>
+                      <div className={styles.spinner}></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    'Delete'
+                  )}
                 </Button>
               </div>
             </motion.div>
           </div>
         )}
       </Container>
+      
+      {/* Error Modal */}
+      {showErrorModal && (
+        <div className={styles.errorModal}>
+          <div className={styles.errorModalContent}>
+            <h3>Cannot Delete Product</h3>
+            <p>{errorMessage}</p>
+            <div className={styles.errorModalActions}>
+              <button 
+                onClick={() => setShowErrorModal(false)}
+                className={styles.closeButton}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Section>
   );
 };

@@ -21,14 +21,17 @@ export const authServices = {
       const response = await api.post('/users/login', credentials);
       
       // Extract data from nested structure
-      const { accessToken, user } = response.data.data;
+      const { accessToken, user, csrfToken } = response.data.data;
       setAccessToken(accessToken, user);
       
-      // CSRF token is set in cookie by backend, no need to handle it here
+          // Store CSRF token from response body for cross-domain access
+          if (csrfToken) {
+            const { setCSRFToken } = await import('./csrfService.js');
+            setCSRFToken(csrfToken);
+          }
       
       return { accessToken, user };
     } catch (error) {
-      console.error('Login request failed:', error);
       throw error;
     }
   },
@@ -37,22 +40,44 @@ export const authServices = {
     try {
       await api.post('/users/logout');
     } catch (error) {
-      console.error('Logout request failed:', error);
+      // Logout request failed
     } finally {
       // Always clear tokens on logout
       setAccessToken(null);
       clearCSRFToken();
+      
+      // Clear all cookies manually
+      if (typeof document !== 'undefined') {
+        // Clear all cookies by setting them to expire in the past
+        const cookies = document.cookie.split(';');
+        cookies.forEach(cookie => {
+          const eqPos = cookie.indexOf('=');
+          const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+          if (name) {
+            // Clear cookie for current domain
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+            // Clear cookie for parent domain (for cross-domain scenarios)
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
+            // Clear cookie for all subdomains
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${window.location.hostname};`;
+          }
+        });
+      }
     }
   },
 
   getCurrentUser: async () => {
     const response = await api.get('/users/current');
     
-    
     // Extract data from nested structure
-    // API returns { message: "...", data: { user data } }
-    const user = response.data.data;
+    // API returns { message: "...", data: { user data, csrfToken } }
+    const { user, csrfToken } = response.data.data;
     
+        // Store CSRF token from response body for cross-domain access
+        if (csrfToken) {
+          const { setCSRFToken } = await import('./csrfService.js');
+          setCSRFToken(csrfToken);
+        }
     
     return { user };
   },

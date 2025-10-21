@@ -32,7 +32,8 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
 
   useEffect(() => {
     if (isOpen) {
-      dispatch(fetchCategories());
+      // Categories are already loaded by ProductsPage
+      // dispatch(fetchCategories());
       dispatch(fetchProductStatuses());
       setErrors({});
     }

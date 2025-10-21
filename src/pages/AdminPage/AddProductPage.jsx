@@ -27,10 +27,15 @@ const AddProductPage = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
-  // Load categories and product statuses on component mount
+  // Load product statuses on component mount (categories already loaded by ProductsPage)
   useEffect(() => {
     if (isAdmin) {
-      dispatch(fetchCategories());
+      // Clear any previous errors when entering this page
+      import('../../redux/products/slice').then(({ clearError }) => {
+        dispatch(clearError());
+      });
+      // Categories are already loaded by ProductsPage
+      // dispatch(fetchCategories());
       dispatch(fetchProductStatuses());
     } else {
       navigate(ROUTES.PRODUCTS);

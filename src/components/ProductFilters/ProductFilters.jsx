@@ -14,13 +14,14 @@ const ProductFilters = () => {
   const hasLoadedCategories = useRef(false);
   const [searchValue, setSearchValue] = useState(filters.search || '');
 
-  useEffect(() => {
-    // Load categories only once
-    if (!hasLoadedCategories.current) {
-      hasLoadedCategories.current = true;
-      dispatch(fetchCategories());
-    }
-  }, []); // Empty dependency array - run only once on mount
+  // Categories are loaded by ProductsPage, no need to load here
+  // useEffect(() => {
+  //   // Load categories only once
+  //   if (!hasLoadedCategories.current) {
+  //     hasLoadedCategories.current = true;
+  //     dispatch(fetchCategories());
+  //   }
+  // }, []); // Empty dependency array - run only once on mount
 
   // Debounce search
   useEffect(() => {
