@@ -35,20 +35,28 @@ export const setCSRFToken = (token) => {
  * Get current CSRF token
  */
 export const getCSRFToken = async () => {
+  console.log('🔍 Getting CSRF token...');
+  console.log('📄 All cookies:', document.cookie);
+  
   // First try to get from cookie (backend sets this)
   const cookieToken = getCSRFTokenFromCookie();
+  console.log('🍪 CSRF token from cookie:', cookieToken);
+  
   if (cookieToken) {
     csrfToken = cookieToken;
     tokenExpiry = Date.now() + TOKEN_LIFETIME;
+    console.log('✅ Using CSRF token from cookie');
     return csrfToken;
   }
 
   // Check if we have a cached token that's still valid
   if (csrfToken && tokenExpiry && Date.now() < tokenExpiry) {
+    console.log('✅ Using cached CSRF token');
     return csrfToken;
   }
 
   // If no valid token, throw error
+  console.error('❌ No valid CSRF token available');
   throw new Error('No valid CSRF token available. Please authenticate first.');
 };
 

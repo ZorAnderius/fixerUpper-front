@@ -47,12 +47,14 @@ api.interceptors.request.use(async (config) => {
   
   if (requiresCSRF && !isAuthEndpoint) {
     try {
+      console.log(`🔒 Adding CSRF token for ${method} request to ${config.url}`);
       const csrfToken = await getCSRFToken();
       if (csrfToken) {
         config.headers['x-csrf-token'] = csrfToken;
+        console.log('✅ CSRF token added to headers');
       }
     } catch (error) {
-      console.error('Failed to get CSRF token:', error);
+      console.error('❌ Failed to get CSRF token:', error);
     }
   }
 
@@ -67,10 +69,18 @@ api.interceptors.request.use(async (config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    console.log('🚨 API Error:', {
+      status: error.response?.status,
+      message: error.response?.data?.message,
+      url: error.config?.url,
+      method: error.config?.method
+    });
+    
     // Handle CSRF token errors
     if (error.response?.status === 403 && 
         (error.response?.data?.message === 'CSRF header missing' || 
          error.response?.data?.error === 'CSRF token mismatch')) {
+      console.log('🔒 CSRF token error detected');
       clearCSRFToken();
       // Optionally retry the request with a new CSRF token
       if (error.config && !error.config._retry) {

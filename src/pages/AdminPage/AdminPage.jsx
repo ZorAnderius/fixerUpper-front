@@ -78,7 +78,9 @@ const AdminPage = () => {
           errorMessage = 'Cannot delete product: it is currently in users\' carts. Please remove it from all carts first.';
         }
         
-        // You could show a toast notification here
+        // Show user-friendly error message
+        console.error('Delete product error:', errorMessage);
+        // TODO: Replace with proper toast notification
         alert(errorMessage);
         
         setShowDeleteConfirm(false);
