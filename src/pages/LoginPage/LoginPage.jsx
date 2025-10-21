@@ -201,12 +201,6 @@ const LoginPage = () => {
                     {isSubmitting || isLoading ? 'Signing in...' : 'Sign in'}
                   </button>
 
-                  {/* Error Message */}
-                  {error && (
-                    <div className={styles.errorMessage}>
-                      {error}
-                    </div>
-                  )}
 
 
                   {/* Register Link */}

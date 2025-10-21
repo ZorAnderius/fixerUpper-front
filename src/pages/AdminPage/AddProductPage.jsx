@@ -27,20 +27,20 @@ const AddProductPage = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
-  // Load product statuses on component mount (categories already loaded by ProductsPage)
+  // Load categories and product statuses on component mount
   useEffect(() => {
     if (isAdmin) {
-      // Clear any previous errors when entering this page
-      import('../../redux/products/slice').then(({ clearError }) => {
-        dispatch(clearError());
-      });
-      // Categories are already loaded by ProductsPage
-      // dispatch(fetchCategories());
+      // Clear any previous errors when entering this page - SYNCHRONOUS
+      dispatch({ type: 'products/clearError' });
+      // Load categories if not already loaded
+      if (categories.length === 0) {
+        dispatch(fetchCategories());
+      }
       dispatch(fetchProductStatuses());
     } else {
       navigate(ROUTES.PRODUCTS);
     }
-  }, [dispatch, isAdmin, navigate]);
+  }, [dispatch, isAdmin, navigate, categories.length]);
 
   // Redirect if not admin
   if (!isAdmin) {
@@ -110,10 +110,20 @@ const AddProductPage = () => {
         errors.product_image = 'Image file size must be less than 5MB';
       }
       
+      // Check if file is empty
+      if (values.product_image.size === 0) {
+        errors.product_image = 'File is empty or corrupted';
+      }
+      
       // Check file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
       if (!allowedTypes.includes(values.product_image.type)) {
         errors.product_image = 'Only JPEG, PNG, GIF, and WebP images are allowed';
+      }
+      
+      // Check file name
+      if (!values.product_image.name || values.product_image.name.trim() === '') {
+        errors.product_image = 'Invalid file name';
       }
     }
 
@@ -150,6 +160,8 @@ const AddProductPage = () => {
       });
 
       await dispatch(createProduct(sanitizedData)).unwrap();
+      // Clear any errors after successful creation
+      dispatch({ type: 'products/clearError' });
       navigate(ROUTES.ADMIN);
     } catch (error) {
       console.error('Failed to create product:', error);
@@ -406,11 +418,6 @@ const AddProductPage = () => {
                   </div>
                 </div>
 
-                {error && (
-                  <div className={styles.errorMessage}>
-                    {error}
-                  </div>
-                )}
 
                 <div className={styles.formActions}>
                   <Button

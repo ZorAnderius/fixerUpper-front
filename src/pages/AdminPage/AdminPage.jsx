@@ -37,10 +37,8 @@ const AdminPage = () => {
 
   useEffect(() => {
     if (isAdmin) {
-      // Clear any previous errors when entering admin page
-      import('../../redux/products/slice').then(({ clearError }) => {
-        dispatch(clearError());
-      });
+      // Clear any previous errors when entering admin page - SYNCHRONOUS
+      dispatch({ type: 'products/clearError' });
       dispatch(fetchAllProducts());
     }
     // Don't redirect here, let the component handle the access denied message
@@ -81,6 +79,8 @@ const AdminPage = () => {
       setIsDeleting(true);
       try {
         await dispatch(deleteProduct(productToDelete.id)).unwrap();
+        // Clear any errors after successful deletion
+        dispatch({ type: 'products/clearError' });
         setShowDeleteConfirm(false);
         setProductToDelete(null);
       } catch (error) {

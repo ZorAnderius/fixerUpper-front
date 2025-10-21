@@ -244,7 +244,6 @@ const RegisterPage = () => {
                       'Sign up'
                     )}
                   </button>
-                  {error && <div className={styles.errorMessage}>{error}</div>}
                   <div className={styles.socialSection}>
                     <p className={styles.socialText}>or sign up with Google</p>
                     <div className={styles.socialButtons}>

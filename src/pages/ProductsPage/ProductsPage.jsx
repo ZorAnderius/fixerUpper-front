@@ -27,10 +27,8 @@ const ProductsPage = () => {
 
   // Fetch categories only once on component mount
   useEffect(() => {
-    // Clear any previous errors when entering products page
-    import('../../redux/products/slice').then(({ clearError }) => {
-      dispatch(clearError());
-    });
+    // Clear any previous errors when entering products page - SYNCHRONOUS
+    dispatch({ type: 'products/clearError' });
     dispatch(fetchCategories());
   }, [dispatch]);
 

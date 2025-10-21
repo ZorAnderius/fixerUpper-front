@@ -16,7 +16,8 @@ import {
   setCategories,
   setProductStatuses,
   removeProduct,
-  clearError
+  clearError,
+  setCurrentProduct
 } from './slice';
 
 // Fetch all products
@@ -119,10 +120,11 @@ export const fetchProductById = createAsyncThunk(
       // Extract the actual product data from response.data
       const productData = response.data || response;
       
+      // Set the current product in Redux state
+      dispatch(setCurrentProduct(productData));
       dispatch(setLoading(false));
       return productData;
     } catch (error) {
-      console.error('fetchProductById error:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch product';
       dispatch(setError(errorMessage));
       dispatch(setLoading(false));
@@ -197,8 +199,16 @@ export const deleteProduct = createAsyncThunk(
 // Fetch categories
 export const fetchCategories = createAsyncThunk(
   'products/fetchCategories',
-  async (_, { dispatch, rejectWithValue }) => {
+  async (_, { dispatch, rejectWithValue, getState }) => {
     try {
+      // Check if categories are already loaded
+      const currentState = getState();
+      const existingCategories = currentState.products.categories;
+      
+      if (existingCategories && existingCategories.length > 0) {
+        return existingCategories;
+      }
+      
       const response = await getAllCategoriesAPI();
       
       // Handle different response formats
@@ -207,7 +217,6 @@ export const fetchCategories = createAsyncThunk(
       dispatch(setCategories(categories));
       return categories;
     } catch (error) {
-      console.error('fetchCategories error:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch categories';
       dispatch(setError(errorMessage));
       return rejectWithValue(errorMessage);
@@ -218,8 +227,16 @@ export const fetchCategories = createAsyncThunk(
 // Fetch product statuses
 export const fetchProductStatuses = createAsyncThunk(
   'products/fetchProductStatuses',
-  async (_, { dispatch, rejectWithValue }) => {
+  async (_, { dispatch, rejectWithValue, getState }) => {
     try {
+      // Check if product statuses are already loaded
+      const currentState = getState();
+      const existingStatuses = currentState.products.productStatuses;
+      
+      if (existingStatuses && existingStatuses.length > 0) {
+        return existingStatuses;
+      }
+      
       const response = await getAllProductStatusesAPI();
       
       // Handle different response formats
@@ -228,7 +245,6 @@ export const fetchProductStatuses = createAsyncThunk(
       dispatch(setProductStatuses(statuses));
       return statuses;
     } catch (error) {
-      console.error('fetchProductStatuses error:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch product statuses';
       dispatch(setError(errorMessage));
       return rejectWithValue(errorMessage);
