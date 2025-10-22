@@ -103,25 +103,13 @@ export const updateProduct = async (id, productData) => {
     // Create FormData for file upload (similar to createProduct)
     const formData = new FormData();
     
-    // Add text fields (only if they have values)
-    if (productData.title !== undefined) {
-      formData.append('title', productData.title);
-    }
-    if (productData.description !== undefined) {
-      formData.append('description', productData.description);
-    }
-    if (productData.price !== undefined) {
-      formData.append('price', productData.price);
-    }
-    if (productData.quantity !== undefined) {
-      formData.append('quantity', productData.quantity);
-    }
-    if (productData.category_id !== undefined) {
-      formData.append('category_id', productData.category_id);
-    }
-    if (productData.status_id !== undefined) {
-      formData.append('status_id', productData.status_id);
-    }
+    // Add ALL text fields (backend expects complete object)
+    formData.append('title', productData.title || '');
+    formData.append('description', productData.description || '');
+    formData.append('price', productData.price || 0);
+    formData.append('quantity', productData.quantity || 0);
+    formData.append('category_id', productData.category_id || '');
+    formData.append('status_id', productData.status_id || '');
     
     // Add image file if present
     if (productData.product_image && productData.product_image instanceof File) {
@@ -130,7 +118,7 @@ export const updateProduct = async (id, productData) => {
     
     
     
-    const response = await api.patch(`/products/${id}`, formData, {
+    const response = await api.patch(`/products/${id}/edit`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }

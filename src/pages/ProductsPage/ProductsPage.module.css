@@ -3,6 +3,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-4xl);
 }
 
 .loadingContainer {

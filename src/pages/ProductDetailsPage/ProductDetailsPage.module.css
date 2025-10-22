@@ -1,7 +1,7 @@
 /* Modern Product Details Page - Mobile First Approach */
 
 .productDetails {
-  padding: var(--spacing-lg) 0;
+  padding: var(--spacing-lg) 0 var(--spacing-4xl) 0;
   min-height: 100vh;
   background: var(--color-background-white);
 }

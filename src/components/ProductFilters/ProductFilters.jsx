@@ -52,12 +52,12 @@ const ProductFilters = () => {
     dispatch(setFilters({ 
       search: '', 
       category: '', 
-      sortBy: 'newest', 
+      sortBy: 'price-low', 
       page: 1 
     }));
   };
 
-  const hasActiveFilters = searchValue || filters.category || filters.sortBy !== 'newest';
+  const hasActiveFilters = searchValue || filters.category || filters.sortBy !== 'price-low';
 
   return (
     <motion.div 
@@ -93,7 +93,7 @@ const ProductFilters = () => {
               onChange={handleCategoryChange}
               className={styles.selectInput}
             >
-              <option value="">All Categories</option>
+              <option value="">All</option>
               {Array.isArray(categories) && categories.map(category => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -110,8 +110,6 @@ const ProductFilters = () => {
               onChange={handleSortChange}
               className={styles.selectInput}
             >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
               <option value="price-low">Price: Low to High</option>
               <option value="price-high">Price: High to Low</option>
               <option value="name">Name A-Z</option>

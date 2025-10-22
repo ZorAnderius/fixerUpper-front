@@ -71,7 +71,7 @@ const ProductsPage = () => {
         >
           <ProductFilters />
           
-          {isLoading && products.length === 0 ? (
+          {isLoading ? (
             <ContentLoader 
               variant="dots"
               text="Loading products..."

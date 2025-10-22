@@ -29,6 +29,7 @@ const AdminPage = () => {
   const [modalMode, setModalMode] = useState('create');
   const [selectedProduct, setSelectedProduct] = useState(null);
   
+  
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -79,7 +80,6 @@ const AdminPage = () => {
       setIsDeleting(true);
       try {
         await dispatch(deleteProduct(productToDelete.id)).unwrap();
-        // Clear any errors after successful deletion
         dispatch({ type: 'products/clearError' });
         setShowDeleteConfirm(false);
         setProductToDelete(null);
@@ -233,7 +233,7 @@ const AdminPage = () => {
                     {product.image_url ? (
                       <img 
                         src={product.image_url} 
-                        alt={product.title}
+                        alt={product?.title}
                         className={styles.productImageImg}
                       />
                     ) : (
@@ -246,17 +246,17 @@ const AdminPage = () => {
                   </div>
 
                   <div className={styles.productInfo}>
-                    <h3 className={styles.productTitle}>{product.title}</h3>
+                    <h3 className={styles.productTitle}>{product?.title}</h3>
                     <p className={styles.productDescription}>
-                      {product.description.length > 100 
+                      {product.description && product.description.length > 100 
                         ? `${product.description.substring(0, 100)}...` 
-                        : product.description
+                        : product.description || 'No description available'
                       }
                     </p>
                     <div className={styles.productMeta}>
                       <span className={styles.productPrice}>{formatPrice(product.price)}</span>
                       <span className={styles.productQuantity}>
-                        Quantity: {product.quantity}
+                        Quantity: {product.quantity || 0}
                       </span>
                     </div>
                   </div>
@@ -290,7 +290,7 @@ const AdminPage = () => {
         <ProductModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          product={selectedProduct}
+          productId={selectedProduct?.id}
           mode={modalMode}
         />
 

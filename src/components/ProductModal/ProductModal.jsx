@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createProduct, updateProduct } from '../../redux/products/operations';
+import { createProduct, updateProduct, fetchProductById, fetchAllProducts } from '../../redux/products/operations';
 import { selectCategories, selectProductStatuses, selectProductsLoading } from '../../redux/products/selectors';
 import { fetchCategories, fetchProductStatuses } from '../../redux/products/operations';
-import { productSchema, validateForm } from '../../utils/validation';
+import { productSchema, validateAndSanitize } from '../../utils/validation';
 import { sanitizeInput } from '../../utils/security';
 import Button from '../Button/Button';
 import styles from './ProductModal.module.css';
 
-const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
-  
+const ProductModal = ({ isOpen, onClose, productId = null, mode = 'create' }) => {
+
   const dispatch = useDispatch();
   const categories = useSelector(selectCategories);
   const productStatuses = useSelector(selectProductStatuses);
   const isLoading = useSelector(selectProductsLoading);
-  
+
 
   const [formData, setFormData] = useState({
     title: '',
@@ -28,7 +28,12 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
 
   const [errors, setErrors] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
-  
+
+  // Local state for the product being edited
+  const [product, setProduct] = useState(null);
+  const [isLoadingProduct, setIsLoadingProduct] = useState(false);
+
+
 
   useEffect(() => {
     if (isOpen) {
@@ -36,12 +41,35 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
       // dispatch(fetchCategories());
       dispatch(fetchProductStatuses());
       setErrors({});
+
+      // Load product data if in edit mode
+      if (mode === 'edit' && productId) {
+        loadProductData();
+      }
     }
-  }, [isOpen, dispatch]);
+  }, [isOpen, dispatch, mode, productId]);
+
+  // Function to load product data
+  const loadProductData = async () => {
+    if (!productId) {
+      return;
+    }
+
+    setIsLoadingProduct(true);
+    try {
+      const result = await dispatch(fetchProductById(productId)).unwrap();
+      setProduct(result);
+    } catch (error) {
+      console.error('Failed to load product:', error);
+      setErrors({ general: 'Failed to load product data' });
+    } finally {
+      setIsLoadingProduct(false);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
-      if (mode === 'edit' && product) {
+      if (mode === 'edit' && product && product?.title) {
         setFormData({
           title: product.title || '',
           description: product.description || '',
@@ -52,7 +80,7 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
           product_image: null
         });
         setImagePreview(product.image_url || null);
-      } else {
+      } else if (mode === 'create') {
         setFormData({
           title: '',
           description: '',
@@ -84,9 +112,9 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error when user starts typing
-    if (errors[name]) {
+    if (errors?.[name]) {
       setErrors(prev => ({
         ...prev,
         [name]: ''
@@ -101,7 +129,7 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
         ...prev,
         product_image: file
       }));
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -114,12 +142,24 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
+    // Перевірити чи продукт завантажений для режиму edit
+    if (mode === 'edit' && (!productId || !product)) {
+      console.error('❌ Cannot save: Product not loaded');
+      setErrors({ general: 'Product not loaded. Please try again.' });
+      return;
+    }
+
     // Validate form data using Joi schema
-    const validationResult = validateForm(formData, productSchema);
-    
+    const validationResult = validateAndSanitize(formData, productSchema);
+
     if (!validationResult.isValid) {
-      setErrors(validationResult.errors);
+      // Convert validation errors to the format expected by the form
+      const formattedErrors = {};
+      validationResult.errors.forEach(error => {
+        formattedErrors[error.field] = error.message;
+      });
+      setErrors(formattedErrors);
       return;
     }
 
@@ -136,20 +176,31 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
       };
 
       if (mode === 'create') {
-        await dispatch(createProduct(sanitizedData)).unwrap();
+        console.log('💾 Creating new product:', sanitizedData);
+        const result = await dispatch(createProduct(sanitizedData)).unwrap();
+        console.log('✅ Product created successfully:', result);
       } else {
-        // For update, only send changed fields
-        const updateData = {};
-        if (sanitizedData.title !== product.title) updateData.title = sanitizedData.title;
-        if (sanitizedData.description !== product.description) updateData.description = sanitizedData.description;
-        if (sanitizedData.price !== product.price) updateData.price = sanitizedData.price;
-        if (sanitizedData.quantity !== product.quantity) updateData.quantity = sanitizedData.quantity;
-        if (sanitizedData.category_id !== product.category?.id) updateData.category_id = sanitizedData.category_id;
-        if (sanitizedData.status_id !== product.status?.id) updateData.status_id = sanitizedData.status_id;
-        if (sanitizedData.product_image) updateData.product_image = sanitizedData.product_image;
+        // For update, send ALL fields (backend expects complete object)
+        const updateData = {
+          title: sanitizedData.title,
+          description: sanitizedData.description,
+          price: sanitizedData.price,
+          quantity: sanitizedData.quantity,
+          category_id: sanitizedData.category_id,
+          status_id: sanitizedData.status_id,
+          product_image: sanitizedData.product_image
+        };
+
+        if (!productId) {
+          throw new Error('Product ID is missing');
+        }
+        const result = await dispatch(updateProduct({ id: productId, productData: updateData })).unwrap();
         
-        await dispatch(updateProduct({ id: product.id, productData: updateData })).unwrap();
+        // Оновити список продуктів після успішного оновлення
+        dispatch(fetchAllProducts());
       }
+      
+      // Закрити модальку тільки після успішного збереження
       onClose();
     } catch (error) {
       console.error('Failed to save product:', error);
@@ -173,17 +224,31 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
     onClose();
   };
 
-  
+
   if (!isOpen) return null;
   
-  
-  
+  // Якщо режим edit, але продукт не завантажений, показуємо завантаження
+  if (mode === 'edit' && (isLoadingProduct || !product)) {
+    return (
+      <div className={styles.modalOverlay}>
+        <div className={styles.modalContent}>
+          <div className={styles.loadingContainer}>
+            <div className={styles.spinner}></div>
+            <p>Loading product details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+
+
   return (
     <>
       {/* Backdrop */}
       <div
         onClick={handleClose}
-        style={{ 
+        style={{
           position: 'fixed',
           top: 0,
           left: 0,
@@ -196,12 +261,12 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
           justifyContent: 'center'
         }}
       />
-      
+
       {/* Modal */}
       <div
         data-testid="product-modal"
         className={styles.modal}
-        style={{ 
+        style={{
           position: 'fixed',
           top: '50%',
           left: '50%',
@@ -209,189 +274,189 @@ const ProductModal = ({ isOpen, onClose, product = null, mode = 'create' }) => {
           zIndex: 10000
         }}
       >
-            <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>
-                {mode === 'create' ? 'Create Product' : 'Edit Product'}
-              </h2>
-              <button
-                className={styles.closeButton}
-                onClick={handleClose}
-                aria-label="Close"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
+        <div className={styles.modalHeader}>
+          <h2 className={styles.modalTitle}>
+            {mode === 'create' ? 'Create Product' : 'Edit Product'}
+          </h2>
+          <button
+            className={styles.closeButton}
+            onClick={handleClose}
+            aria-label="Close"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className={styles.modalContent}>
+          <div className={styles.formGrid}>
+            {/* Title */}
+            <div className={styles.formGroup}>
+              <label htmlFor="title" className={styles.label}>
+                Product Title *
+              </label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                value={formData.title || ''}
+                onChange={handleInputChange}
+                className={`${styles.input} ${errors?.title ? styles.inputError : ''}`}
+                placeholder="Enter product title"
+              />
+              {errors?.title && <span className={styles.error}>{errors.title}</span>}
             </div>
 
-            <form onSubmit={handleSubmit} className={styles.modalContent}>
-              <div className={styles.formGrid}>
-                {/* Title */}
-                <div className={styles.formGroup}>
-                  <label htmlFor="title" className={styles.label}>
-                    Product Title *
-                  </label>
-                  <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    className={`${styles.input} ${errors.title ? styles.inputError : ''}`}
-                    placeholder="Enter product title"
-                  />
-                  {errors.title && <span className={styles.error}>{errors.title}</span>}
-                </div>
+            {/* Price */}
+            <div className={styles.formGroup}>
+              <label htmlFor="price" className={styles.label}>
+                Price (£) *
+              </label>
+              <input
+                type="number"
+                id="price"
+                name="price"
+                value={formData.price}
+                onChange={handleInputChange}
+                className={`${styles.input} ${errors?.price ? styles.inputError : ''}`}
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+              />
+              {errors?.price && <span className={styles.error}>{errors.price}</span>}
+            </div>
 
-                {/* Price */}
-                <div className={styles.formGroup}>
-                  <label htmlFor="price" className={styles.label}>
-                    Price (£) *
-                  </label>
-                  <input
-                    type="number"
-                    id="price"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleInputChange}
-                    className={`${styles.input} ${errors.price ? styles.inputError : ''}`}
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0"
-                  />
-                  {errors.price && <span className={styles.error}>{errors.price}</span>}
-                </div>
+            {/* Quantity */}
+            <div className={styles.formGroup}>
+              <label htmlFor="quantity" className={styles.label}>
+                Quantity *
+              </label>
+              <input
+                type="number"
+                id="quantity"
+                name="quantity"
+                value={formData.quantity}
+                onChange={handleInputChange}
+                className={`${styles.input} ${errors?.quantity ? styles.inputError : ''}`}
+                placeholder="0"
+                min="0"
+              />
+              {errors?.quantity && <span className={styles.error}>{errors.quantity}</span>}
+            </div>
 
-                {/* Quantity */}
-                <div className={styles.formGroup}>
-                  <label htmlFor="quantity" className={styles.label}>
-                    Quantity *
-                  </label>
-                  <input
-                    type="number"
-                    id="quantity"
-                    name="quantity"
-                    value={formData.quantity}
-                    onChange={handleInputChange}
-                    className={`${styles.input} ${errors.quantity ? styles.inputError : ''}`}
-                    placeholder="0"
-                    min="0"
-                  />
-                  {errors.quantity && <span className={styles.error}>{errors.quantity}</span>}
-                </div>
+            {/* Category */}
+            <div className={styles.formGroup}>
+              <label htmlFor="category_id" className={styles.label}>
+                Category *
+              </label>
+              <select
+                id="category_id"
+                name="category_id"
+                value={formData.category_id}
+                onChange={handleInputChange}
+                className={`${styles.select} ${errors?.category_id ? styles.inputError : ''}`}
+              >
+                <option value="">Select category</option>
+                {Array.isArray(categories) && categories.map(category => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+              {errors?.category_id && <span className={styles.error}>{errors.category_id}</span>}
+            </div>
 
-                {/* Category */}
-                <div className={styles.formGroup}>
-                  <label htmlFor="category_id" className={styles.label}>
-                    Category *
-                  </label>
-                  <select
-                    id="category_id"
-                    name="category_id"
-                    value={formData.category_id}
-                    onChange={handleInputChange}
-                    className={`${styles.select} ${errors.category_id ? styles.inputError : ''}`}
-                  >
-                    <option value="">Select category</option>
-                    {Array.isArray(categories) && categories.map(category => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.category_id && <span className={styles.error}>{errors.category_id}</span>}
-                </div>
+            {/* Status */}
+            <div className={styles.formGroup}>
+              <label htmlFor="status_id" className={styles.label}>
+                Status *
+              </label>
+              <select
+                id="status_id"
+                name="status_id"
+                value={formData.status_id}
+                onChange={handleInputChange}
+                className={`${styles.select} ${errors?.status_id ? styles.inputError : ''}`}
+              >
+                <option value="">Select status</option>
+                {Array.isArray(productStatuses) && productStatuses.map(status => (
+                  <option key={status.id} value={status.id}>
+                    {status.name}
+                  </option>
+                ))}
+              </select>
+              {errors?.status_id && <span className={styles.error}>{errors.status_id}</span>}
+            </div>
 
-                {/* Status */}
-                <div className={styles.formGroup}>
-                  <label htmlFor="status_id" className={styles.label}>
-                    Status *
-                  </label>
-                  <select
-                    id="status_id"
-                    name="status_id"
-                    value={formData.status_id}
-                    onChange={handleInputChange}
-                    className={`${styles.select} ${errors.status_id ? styles.inputError : ''}`}
-                  >
-                    <option value="">Select status</option>
-                    {Array.isArray(productStatuses) && productStatuses.map(status => (
-                      <option key={status.id} value={status.id}>
-                        {status.name}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.status_id && <span className={styles.error}>{errors.status_id}</span>}
-                </div>
+            {/* Description */}
+            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+              <label htmlFor="description" className={styles.label}>
+                Product Description *
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                className={`${styles.textarea} ${errors?.description ? styles.inputError : ''}`}
+                placeholder="Enter detailed product description"
+                rows="4"
+              />
+              {errors?.description && <span className={styles.error}>{errors.description}</span>}
+            </div>
 
-                {/* Description */}
-                <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                  <label htmlFor="description" className={styles.label}>
-                    Product Description *
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    className={`${styles.textarea} ${errors.description ? styles.inputError : ''}`}
-                    placeholder="Enter detailed product description"
-                    rows="4"
-                  />
-                  {errors.description && <span className={styles.error}>{errors.description}</span>}
-                </div>
-
-                {/* Image Upload */}
-                <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                  <label htmlFor="product_image" className={styles.label}>
-                    Product Image
-                  </label>
-                  <div className={styles.imageUpload}>
-                    <input
-                      type="file"
-                      id="product_image"
-                      name="product_image"
-                      onChange={handleImageChange}
-                      accept="image/*"
-                      className={styles.fileInput}
-                    />
-                    <label htmlFor="product_image" className={styles.fileLabel}>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      <span>Select image</span>
-                    </label>
-                  </div>
-                  
-                  {imagePreview && (
-                    <div className={styles.imagePreview}>
-                      <img src={imagePreview} alt="Preview" className={styles.previewImg} />
-                    </div>
-                  )}
-                </div>
+            {/* Image Upload */}
+            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+              <label htmlFor="product_image" className={styles.label}>
+                Product Image
+              </label>
+              <div className={styles.imageUpload}>
+                <input
+                  type="file"
+                  id="product_image"
+                  name="product_image"
+                  onChange={handleImageChange}
+                  accept="image/*"
+                  className={styles.fileInput}
+                />
+                <label htmlFor="product_image" className={styles.fileLabel}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <span>Select image</span>
+                </label>
               </div>
 
-              <div className={styles.modalFooter}>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleClose}
-                  disabled={isLoading}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  loading={isLoading}
-                  disabled={isLoading}
-                >
-                  {mode === 'create' ? 'Create' : 'Save'}
-                </Button>
-              </div>
-            </form>
+              {imagePreview && (
+                <div className={styles.imagePreview}>
+                  <img src={imagePreview} alt="Preview" className={styles.previewImg} />
+                </div>
+              )}
+            </div>
           </div>
-        </>
+
+          <div className={styles.modalFooter}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleClose}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              loading={isLoading}
+              disabled={isLoading}
+            >
+              {mode === 'create' ? 'Create' : 'Save'}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </>
   );
 };
 

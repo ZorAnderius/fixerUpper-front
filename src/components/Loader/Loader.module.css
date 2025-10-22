@@ -218,6 +218,10 @@
 
 /* Content loader */
 .contentLoader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
   padding: var(--spacing-2xl);
   text-align: center;
 }
