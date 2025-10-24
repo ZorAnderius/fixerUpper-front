@@ -7,8 +7,6 @@ export const ordersServices = {
       const response = await api.get(`/orders?page=${page}&limit=${limit}`);
       return response.data;
     } catch (error) {
-      console.error('Orders API Error:', error);
-      throw new Error(`Failed to fetch orders: ${error.response?.status || 'Unknown error'}`);
     }
   },
 
@@ -22,8 +20,6 @@ export const ordersServices = {
       const response = await api.get(`/orders/${orderId}`);
       return response.data;
     } catch (error) {
-      console.error('Order API Error:', error);
-      throw new Error(`Failed to fetch order: ${error.response?.status || 'Unknown error'}`);
     }
   },
 };

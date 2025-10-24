@@ -4,7 +4,7 @@ import api from './client';
 const sanitizeInput = (input) => {
   if (typeof input === 'string') {
     return input
-      .replace(/[<>]/g, '') // Remove potential HTML tags
+      .replace(/[<>]/g, '')
       .trim();
   }
   return input;
@@ -43,14 +43,6 @@ export const getAllProducts = async (filters = {}) => {
     const response = await api.get(url);
     return response.data;
   } catch (error) {
-    console.error('Error fetching products:', error);
-    console.error('Error details:', {
-      message: error.message,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data
-    });
-    throw error;
   }
 };
 
@@ -60,8 +52,6 @@ export const getProductById = async (id) => {
     const response = await api.get(`/products/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching product:', error);
-    throw error;
   }
 };
 
@@ -84,7 +74,6 @@ export const createProduct = async (productData) => {
       formData.append('product_image', productData.product_image);
     }
     
-    
     const response = await api.post('/products', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -92,8 +81,6 @@ export const createProduct = async (productData) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error creating product:', error);
-    throw error;
   }
 };
 
@@ -117,7 +104,6 @@ export const updateProduct = async (id, productData) => {
     }
     
     
-    
     const response = await api.patch(`/products/${id}/edit`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -125,8 +111,6 @@ export const updateProduct = async (id, productData) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error updating product:', error);
-    throw error;
   }
 };
 
@@ -136,8 +120,6 @@ export const deleteProduct = async (id) => {
     const response = await api.delete(`/products/${id}/delete`);
     return response.data;
   } catch (error) {
-    console.error('Error deleting product:', error);
-    throw error;
   }
 };
 
@@ -151,14 +133,6 @@ export const getAllCategories = async () => {
     const categories = response.data.data || response.data;
     return categories;
   } catch (error) {
-    console.error('Error fetching categories:', error);
-    console.error('Error details:', {
-      message: error.message,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data
-    });
-    throw error;
   }
 };
 
@@ -170,17 +144,9 @@ export const getAllProductStatuses = async () => {
     // We need to return the data array and map status field to name field
     const statuses = response.data.data.map(item => ({
       id: item.id,
-      name: item.status // Map 'status' field to 'name' field for consistency
+      name: item.status
     }));
     return statuses;
   } catch (error) {
-    console.error('Error fetching product statuses:', error);
-    console.error('Error details:', {
-      message: error.message,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data
-    });
-    throw error;
   }
 };

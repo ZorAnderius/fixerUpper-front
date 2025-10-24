@@ -37,8 +37,8 @@ const ProductModal = ({ isOpen, onClose, productId = null, mode = 'create' }) =>
 
   useEffect(() => {
     if (isOpen) {
-      // Categories are already loaded by ProductsPage
-      // dispatch(fetchCategories());
+      // Load categories and product statuses when modal opens
+      dispatch(fetchCategories());
       dispatch(fetchProductStatuses());
       setErrors({});
 
@@ -143,7 +143,7 @@ const ProductModal = ({ isOpen, onClose, productId = null, mode = 'create' }) =>
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Перевірити чи продукт завантажений для режиму edit
+    // Check if product is loaded for edit mode
     if (mode === 'edit' && (!productId || !product)) {
       console.error('❌ Cannot save: Product not loaded');
       setErrors({ general: 'Product not loaded. Please try again.' });
@@ -196,11 +196,11 @@ const ProductModal = ({ isOpen, onClose, productId = null, mode = 'create' }) =>
         }
         const result = await dispatch(updateProduct({ id: productId, productData: updateData })).unwrap();
         
-        // Оновити список продуктів після успішного оновлення
+        // Update product list after successful update
         dispatch(fetchAllProducts());
       }
       
-      // Закрити модальку тільки після успішного збереження
+      // Close modal only after successful save
       onClose();
     } catch (error) {
       console.error('Failed to save product:', error);
@@ -227,7 +227,7 @@ const ProductModal = ({ isOpen, onClose, productId = null, mode = 'create' }) =>
 
   if (!isOpen) return null;
   
-  // Якщо режим edit, але продукт не завантажений, показуємо завантаження
+  // If edit mode but product not loaded, show loading
   if (mode === 'edit' && (isLoadingProduct || !product)) {
     return (
       <div className={styles.modalOverlay}>

@@ -80,11 +80,11 @@ const OrderDetailsModal = () => {
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
           >
             <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>Деталі замовлення</h2>
+              <h2 className={styles.modalTitle}>Order Details</h2>
               <button
                 className={styles.closeButton}
                 onClick={handleClose}
-                aria-label="Закрити"
+                aria-label="Close"
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -96,7 +96,7 @@ const OrderDetailsModal = () => {
               {isLoading ? (
                 <div className={styles.loadingContainer}>
                   <div className={styles.loadingSpinner}></div>
-                  <p>Завантаження деталей замовлення...</p>
+                  <p>Loading order details...</p>
                 </div>
               ) : order ? (
                 <>
@@ -104,7 +104,7 @@ const OrderDetailsModal = () => {
                   <div className={styles.orderInfo}>
                     <div className={styles.orderHeader}>
                       <div className={styles.orderNumber}>
-                        <h3>Замовлення #{order.id.slice(-8)}</h3>
+                        <h3>Order #{order.id.slice(-8)}</h3>
                         <p className={styles.orderDate}>
                           {formatDate(order.createdAt)}
                         </p>
@@ -119,7 +119,7 @@ const OrderDetailsModal = () => {
 
                   {/* Order Items */}
                   <div className={styles.orderItems}>
-                    <h4>Товари в замовленні:</h4>
+                    <h4>Items in order:</h4>
                     <div className={styles.itemsList}>
                       {order.items?.map((item, index) => (
                         <motion.div
@@ -147,7 +147,7 @@ const OrderDetailsModal = () => {
 
                           <div className={styles.itemDetails}>
                             <h5 className={styles.itemTitle}>
-                              {item.product?.title || 'Товар'}
+                              {item.product?.title || 'Product'}
                             </h5>
                             <p className={styles.itemQuantity}>
                               Quantity: {item.quantity}
@@ -172,7 +172,7 @@ const OrderDetailsModal = () => {
                       <span>{order.items?.length || 0}</span>
                     </div>
                     <div className={styles.summaryRow}>
-                      <span>Загальна сума:</span>
+                      <span>Total amount:</span>
                       <span className={styles.totalAmount}>
                         {formatPrice(order.totalAmount || 0)}
                       </span>
@@ -181,8 +181,8 @@ const OrderDetailsModal = () => {
                 </>
               ) : (
                 <div className={styles.errorContainer}>
-                  <h3>Помилка завантаження</h3>
-                  <p>Не вдалося завантажити деталі замовлення</p>
+                  <h3>Loading error</h3>
+                  <p>Failed to load order details</p>
                 </div>
               )}
             </div>
@@ -193,7 +193,7 @@ const OrderDetailsModal = () => {
                 onClick={handleClose}
                 fullWidth
               >
-                Закрити
+                Close
               </Button>
             </div>
           </motion.div>

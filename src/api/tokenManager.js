@@ -64,14 +64,12 @@ const initializeStoreSubscription = async () => {
       }
     });
   } catch (error) {
-    console.error('Failed to initialize store subscription:', error);
   }
 };
 
 export const getAccessToken = () => {
   // Initialize store subscription on first access (async, don't wait)
   initializeStoreSubscription().catch(error => {
-    console.error('Failed to initialize store subscription:', error);
   });
   
   // If no token in memory, try to get from localStorage
@@ -82,23 +80,11 @@ export const getAccessToken = () => {
     }
   }
   
-  // Temporary debug log to check token
-  if (!accessToken) {
-    console.warn('No access token available');
-  }
-  
   return accessToken;
 };
 
 export const setAccessToken = (token, user = null) => {
   accessToken = token;
-  
-  // Temporary debug log
-  if (token) {
-    console.log('Token set:', token.substring(0, 10) + '...');
-  } else {
-    console.log('Token cleared');
-  }
   
   // Save to localStorage
   if (token) {

@@ -9,7 +9,7 @@ export const CSP_CONFIG = {
   'default-src': ["'self'"],
   'script-src': [
     "'self'",
-    "'unsafe-inline'", // Required for Vite in development
+    "'unsafe-inline'", 
     "'unsafe-eval'", // Required for Vite in development
     'https://accounts.google.com', // For Google OAuth
     'https://apis.google.com'

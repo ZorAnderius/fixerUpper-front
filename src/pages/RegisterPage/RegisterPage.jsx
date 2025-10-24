@@ -217,12 +217,12 @@ const RegisterPage = () => {
                   <div className={styles.passwordFields}>
                     <div className={styles.inputGroup}>
                       <label htmlFor="password" className={styles.label}>Password</label>
-                      <Field type="password" id="password" name="password" className={`${styles.input} ${errors.password && touched.password ? styles.inputError : ''}`} placeholder="Enter your password" />
+                      <Field type="password" id="password" name="password" autoComplete="new-password" className={`${styles.input} ${errors.password && touched.password ? styles.inputError : ''}`} placeholder="Enter your password" />
                       {errors.password && touched.password && <span className={styles.error}>{errors.password}</span>}
                     </div>
                     <div className={styles.inputGroup}>
                       <label htmlFor="confirmPassword" className={styles.label}>Confirm password</label>
-                      <Field type="password" id="confirmPassword" name="confirmPassword" className={`${styles.input} ${errors.confirmPassword && touched.confirmPassword ? styles.inputError : ''}`} placeholder="Confirm your password" />
+                      <Field type="password" id="confirmPassword" name="confirmPassword" autoComplete="new-password" className={`${styles.input} ${errors.confirmPassword && touched.confirmPassword ? styles.inputError : ''}`} placeholder="Confirm your password" />
                       {errors.confirmPassword && touched.confirmPassword && <span className={styles.error}>{errors.confirmPassword}</span>}
                     </div>
                   </div>

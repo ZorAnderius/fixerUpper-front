@@ -45,7 +45,7 @@ const ProductDetailsPage = () => {
   const handleAddToCart = async () => {
     // Check if user is authenticated
     if (!isAuthenticated) {
-      // Просто показуємо модальку авторизації
+      // Simply show authentication modal
       setShowAuthModal(true);
       return;
     }

@@ -177,6 +177,7 @@ const LoginPage = () => {
                       type="password"
                       id="password"
                       name="password"
+                      autoComplete="current-password"
                       className={`${styles.input} ${errors.password && touched.password ? styles.inputError : ''}`}
                       placeholder="Enter your password"
                     />

@@ -32,8 +32,6 @@ export const getCartItems = async () => {
         cartId: null
       };
     }
-    // Re-throw other errors
-    throw error;
   }
 };
 

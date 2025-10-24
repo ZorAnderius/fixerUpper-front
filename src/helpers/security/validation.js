@@ -102,14 +102,11 @@ export class RateLimiter {
     const now = Date.now();
     const windowStart = now - this.windowMs;
 
-    // Clean old entries
     for (const [key, timestamp] of this.requests.entries()) {
       if (timestamp < windowStart) {
         this.requests.delete(key);
       }
     }
-
-    // Check current requests
     const currentRequests = Array.from(this.requests.values())
       .filter(timestamp => timestamp > windowStart).length;
 
@@ -117,7 +114,6 @@ export class RateLimiter {
       return false;
     }
 
-    // Add current request
     this.requests.set(identifier, now);
     return true;
   }

@@ -1,17 +1,17 @@
 export const pendingInitialState = {
-  // Зберігаємо попередню сторінку
+  // Store previous page
   previousLocation: null,
   
-  // Зберігаємо товари, які користувач хотів додати в кошик
+  // Store items that user wanted to add to cart
   pendingCartItems: [],
   
-  // Зберігаємо інформацію про товар, який користувач переглядав
+  // Store information about product that user was viewing
   pendingProduct: null,
   
-  // Чи показувати модальку авторизації
+  // Whether to show authentication modal
   showAuthModal: false,
   
-  // Додаткова інформація для редиректу
+  // Additional information for redirect
   redirectReason: null, // 'add_to_cart', 'view_product', etc.
 };
 

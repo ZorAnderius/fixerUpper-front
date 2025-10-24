@@ -57,7 +57,7 @@ api.interceptors.request.use(async (config) => {
         config.headers['x-csrf-token'] = csrfToken;
       }
     } catch (error) {
-      // Don't throw error, let the request proceed
+     
     }
   }
 

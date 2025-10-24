@@ -60,7 +60,7 @@
   margin: 0 auto;
 }
 
-/* Product Title - РОЗМІЩЕНИЙ ЗВЕРХУ ПО ЦЕНТРУ */
+/* Product Title - POSITIONED AT TOP CENTER */
 .productTitleSection {
   text-align: center;
   margin-bottom: var(--spacing-lg);
@@ -78,7 +78,7 @@
   background-clip: text;
 }
 
-/* Product Details Grid - ЗОБРАЖЕННЯ ЗЛІВА, ІНФОРМАЦІЯ СПРАВА */
+/* Product Details Grid - IMAGE ON LEFT, INFO ON RIGHT */
 .productDetailsGrid {
   display: grid;
   grid-template-columns: 1fr;
@@ -193,9 +193,9 @@
   background-clip: text;
 }
 
-/* Product Price - ЗБІЛЬШЕНИЙ РОЗМІР */
+/* Product Price - INCREASED SIZE */
 .productPrice {
-  font-size: var(--font-size-5xl); /* Збільшено з 3xl до 5xl */
+  font-size: var(--font-size-5xl); /* Increased from 3xl to 5xl */
   font-weight: var(--font-weight-bold);
   background: linear-gradient(135deg, var(--color-primary-orange) 0%, #ff6b35 100%);
   -webkit-background-clip: text;
@@ -217,7 +217,7 @@
   opacity: 0.3;
 }
 
-/* Quantity Selector - МІНІМАЛІСТИЧНА СЕКЦІЯ КІЛЬКОСТІ */
+/* Quantity Selector - MINIMALISTIC QUANTITY SECTION */
 .quantitySection {
   margin: var(--spacing-md) 0;
 }
@@ -290,7 +290,7 @@
   background: var(--color-background-slate);
 }
 
-/* Buy Button - РОЗМІЩЕНИЙ ПІД КІЛЬКІСТЮ */
+/* Buy Button - POSITIONED UNDER QUANTITY */
 .buyButton {
   margin-top: var(--spacing-md);
   margin-bottom: var(--spacing-lg);
@@ -719,7 +719,7 @@
   }
   
   .productPrice {
-    font-size: var(--font-size-6xl); /* Збільшено для планшетів */
+    font-size: var(--font-size-6xl); /* Increased for tablets */
   }
   
   .adminButtons {
@@ -741,7 +741,7 @@
   }
   
   .productPrice {
-    font-size: var(--font-size-7xl); /* Збільшено для десктопів */
+    font-size: var(--font-size-7xl); /* Increased for desktops */
   }
   
   .productInfo {

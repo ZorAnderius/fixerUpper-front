@@ -40,15 +40,15 @@ export const registerSchema = Yup.object().shape({
 // Create product schema
 export const createProductSchema = Yup.object().shape({
   title: Yup.string()
-    .min(3, 'Назва повинна містити мінімум 3 символи')
-    .max(150, 'Назва не може перевищувати 150 символів')
-    .required('Назва обов\'язкова'),
+    .min(3, 'Title must contain at least 3 characters')
+    .max(150, 'Title cannot exceed 150 characters')
+    .required('Title is required'),
   description: Yup.string()
-    .min(10, 'Опис повинен містити мінімум 10 символів')
-    .max(2000, 'Опис не може перевищувати 2000 символів')
-    .required('Опис обов\'язковий'),
+    .min(10, 'Description must contain at least 10 characters')
+    .max(2000, 'Description cannot exceed 2000 characters')
+    .required('Description is required'),
   price: Yup.number()
-    .positive('Ціна повинна бути позитивною')
+    .positive('Price must be positive')
     .required('Price is required'),
   quantity: Yup.number()
     .integer('Quantity must be a whole number')
@@ -56,40 +56,40 @@ export const createProductSchema = Yup.object().shape({
     .required('Quantity is required'),
   category_id: Yup.string()
     .uuid('Category ID must be a valid UUID')
-    .required('Категорія обов\'язкова'),
+    .required('Category is required'),
   status_id: Yup.string()
-    .uuid('ID статусу повинен бути валідним UUID')
-    .required('Статус обов\'язковий')
+    .uuid('Status ID must be a valid UUID')
+    .required('Status is required')
 });
 
 // Update product schema
 export const updateProductSchema = Yup.object().shape({
   title: Yup.string()
-    .min(3, 'Назва повинна містити мінімум 3 символи')
-    .max(150, 'Назва не може перевищувати 150 символів'),
+    .min(3, 'Title must contain at least 3 characters')
+    .max(150, 'Title cannot exceed 150 characters'),
   description: Yup.string()
-    .min(10, 'Опис повинен містити мінімум 10 символів')
-    .max(1000, 'Опис не може перевищувати 1000 символів'),
+    .min(10, 'Description must contain at least 10 characters')
+    .max(1000, 'Description cannot exceed 1000 characters'),
   price: Yup.number()
-    .positive('Ціна повинна бути позитивною'),
+    .positive('Price must be positive'),
   quantity: Yup.number()
     .integer('Quantity must be a whole number')
     .min(0, 'Quantity cannot be negative'),
   category_id: Yup.string()
     .uuid('Category ID must be a valid UUID'),
   status_id: Yup.string()
-    .uuid('ID статусу повинен бути валідним UUID')
+    .uuid('Status ID must be a valid UUID')
 });
 
 // Add to cart schema
 export const addToCartSchema = Yup.object().shape({
   product_id: Yup.string()
-    .uuid('ID товару повинен бути валідним UUID')
-    .required('ID товару обов\'язковий'),
+    .uuid('Product ID must be a valid UUID')
+    .required('Product ID is required'),
   quantity: Yup.number()
     .integer('Quantity must be a whole number')
-    .min(1, 'Кількість повинна бути мінімум 1')
-    .required('Кількість обов\'язкова')
+    .min(1, 'Quantity must be at least 1')
+    .required('Quantity is required')
 });
 
 // Update cart item quantity schema
@@ -97,6 +97,6 @@ export const updateCartItemSchema = Yup.object().shape({
   quantity: Yup.number()
     .integer('Quantity must be a whole number')
     .min(0, 'Quantity cannot be negative')
-    .required('Кількість обов\'язкова')
+    .required('Quantity is required')
 });
 

@@ -145,7 +145,7 @@
   transform: translateY(-1px);
 }
 
-/* Зелена обводка тільки для валідних полів після введення */
+/* Green border only for valid fields after input */
 .input.valid {
   border-color: #10b981;
 }
